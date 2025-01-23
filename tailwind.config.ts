@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        exconmedium: ["Excon-Medium"],
+      },
       animation: {
         shimmer: "shimmer 2s linear infinite",
         "fade-in": "fade-in 0.5s linear forwards",
@@ -50,6 +53,7 @@ export default {
         },
       },
       colors: {
+        maincolor: "#735AF4",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
