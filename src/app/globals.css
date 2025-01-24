@@ -9,6 +9,15 @@ body {
 }
 
 @layer base {
+  @font-face {
+    font-family: "Excon-Medium";
+    font-weight: 500;
+    src: url("../../public/fonts/Excon_Complete/Fonts/OTF/Excon-Bold.otf")
+      format("opentype");
+  }
+}
+
+@layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;

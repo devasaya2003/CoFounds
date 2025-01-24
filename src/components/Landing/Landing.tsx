@@ -15,37 +15,22 @@ const Landing = () => {
   return (
     <div
       className={cn(
-        "  bg-black text-white grid lg:grid-cols-2 md:grid-cols-1 grid-cols-1 md:px-20 px-5  lg:max-h-screen   ",
+        "  bg-black text-white grid lg:grid-cols-2 md:grid-cols-1 grid-cols-1 md:px-20 px-5  lg:min-h-screen   ",
         UbuntuFont.className
       )}
     >
       <div
         className={cn(
-          "  dark bg-black text-white   flex flex-col justify-start relative  items-start  lg:py-32 gap-8 py-10  ",
-          UbuntuFont.className
+          "  dark  text-white font-exconmedium   flex flex-col justify-center relative  items-start  lg:py-32 gap-8 py-10  "
         )}
       >
-        <div className="md:absolute hidden -right-[7rem] bottom-32">
-          <Image
-            src={ArrowPng}
-            alt="joboffersvgimage"
-            width={400}
-            height={400}
-          />
-        </div>
-
-        <div className="heading md:text-6xl lg:text-8xl text-5xl max-w-3xl text-start ">
-          Your
-          <span
-            className={cn(
-              "text-blue-600 lg:text-9xl md:text-8xl text-7xl",
-              JerseyFont.className
-            )}
-          >
+        <div className="heading md:text-6xl lg:text-7xl text-5xl max-w-3xl text-start ">
+          Where
+          <span className={cn("text-blue-600  font-exconmedium")}>
             {" "}
-            Dream Job{" "}
+            Founders{" "}
           </span>
-          is Just a Click Away
+          meet Founding level Talent
         </div>
         <div className="subheading max-w-3xl text-start">
           <span className={cn("text-center md:text-3xl text-xl")}>

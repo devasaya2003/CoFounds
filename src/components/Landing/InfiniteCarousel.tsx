@@ -335,7 +335,7 @@ function Review({ review, className, ...props }: ReviewProps) {
   return (
     <div
       className={cn(
-        "animate-fade-in rounded-lg bg-white p-6 opacity-0 shadow-xl shadow-slate-900/5",
+        "animate-fade-in rounded-lg bg-[#FCF6EA] p-6 opacity-0 shadow-xl shadow-slate-900/5",
         className
       )}
       style={{ animationDelay }}
