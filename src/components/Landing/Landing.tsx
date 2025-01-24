@@ -3,13 +3,19 @@ import { Ubuntu, Jersey_15 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 
-import ArrowPng from "../../assets/LandingPageAssets/kwjfbk-removebg-preview.png";
-import Image from "next/image";
+// import ArrowPng from "../../assets/LandingPageAssets/kwjfbk-removebg-preview.png";
+// import Image from "next/image";
 import { Briefcase, Star, User2 } from "lucide-react";
 import { Reviews } from "./InfiniteCarousel";
 
-const UbuntuFont = Ubuntu({ weight: ["500"] });
-const JerseyFont = Jersey_15({ weight: ["400"] });
+const UbuntuFont = Ubuntu({ 
+  weight: ["500"], 
+  subsets: ["latin"], // Specify subsets here
+});
+const JerseyFont = Jersey_15({ 
+  weight: ["400"], 
+  subsets: ["latin"], // Specify subsets here
+});
 
 const Landing = () => {
   return (
