@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server"
 import { getResourceByTitle } from "@/backend/functions/resource_master/GET/get_by_title";
 
-export async function GET(req: Request, { params }: { params: { title: string } }) {
-  const { title } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ title: string }> }) {
+  const title = (await params).title
 
   try {
     if (!title) {

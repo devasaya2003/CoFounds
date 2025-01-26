@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import {NextResponse } from "next/server";
+import type { NextRequest } from "next/server"
 import { getPaginatedResources } from "@/backend/functions/resource_master/GET/paginated";
 
-export async function GET(req: Request, { params }: { params: { page_no: string } }) {
-  const { page_no } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{page_no: string}> }) {
+  const page_no = (await params).page_no;
 
   try {
     const page = parseInt(page_no, 10);
