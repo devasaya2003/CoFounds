@@ -4,7 +4,7 @@ export const updateResource = async (id: string, data: Partial<{
     title: string; 
     link: string; 
     image: string; 
-    is_active: boolean; 
+    isActive: boolean; 
   }>) => {
     return prisma.resourceMaster.update({
       where: { id },

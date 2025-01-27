@@ -9,7 +9,7 @@ interface UpdateResourceData {
     title: string;
     link: string;
     image: string;
-    is_active: boolean;
+    isActive: boolean;
   }>;
 }
 
