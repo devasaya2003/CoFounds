@@ -1,160 +1,121 @@
 "use client";
-import { cn } from "@/lib/utils";
-import Image, { type StaticImageData } from "next/image";
 import React from "react";
-import WhyChooseImage1 from "../../../public/assets/WhyChoose/pixeltrue-seo-1.png";
-import WhyChooseImage2 from "../../../public/assets/WhyChoose/pixeltrue-plan-1.png";
-import WhyChooseImage3 from "../../../public/assets/WhyChoose/pixeltrue-data-analysis.png";
-import WhyChooseImage4 from "../../../public/assets/WhyChoose/pixeltrue-business-meeting-1.png";
-import * as motion from "motion/react-client";
-import type { Variants } from "motion/react";
-import { Card } from "@/components/ui/card";
-import { useWindowSize } from "@/hooks/useWindowSize";
+import { Button } from "@/components/ui/button"; // Replace with your button component
 
-interface CardData {
-  title: string;
-  description: string;
-  image: StaticImageData;
-  bgColor: string;
-  rotate: number; // Rotation in degrees
-  position: {
-    x: number; // Horizontal translation in pixels
-    y: number; // Vertical translation in pixels
-  };
-}
-
-const containerVariants: Variants = {
-  offscreen: {},
-  onscreen: {
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-};
-
-const cardVariants: Variants = {
-  offscreen: {
-    y: 300,
-    opacity: 0,
-  },
-  onscreen: {
-    y: 50,
-    rotate: -1,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      bounce: 0.4,
-      duration: 0.8,
-    },
-  },
-};
-
-export default function RotatingCards() {
-  const { width } = useWindowSize();
-
-  const getPosition = (baseX: number, baseY: number) => {
-    if (width && width < 640) {
-      return { x: baseX * -0.1, y: baseY * -0.5 }; // Adjust for small screens
-    }
-    return { x: baseX, y: baseY };
-  };
-
+export default function WhyChooseUs() {
   return (
-    <motion.div
-      className="w-full bg-black p-4 sm:p-8"
-      initial="offscreen"
-      whileInView="onscreen"
-      viewport={{ amount: 0.5, once: true }}
-    >
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-[#FCF6EA] text-center md:text-6xl lg:text-7xl text-5xl font-bold mb-8 sm:mb-16 flex flex-col md:flex-row justify-center items-center gap-4 z-50">
-          <span>Your Career</span>
-          <span>Simplified</span>
-        </h1>
-
-        <motion.div
-          className="relative w-full flex flex-col sm:flex-row justify-center items-center sm:items-start gap-6 sm:gap-4 md:px-10 px-10"
-          variants={containerVariants}
-        >
-          {cards.map((card, index) => {
-            const position = getPosition(card.position.x, card.position.y);
-            return (
-              <motion.div
-                key={index}
-                variants={cardVariants}
-                className="w-full md:w-1/4 max-w-xs sm:max-w-sm"
-              >
-                <Card
-                  className={cn(
-                    "md:w-full w-[17rem] md:h-[27rem] p-4 sm:p-6 rounded-3xl transition-all duration-300 hover:z-10 hover:scale-105"
-                  )}
-                  style={{
-                    backgroundColor: card.bgColor,
-                    color: card.bgColor === "#162D67" ? "white" : "#162D67",
-                    zIndex: index === 2 ? "999" : `${index}`,
-                    transform: `translate(${position.x}px, ${position.y}px) rotate(${card.rotate}deg)`,
-                  }}
-                >
-                  <div className="aspect-video relative mb-4">
-                    <Image
-                      src={card.image || "/placeholder.svg"}
-                      alt={card.title}
-                      width={500}
-                      height={500}
-                      className="object-cover h-52"
-                    />
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm opacity-90">
-                    {card.description}
-                  </p>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+    <div className="w-full  md:px-44 px-5 py-10">
+      <div className="w-full py-5 text-center">
+        <span className="text-white md:text-7xl text-4xl   font-exconmedium">
+          Why CoFounds.
+        </span>
       </div>
-    </motion.div>
+      {/* Job Seekers Section */}
+      <div className="flex flex-col md:flex-row gap-5 md:gap-0">
+        <div className="w-full md:w-1/2 bg-[#F4F7FA] p-8 sm:p-12 lg:p-16 rounded-lg md:rounded-r-none">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#162D67] mb-6">
+            Got talent?
+          </h2>
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#162D67] mb-8">
+            Why job seekers love us
+          </h3>
+          <ul className="space-y-4 mb-8">
+            <li className="flex items-start">
+              <span className="text-[#162D67] mr-4">✔</span>
+              <p className="text-lg">
+                Connect directly with founders at top startups - no third-party
+                recruiters allowed.
+              </p>
+            </li>
+            <li className="flex items-start">
+              <span className="text-[#162D67] mr-4">✔</span>
+              <p className="text-lg">
+                Everything you need to know, all upfront. View salary, stock
+                options, and more before applying.
+              </p>
+            </li>
+            <li className="flex items-start">
+              <span className="text-[#162D67] mr-4">✔</span>
+              <p className="text-lg">
+                Say goodbye to cover letters - your profile is all you need. One
+                click to apply and you&apos;re done.
+              </p>
+            </li>
+            <li className="flex items-start">
+              <span className="text-[#162D67] mr-4">✔</span>
+              <p className="text-lg">
+                Unique jobs at startups and tech companies you can&apos;t find
+                anywhere else.
+              </p>
+            </li>
+            <li className="flex items-start">
+              <span className="text-[#162D67] mr-4">✔</span>
+              <p className="text-lg">
+                Unique jobs at startups and tech companies you can&apos;t find
+                anywhere else.
+              </p>
+            </li>
+          </ul>
+          <div className="flex space-x-4">
+            <Button className="bg-[#162D67] text-white px-8 py-3 rounded-lg hover:bg-[#0E1F4D] transition-colors duration-300">
+              Learn More
+            </Button>
+            <Button className="bg-transparent border border-[#162D67] text-[#162D67] px-8 py-3 rounded-lg hover:bg-[#162D67] hover:text-white transition-colors duration-300">
+              Sign Up
+            </Button>
+          </div>
+        </div>
+
+        {/* Recruiters Section */}
+        <div className="w-full md:w-1/2 bg-[#162D67] p-8 sm:p-12 lg:p-16 rounded-lg md:rounded-l-none">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+            Need talent?
+          </h2>
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-8">
+            Why recruiters love us
+          </h3>
+          <ul className="space-y-4 mb-8">
+            <li className="flex items-start">
+              <span className="text-white mr-4">✔</span>
+              <p className="text-lg text-white">
+                Tap into a community of 10M+ engaged, startup-ready candidates.
+              </p>
+            </li>
+            <li className="flex items-start">
+              <span className="text-white mr-4">✔</span>
+              <p className="text-lg text-white">
+                Everything you need to kickstart your recruiting — set up job
+                posts, company branding, and HR tools within 10 minutes, all for
+                free.
+              </p>
+            </li>
+            <li className="flex items-start">
+              <span className="text-white mr-4">✔</span>
+              <p className="text-lg text-white">
+                A free applicant tracking system, or free integration with any
+                ATS you may already use.
+              </p>
+            </li>
+            <li className="flex items-start">
+              <span className="text-white mr-4">✔</span>
+              <p className="text-lg text-white">
+                Let us handle the heavy-lifting with RecruiterCloud. Our new
+                AI-Recruiter scans 500M+ candidates, filters it down based on
+                your unique calibration, and schedules your favorites on your
+                calendar in a matter of days.
+              </p>
+            </li>
+          </ul>
+          <div className="flex space-x-4">
+            <Button className="bg-white text-[#162D67] px-8 py-3 rounded-lg hover:bg-[#F4F7FA] transition-colors duration-300">
+              Learn More
+            </Button>
+            <Button className="bg-transparent border border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-[#162D67] transition-colors duration-300">
+              Sign Up
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
-const cards: CardData[] = [
-  {
-    title: "More Reliability",
-    description:
-      "Enjoy zero downtime with our lightning-fast contactless cards and readers. Customers never waste a second and you never lose a sale.",
-    image: WhyChooseImage1,
-    bgColor: "#FCF6EA",
-    rotate: -5,
-    position: { x: 40, y: -15 }, // Translate 40px right, 0px vertically
-  },
-  {
-    title: "More Revenue",
-    description:
-      "Centralize the payment experience and capture every kobo that moves through your ecosystem with a single integration.",
-    image: WhyChooseImage2,
-    bgColor: "#FFE9F4",
-    rotate: 5,
-    position: { x: 20, y: -20 }, // Translate 0px horizontally, 20px up
-  },
-  {
-    title: "More Control",
-    description:
-      "Virtual and physical card issuing; submerchant collections; instant settlements – everything they said was impossible from a simple dashboard.",
-    image: WhyChooseImage3,
-    bgColor: "#68DACB",
-    rotate: 8,
-    position: { x: -20, y: -15 }, // Translate 20px right, 50px up
-  },
-  {
-    title: "More Loyalty",
-    description:
-      "Flex on ‘em with branded cards and rewards programs that keep you top of your customers’ minds – and wallets!",
-    image: WhyChooseImage4,
-    bgColor: "#162D67",
-    rotate: -2,
-    position: { x: -50, y: -20 }, // Translate 0px horizontally, 80px up
-  },
-];

@@ -155,7 +155,7 @@ const TESTIMONIALS = [
 
 export function Reviews() {
   return (
-    <div className="relative max-w-5xl">
+    <div className="relative max-w-5xl  ">
       <img
         className="absolute select-none hidden xl:block -left-32 top-1/3"
         src="/what-people-are-saying.png"
@@ -178,7 +178,7 @@ function ReviewGrid() {
   return (
     <div
       ref={containerRef}
-      className="relative -mx-4 mt-16 grid lg:h-[49rem]  lg:max-h-[150vh] max-h-max grid-cols-1 items-start gap-8 overflow-hidden px-4 sm:mt-20 md:grid-cols-1 lg:grid-cols-2"
+      className="relative -mx-4 mt-16 grid lg:h-[49rem]  lg:max-h-[60vh] max-h-max grid-cols-1 items-start gap-8 overflow-hidden px-4 sm:mt-20 md:grid-cols-1 lg:grid-cols-3"
     >
       {isInView ? (
         <>
@@ -335,7 +335,7 @@ function Review({ review, className, ...props }: ReviewProps) {
   return (
     <div
       className={cn(
-        "animate-fade-in rounded-lg bg-[#FCF6EA] p-6 opacity-0 shadow-xl shadow-slate-900/5",
+        "animate-fade-in rounded-lg bg-white p-6 opacity-0 shadow-xl shadow-slate-900/5",
         className
       )}
       style={{ animationDelay }}
