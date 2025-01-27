@@ -1,36 +1,28 @@
 import React from "react";
-import { Ubuntu, Jersey_15 } from "next/font/google";
+import { Ubuntu } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-
-// import ArrowPng from "../../assets/LandingPageAssets/kwjfbk-removebg-preview.png";
-// import Image from "next/image";
 import { Briefcase, Star, User2 } from "lucide-react";
-import { Reviews } from "./InfiniteCarousel";
 
-const UbuntuFont = Ubuntu({ 
-  weight: ["500"], 
-  subsets: ["latin"], // Specify subsets here
-});
-const JerseyFont = Jersey_15({ 
-  weight: ["400"], 
-  subsets: ["latin"], // Specify subsets here
+const UbuntuFont = Ubuntu({
+  weight: ["500"],
+  subsets: ["latin"],
 });
 
 const Landing = () => {
   return (
     <div
       className={cn(
-        "  bg-black text-white grid lg:grid-cols-2 md:grid-cols-1 grid-cols-1 md:px-20 px-5  lg:min-h-screen   ",
+        "  bg-black text-white w-full  md:px-20 px-5  lg:min-h-screen flex justify-center align-middle items-center   ",
         UbuntuFont.className
       )}
     >
       <div
         className={cn(
-          "  dark  text-white font-exconmedium   flex flex-col justify-center relative  items-start  lg:py-32 gap-8 py-10  "
+          "  dark  text-white font-exconmedium   flex flex-col justify-center relative  items-center  lg:py-32 gap-8 py-10  "
         )}
       >
-        <div className="heading md:text-6xl lg:text-7xl text-5xl max-w-3xl text-start ">
+        <div className="heading md:text-6xl lg:text-9xl text-5xl max-w-7xl text-center ">
           Where
           <span className={cn("text-blue-600  font-exconmedium")}>
             {" "}
@@ -38,14 +30,14 @@ const Landing = () => {
           </span>
           meet Founding level Talent
         </div>
-        <div className="subheading max-w-3xl text-start">
+        <div className="subheading max-w-3xl text-center ">
           <span className={cn("text-center md:text-3xl text-xl")}>
             <span className={cn("text-blue-600 ")}> CoFounds </span>
             connects you with top opportunities, personalized to your skills and
             career goals.
           </span>
         </div>
-        <div className="CTA_buttons flex justify-start align-middle items-start gap-3 md:flex-row flex-col w-full ">
+        <div className="CTA_buttons flex justify-center align-middle items-center gap-3 md:flex-row flex-col w-full ">
           <Button className="bg-blue-700 w-full text-white rounded-lg text-lg py-5 px-2 md:w-48 hover:bg-blue-700">
             Signup For Free
           </Button>
@@ -68,7 +60,6 @@ const Landing = () => {
           </div>
         </div>
       </div>
-      <Reviews />
     </div>
   );
 };
