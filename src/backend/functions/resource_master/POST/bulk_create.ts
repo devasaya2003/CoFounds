@@ -14,10 +14,10 @@ export const createBulkResources = async (
       title: resource.title,
       link: resource.link,
       image: resource.image,
-      is_active: resource.is_active ?? true,
-      created_by: resource.created_by || null,
-      updated_by: resource.created_by || null,
-      updated_at: new Date()
+      isActive: resource.is_active ?? true,
+      createdBy: resource.created_by || null,
+      updatedBy: resource.created_by || null,
+      updatedAt: new Date()
     })),
     skipDuplicates: true, // Skip duplicate entries
   });
