@@ -1,7 +1,7 @@
 import prisma from "../../../../../prisma/client";
 
-export const getResourceById = async (id: string) => {
-  return prisma.resourceMaster.findUnique({
+export const getSkillById = async (id: string) => {
+  return prisma.skillMaster.findUnique({
     where: { id },
     omit: {
       createdBy: true,
