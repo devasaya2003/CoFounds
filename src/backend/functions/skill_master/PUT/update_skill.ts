@@ -1,4 +1,4 @@
-import prisma from "../../../prisma/client";
+import prisma from "../../../../../prisma/client";
 
 export const updateSkill = async (
   id: string,
@@ -7,11 +7,11 @@ export const updateSkill = async (
     is_active: boolean;
   }>
 ) => {
-  return prisma.skill_master.update({
+  return prisma.skillMaster.update({
     where: { id },
     data: {
       ...data,
-      updated_at: new Date(),
+      updatedAt: new Date(),
     },
   });
 };
