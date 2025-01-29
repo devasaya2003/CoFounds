@@ -11,6 +11,7 @@ export const getPaginatedResources = async (page: number) => {
         id: "asc",
       },
       select: {
+        id: true,
         title: true,
         link: true,
         isActive: true,
