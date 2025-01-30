@@ -1,10 +1,10 @@
 import { ITEMS_PER_PAGE } from "@/backend/constants/constants";
 import prisma from "../../../../../prisma/client";
 
-export const getPaginatedSkills = async (page: number) => {
+export const getPaginatedDegrees = async (page: number) => {
   const skip = (page - 1) * ITEMS_PER_PAGE;
 
-  const skills = await prisma.skillMaster.findMany({
+  const degrees = await prisma.degreeMaster.findMany({
     skip: skip,
     take: ITEMS_PER_PAGE,
     orderBy: {
@@ -13,18 +13,19 @@ export const getPaginatedSkills = async (page: number) => {
     select: {
       id: true,
       name: true,
+      type: true,
       isActive: true,
       createdAt: true,
       updatedAt: true,
     },
   });
 
-  const totalSkills = await prisma.skillMaster.count();
+  const totalDegrees = await prisma.degreeMaster.count();
 
   return {
-    skills,
-    totalSkills,
-    totalPages: Math.ceil(totalSkills / ITEMS_PER_PAGE),
+    degrees,
+    totalDegrees,
+    totalPages: Math.ceil(totalDegrees / ITEMS_PER_PAGE),
     currentPage: page,
   };
 };
