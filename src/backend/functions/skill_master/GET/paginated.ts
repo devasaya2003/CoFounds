@@ -1,12 +1,12 @@
+import { ITEMS_PER_PAGE } from "@/backend/constants/constants";
 import prisma from "../../../../../prisma/client";
 
 export const getPaginatedSkills = async (page: number) => {
-  const limit = 10;
-  const skip = (page - 1) * limit;
+  const skip = (page - 1) * ITEMS_PER_PAGE;
 
   const skills = await prisma.skillMaster.findMany({
     skip: skip,
-    take: limit,
+    take: ITEMS_PER_PAGE,
     orderBy: {
       id: "asc",
     },
@@ -24,7 +24,7 @@ export const getPaginatedSkills = async (page: number) => {
   return {
     skills,
     totalSkills,
-    totalPages: Math.ceil(totalSkills / limit),
+    totalPages: Math.ceil(totalSkills / ITEMS_PER_PAGE),
     currentPage: page,
   };
 };

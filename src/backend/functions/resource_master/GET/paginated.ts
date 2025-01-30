@@ -1,12 +1,12 @@
 import prisma from "../../../../../prisma/client";
+import { ITEMS_PER_PAGE } from "@/backend/constants/constants";
 
 export const getPaginatedResources = async (page: number) => {
-    const limit = 9;
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * ITEMS_PER_PAGE;
   
     const resources = await prisma.resourceMaster.findMany({
       skip: skip,
-      take: limit,
+      take: ITEMS_PER_PAGE,
       orderBy: {
         id: "asc",
       },
@@ -24,7 +24,7 @@ export const getPaginatedResources = async (page: number) => {
     return {
       resources,
       totalResources,
-      totalPages: Math.ceil(totalResources / limit),
+      totalPages: Math.ceil(totalResources / ITEMS_PER_PAGE),
       currentPage: page,
     };
   };
