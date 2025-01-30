@@ -1,12 +1,11 @@
 import prisma from "../../../../../prisma/client";
 
-export const getResourceByTitle = async (title: string) => {
-    return prisma.resourceMaster.findUnique({
-        where: {title},
+export const getSkillByName = async (name: string) => {
+    return prisma.skillMaster.findUnique({
+        where: {name},
         select: {
             id: true,
-            title: true,
-            link: true,
+            name: true,
             isActive: true,
             createdAt: true,
             updatedAt: true,
