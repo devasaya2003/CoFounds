@@ -4,10 +4,10 @@ import { getPaginatedDegreesByType } from "@/backend/functions/degree_master/GET
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { type: string; page_no: string } }
+  { params }: { params: Promise<{ type: string; page_no: string }> }
 ) {
-  const type = params.type;
-  const page = parseInt(params.page_no, 10);
+  const type = (await params).type;
+  const page = parseInt((await params).page_no, 10);
 
   if (!type) {
     return NextResponse.json({ error: "Type is required" }, { status: 400 });
