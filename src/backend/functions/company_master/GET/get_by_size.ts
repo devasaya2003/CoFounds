@@ -1,8 +1,13 @@
 import prisma from "../../../../../prisma/client";
 
-export const getCompaniesBySize = async (size: number) => {
-  return prisma.companyMaster.findMany({
-    where: { size },
+export const getCompaniesBySizeRange = async (low: number, high: number) => {
+  return await prisma.companyMaster.findMany({
+    where: {
+      size: {
+        gte: low,
+        lte: high,
+      },
+    },
     select: {
       id: true,
       name: true,

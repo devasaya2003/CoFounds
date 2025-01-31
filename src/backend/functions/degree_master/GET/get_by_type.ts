@@ -10,6 +10,9 @@ export const getDegreeByType = async (type: string) => {
             isActive: true,
             createdAt: true,
             updatedAt: true,
-        }
+        },
+        orderBy: {
+            updatedAt: "desc",
+          },
     });
 };

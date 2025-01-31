@@ -10,6 +10,9 @@ export const getAllResources = async () => {
         createdAt: true,
         updatedAt: true,
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
   };
   

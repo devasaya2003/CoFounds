@@ -9,5 +9,8 @@ export const getAllSkills = async () => {
             createdAt: true,
             updatedAt: true,
         },
+        orderBy: {
+            updatedAt: "desc",
+          },
     });
 };

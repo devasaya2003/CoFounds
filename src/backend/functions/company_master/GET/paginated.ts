@@ -8,7 +8,7 @@ export const getPaginatedCompanies = async (page: number) => {
       skip: skip,
       take: ITEMS_PER_PAGE,
       orderBy: {
-        id: "asc",
+        updatedAt: "desc",
       },
       select: {
         id: true,

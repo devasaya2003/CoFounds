@@ -12,6 +12,9 @@ export const getAllCompanies = async () => {
         createdAt: true,
         updatedAt: true,
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
   };
   
