@@ -10,5 +10,8 @@ export const getAllDegrees = async () => {
             createdAt: true,
             updatedAt: true,
         },
+        orderBy: {
+            updatedAt: "desc",
+          },
     });
 };

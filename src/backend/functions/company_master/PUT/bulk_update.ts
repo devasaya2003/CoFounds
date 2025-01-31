@@ -1,31 +1,31 @@
-import { UUID_REGEX } from "@/backend/constants/constants";
 import prisma from "../../../../../prisma/client";
+import { UUID_REGEX } from "@/backend/constants/constants";
 
-interface UpdateResourceData {
+interface UpdateCompanyData {
   id: string;
   data: Partial<{
-    title: string;
-    link: string;
-    image: string;
+    name: string;
+    size: number;
+    url: string;
+    description: string;
     isActive: boolean;
   }>;
 }
 
-export const updateBulkResources = async (resources: UpdateResourceData[]) => {
+export const updateBulkCompanies = async (companies: UpdateCompanyData[]) => {
   console.log("************Starting bulk update process...");
 
-  // Validate all UUIDs first
-  const invalidIds = resources.filter(r => !UUID_REGEX.test(r.id));
+  const invalidIds = companies.filter(r => !UUID_REGEX.test(r.id));
   if (invalidIds.length > 0) {
     throw new Error(`Invalid UUID format found for ids: ${invalidIds.map(r => r.id).join(', ')}`);
   }
 
   try {
-    const updatePromises = resources.map(resource => 
-      prisma.resourceMaster.update({
-        where: { id: resource.id },
+    const updatePromises = companies.map(company => 
+      prisma.companyMaster.update({
+        where: { id: company.id },
         data: {
-          ...resource.data,
+          ...company.data,
           updatedAt: new Date(),
         },
       })
