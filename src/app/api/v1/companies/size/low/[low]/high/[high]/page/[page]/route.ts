@@ -6,9 +6,9 @@ export async function GET(
   { params }: { params: Promise<{ low: string; high: string; page_no: string }> }
 ) {
   try {
-    let low = parseInt((await params).low) || 0;
-    let high = parseInt((await params).high);
-    let page = parseInt((await params).page_no) || 1;
+    const low = parseInt((await params).low) || 0;
+    const high = parseInt((await params).high);
+    const page = parseInt((await params).page_no) || 1;
 
     if (isNaN(high) || high < low) {
       return NextResponse.json(

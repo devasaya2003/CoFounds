@@ -3,11 +3,11 @@ import { getCompaniesBySizeRange } from "@/backend/functions/company_master/GET/
 
 export async function GET(
   req: Request,
-  { params }: { params: { low: string; high: string } }
+  { params }: { params: Promise<{ low: string; high: string }> }
 ) {
   try {
-    let low = parseInt(params.low) || 0;
-    let high = parseInt(params.high);
+    const low = parseInt((await params).low) || 0;
+    const high = parseInt((await params).high);
 
     if (isNaN(high) || high < low) {
       return NextResponse.json(
