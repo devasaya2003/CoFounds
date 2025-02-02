@@ -10,6 +10,7 @@ datasource db {
 model UserMaster {
   id                 String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email              String                    @unique
+  passwordHash       String?                   @map("password_hash")
   phone              String?                   @unique
   userName           String?                   @unique @map("user_name")
   dob                DateTime?                 @db.Date
