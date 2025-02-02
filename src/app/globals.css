@@ -17,6 +17,17 @@ body {
   }
 }
 
+.glass-effect {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.dotted-bg {
+  background-image: radial-gradient(#99fd5d 1px, transparent 10px);
+  background-size: 40px 40px;
+  background-position: -19px -19px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
