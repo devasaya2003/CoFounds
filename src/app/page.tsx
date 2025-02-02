@@ -8,9 +8,9 @@ export default function Home() {
   return (
     <div className="">
       <Landing />
-      <RotatingCards />
+      {/* <RotatingCards />
       <SuccessStories />
-      {/* <HowItWorks /> */}
+      <HowItWorks /> */}
     </div>
   );
 }

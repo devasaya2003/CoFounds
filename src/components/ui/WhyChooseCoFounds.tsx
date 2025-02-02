@@ -1,121 +1,145 @@
 "use client";
-import React from "react";
-import { Button } from "@/components/ui/button"; // Replace with your button component
 
-export default function WhyChooseUs() {
+import { motion } from "framer-motion";
+import { useState } from "react";
+import ImageWhyus from "./pixeltrue-business-meeting-1.png";
+
+import Image from "next/image";
+
+export interface WhyUsCard {
+  id: string;
+  title: string;
+  description: string;
+  image?: string;
+  className?: string;
+}
+
+export interface WhyUsData {
+  heading: {
+    prefix: string;
+    highlight1: string;
+    middle: string;
+    highlight2: string;
+    conjunction: string;
+    highlight3: string;
+  };
+  subheading: string;
+  cards: WhyUsCard[];
+}
+
+export const whyUsData: WhyUsData = {
+  heading: {
+    prefix: "Get",
+    highlight1: "hired",
+    middle: "fast with",
+    highlight2: "proof of work",
+    conjunction: "and",
+    highlight3: "community",
+  },
+  subheading:
+    "NO bullshit resume loop Get hired for your skills not education or college Show your proof of work and community",
+  cards: [
+    {
+      id: "resume",
+      title: "No bullshit resume loop",
+      description:
+        "We believe if you have skills, few keywords wont be the one to define your journey.",
+      image:
+        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EA7Of1FiUFW46frLJ52i7UC4rlRPD8.png",
+      className: "md:col-span-2 md:row-span-2",
+    },
+    {
+      id: "skills",
+      title: "Get hired for your skills not education or college",
+      description:
+        "Get Paid and appreciated for you skills not that you went to some fancy college or have a fancy degree.",
+      className: "md:col-span-2",
+    },
+    {
+      id: "proof",
+      title: "Show your proof of work and community",
+      description:
+        "Showcase your talent to the recruiters with exceptional projects made.",
+      className: "md:col-span-2",
+    },
+  ],
+};
+
+export default function WhyUs() {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
   return (
-    <div className="w-full  md:px-44 px-5 py-10">
-      <div className="w-full py-5 text-center">
-        <span className="text-white md:text-7xl text-4xl   font-exconmedium">
-          Why CoFounds.
-        </span>
-      </div>
-      {/* Job Seekers Section */}
-      <div className="flex flex-col md:flex-row gap-5 md:gap-0">
-        <div className="w-full md:w-1/2 bg-[#F4F7FA] p-8 sm:p-12 lg:p-16 rounded-lg md:rounded-r-none">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#162D67] mb-6">
-            Got talent?
-          </h2>
-          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#162D67] mb-8">
-            Why job seekers love us
-          </h3>
-          <ul className="space-y-4 mb-8">
-            <li className="flex items-start">
-              <span className="text-[#162D67] mr-4">✔</span>
-              <p className="text-lg">
-                Connect directly with founders at top startups - no third-party
-                recruiters allowed.
-              </p>
-            </li>
-            <li className="flex items-start">
-              <span className="text-[#162D67] mr-4">✔</span>
-              <p className="text-lg">
-                Everything you need to know, all upfront. View salary, stock
-                options, and more before applying.
-              </p>
-            </li>
-            <li className="flex items-start">
-              <span className="text-[#162D67] mr-4">✔</span>
-              <p className="text-lg">
-                Say goodbye to cover letters - your profile is all you need. One
-                click to apply and you&apos;re done.
-              </p>
-            </li>
-            <li className="flex items-start">
-              <span className="text-[#162D67] mr-4">✔</span>
-              <p className="text-lg">
-                Unique jobs at startups and tech companies you can&apos;t find
-                anywhere else.
-              </p>
-            </li>
-            <li className="flex items-start">
-              <span className="text-[#162D67] mr-4">✔</span>
-              <p className="text-lg">
-                Unique jobs at startups and tech companies you can&apos;t find
-                anywhere else.
-              </p>
-            </li>
-          </ul>
-          <div className="flex space-x-4">
-            <Button className="bg-[#162D67] text-white px-8 py-3 rounded-lg hover:bg-[#0E1F4D] transition-colors duration-300">
-              Learn More
-            </Button>
-            <Button className="bg-transparent border border-[#162D67] text-[#162D67] px-8 py-3 rounded-lg hover:bg-[#162D67] hover:text-white transition-colors duration-300">
-              Sign Up
-            </Button>
-          </div>
-        </div>
+    <section className="relative min-h-screen max-w-7xl py-24">
+      {/* Background with dots pattern */}
+      <div className="absolute inset-0 bg-black bg-dot-white/[0.2]" />
+      <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
 
-        {/* Recruiters Section */}
-        <div className="w-full md:w-1/2 bg-[#162D67] p-8 sm:p-12 lg:p-16 rounded-lg md:rounded-l-none">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-            Need talent?
-          </h2>
-          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-8">
-            Why recruiters love us
-          </h3>
-          <ul className="space-y-4 mb-8">
-            <li className="flex items-start">
-              <span className="text-white mr-4">✔</span>
-              <p className="text-lg text-white">
-                Tap into a community of 10M+ engaged, startup-ready candidates.
-              </p>
-            </li>
-            <li className="flex items-start">
-              <span className="text-white mr-4">✔</span>
-              <p className="text-lg text-white">
-                Everything you need to kickstart your recruiting — set up job
-                posts, company branding, and HR tools within 10 minutes, all for
-                free.
-              </p>
-            </li>
-            <li className="flex items-start">
-              <span className="text-white mr-4">✔</span>
-              <p className="text-lg text-white">
-                A free applicant tracking system, or free integration with any
-                ATS you may already use.
-              </p>
-            </li>
-            <li className="flex items-start">
-              <span className="text-white mr-4">✔</span>
-              <p className="text-lg text-white">
-                Let us handle the heavy-lifting with RecruiterCloud. Our new
-                AI-Recruiter scans 500M+ candidates, filters it down based on
-                your unique calibration, and schedules your favorites on your
-                calendar in a matter of days.
-              </p>
-            </li>
-          </ul>
-          <div className="flex space-x-4">
-            <Button className="bg-white text-[#162D67] px-8 py-3 rounded-lg hover:bg-[#F4F7FA] transition-colors duration-300">
-              Learn More
-            </Button>
-            <Button className="bg-transparent border border-white text-white px-8 py-3 rounded-lg hover:bg-white hover:text-[#162D67] transition-colors duration-300">
-              Sign Up
-            </Button>
-          </div>
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Why Us Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="flex justify-center mb-12"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-6 py-2 text-base rounded-full bg-[#001F0E] text-[#99FD5D] border border-[#99FD5D]/20 hover:bg-[#99FD5D]/10 transition-colors"
+          >
+            Our Mission
+          </motion.button>
+        </motion.div>
+
+        {/* Bento Grid */}
+        <div className="grid md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+          {whyUsData.cards.map((card) => (
+            <motion.div
+              key={card.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.02 }}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setMousePosition({
+                  x: e.clientX - rect.left,
+                  y: e.clientY - rect.top,
+                });
+              }}
+              className={`relative overflow-hidden rounded-3xl bg-[#1A1F1A] p-8 ${card.className}`}
+            >
+              {/* Spotlight effect */}
+              <div
+                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
+                style={{
+                  background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(153, 253, 93, 0.1), transparent 40%)`,
+                }}
+              />
+
+              <div className="h-full flex flex-col justify-center align-middle items-center">
+                <h3 className="md:text-4xl text-2xl font-bold mb-4 text-[#99FD5D]">
+                  {card.title}
+                </h3>
+                {card.image && (
+                  <div className="relative flex-1 my-6">
+                    <Image
+                      src={ImageWhyus}
+                      alt={card.title}
+                      width={400}
+                      height={300}
+                      className="rounded-lg object-cover md:size-[25rem] size-[20rem]"
+                    />
+                  </div>
+                )}
+                <p className="text-gray-300 md:text-2xl text-lg">
+                  {card.description}
+                </p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }
