@@ -84,7 +84,7 @@ export default function FAQAccordion() {
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="w-screen  px-10"
+                  className="w-screen md:w-full  px-10"
                 >
                   <div className="px-4 pb-4">
                     <p className="text-white/90">{faq.answer}</p>
