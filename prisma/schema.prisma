@@ -7,9 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model WaitListTable {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String @unique
+  phone         String @unique
+  preferredRole String @unique @map("preferred_role")
+
+  @@map("wait_list_table")
+}
+
 model UserMaster {
   id                 String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email              String                    @unique
+  passwordHash       String?                   @map("password_hash")
   phone              String?                   @unique
   userName           String?                   @unique @map("user_name")
   dob                DateTime?                 @db.Date
@@ -35,7 +45,7 @@ model UserMaster {
 model DegreeMaster {
   id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String          @unique
-  type      String          
+  type      String
   isActive  Boolean         @default(true) @map("is_active")
   createdBy String?         @map("created_by") @db.Uuid
   updatedBy String?         @map("updated_by") @db.Uuid
