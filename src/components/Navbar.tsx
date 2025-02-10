@@ -34,13 +34,13 @@ export default function Navbar() {
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 glass-effect text-white px-4 md:px-20 pt-5 bg-transparent"
+      className="absolute top-0 left-0 right-0 z-50  text-white px-4 md:px-20 pt-5 bg-transparent"
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between border bg-maincolor/5 border-maincolor/50 drop-shadow-lg shadow-maincolor rounded-full max-w-5xl">
         {/* Logo */}
         <Link href="/" className="text-xl font-bold">
-          <span className="text-white">Co</span>
-          <span className="text-[#99FD5D]">Founds</span>
+          <span className="text-black">Co</span>
+          <span className="text-[#2563EB]">Founds</span>
           <span className="text-white">.</span>
         </Link>
 
@@ -54,7 +54,7 @@ export default function Navbar() {
             >
               <Link
                 href={`/${item.toLowerCase()}`}
-                className="hover:text-[#99FD5D] transition-colors"
+                className="hover:text-[#2563EB] text-black transition-colors"
               >
                 {item}
               </Link>
@@ -66,7 +66,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           <Link
             href="/join"
-            className="hidden md:block bg-[#99FD5D] text-black px-4 py-2 rounded-full hover:bg-opacity-90 transition-colors"
+            className="hidden md:block bg-[#2563EB] text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition-colors"
           >
             Join Our Community
           </Link>
@@ -83,7 +83,7 @@ export default function Navbar() {
               height="24"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="currentColor"
+              stroke="black"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -134,7 +134,7 @@ export default function Navbar() {
                     >
                       <Link
                         href={`/${item.toLowerCase()}`}
-                        className="block py-2 px-4 hover:text-[#99FD5D]"
+                        className="block py-2 px-4 hover:text-[#2563EB]"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {item}
@@ -148,7 +148,7 @@ export default function Navbar() {
                 >
                   <Link
                     href="/join"
-                    className="block w-full text-center bg-[#99FD5D] text-black px-4 py-2 rounded-full hover:bg-opacity-90"
+                    className="block w-full text-center bg-[#2563EB] text-black px-4 py-2 rounded-full hover:bg-opacity-90"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Join Our Community
