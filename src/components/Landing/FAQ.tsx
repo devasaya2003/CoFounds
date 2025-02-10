@@ -46,7 +46,7 @@ export default function FAQAccordion() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-6 py-2 text-base rounded-full bg-[#001F0E] text-[#99FD5D] border border-[#99FD5D]/20 hover:bg-[#99FD5D]/10 transition-colors"
+          className="px-6 py-2 text-base rounded-full  text-[#2563EB] border border-[#2563EB]/20 hover:bg-[#2563EB]/10 transition-colors"
         >
           Some Q&A
         </motion.button>
@@ -56,23 +56,22 @@ export default function FAQAccordion() {
             key={index}
             initial={false}
             animate={{
-              backgroundColor:
-                openIndex === index ? "rgba(10, 15, 13, 0.3)" : "transparent",
+              backgroundColor: openIndex === index ? "" : "transparent",
             }}
-            className="rounded-lg overflow-hidden "
+            className="rounded-lg overflow-hidden text-black"
           >
             <motion.button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
               className="md:w-[55rem] w-screen flex md:items-center justify-between p-4 text-left px-10"
-              whileHover={{ backgroundColor: "rgba(153, 253, 93, 0.03)" }}
+              whileHover={{ backgroundColor: "" }}
               transition={{ duration: 0.2 }}
             >
-              <span className="text-[#99FD5D] font-medium">{faq.question}</span>
+              <span className="text-[#2563EB] font-medium">{faq.question}</span>
               <motion.div initial={false} transition={{ duration: 0.2 }}>
                 {openIndex === index ? (
-                  <Minus className="w-6 h-6 text-[#99FD5D]" />
+                  <Minus className="w-6 h-6 text-[#2563EB]" />
                 ) : (
-                  <Plus className="w-6 h-6 text-[#99FD5D]" />
+                  <Plus className="w-6 h-6 text-[#2563EB]" />
                 )}
               </motion.div>
             </motion.button>
@@ -86,8 +85,8 @@ export default function FAQAccordion() {
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   className="w-screen md:w-full  px-10"
                 >
-                  <div className="px-4 pb-4">
-                    <p className="text-white/90">{faq.answer}</p>
+                  <div className="px-4 pb-4 ">
+                    <p className="text-black/90">{faq.answer}</p>
                   </div>
                 </motion.div>
               )}

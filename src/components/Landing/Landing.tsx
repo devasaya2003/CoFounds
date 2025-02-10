@@ -6,7 +6,7 @@ import Hero from "./hero";
 
 const Landing = () => {
   return (
-    <div className={cn("  bg-black text-white")}>
+    <div className={cn("  bg-white text-black")}>
       <Hero />
     </div>
   );
