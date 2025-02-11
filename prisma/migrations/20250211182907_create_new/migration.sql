@@ -8,9 +8,18 @@ CREATE TYPE "ApplicationStatus" AS ENUM ('applied', 'under_review', 'rejected', 
 CREATE TYPE "SkillLevel" AS ENUM ('beginner', 'intermediate', 'advanced');
 
 -- CreateTable
+CREATE TABLE "wait_list_table" (
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "email" TEXT NOT NULL,
+
+    CONSTRAINT "wait_list_table_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "user_master" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "email" TEXT NOT NULL,
+    "password_hash" TEXT,
     "phone" TEXT,
     "user_name" TEXT,
     "dob" DATE,
@@ -247,6 +256,9 @@ CREATE TABLE "user_skillset" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "wait_list_table_email_key" ON "wait_list_table"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "user_master_email_key" ON "user_master"("email");
 
 -- CreateIndex
@@ -257,9 +269,6 @@ CREATE UNIQUE INDEX "user_master_user_name_key" ON "user_master"("user_name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "degree_master_name_key" ON "degree_master"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "degree_master_type_key" ON "degree_master"("type");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "skill_master_name_key" ON "skill_master"("name");
@@ -295,19 +304,19 @@ ALTER TABLE "application_candidate_map" ADD CONSTRAINT "application_candidate_ma
 ALTER TABLE "extra_questions" ADD CONSTRAINT "extra_questions_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "job_application"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "extra_answers" ADD CONSTRAINT "extra_answers_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "job_application"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "extra_answers" ADD CONSTRAINT "extra_answers_application_id_fkey" FOREIGN KEY ("application_id") REFERENCES "application_candidate_map"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "extra_answers" ADD CONSTRAINT "extra_answers_application_id_fkey" FOREIGN KEY ("application_id") REFERENCES "application_candidate_map"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "extra_answers" ADD CONSTRAINT "extra_answers_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "job_application"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "extra_answers" ADD CONSTRAINT "extra_answers_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "extra_questions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "application_skill_map" ADD CONSTRAINT "application_skill_map_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skill_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "application_skill_map" ADD CONSTRAINT "application_skill_map_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "job_application"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "application_skill_map" ADD CONSTRAINT "application_skill_map_job_id_fkey" FOREIGN KEY ("job_id") REFERENCES "job_application"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "application_skill_map" ADD CONSTRAINT "application_skill_map_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skill_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "job_application" ADD CONSTRAINT "job_application_company_id_fkey" FOREIGN KEY ("company_id") REFERENCES "company_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -316,10 +325,10 @@ ALTER TABLE "job_application" ADD CONSTRAINT "job_application_company_id_fkey" F
 ALTER TABLE "job_application" ADD CONSTRAINT "job_application_recruiter_id_fkey" FOREIGN KEY ("recruiter_id") REFERENCES "user_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_education" ADD CONSTRAINT "user_education_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "user_education" ADD CONSTRAINT "user_education_degree_id_fkey" FOREIGN KEY ("degree_id") REFERENCES "degree_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_education" ADD CONSTRAINT "user_education_degree_id_fkey" FOREIGN KEY ("degree_id") REFERENCES "degree_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "user_education" ADD CONSTRAINT "user_education_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_experience" ADD CONSTRAINT "user_experience_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -328,7 +337,7 @@ ALTER TABLE "user_experience" ADD CONSTRAINT "user_experience_user_id_fkey" FORE
 ALTER TABLE "user_projects" ADD CONSTRAINT "user_projects_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_skillset" ADD CONSTRAINT "user_skillset_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "user_skillset" ADD CONSTRAINT "user_skillset_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skill_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_skillset" ADD CONSTRAINT "user_skillset_skill_id_fkey" FOREIGN KEY ("skill_id") REFERENCES "skill_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "user_skillset" ADD CONSTRAINT "user_skillset_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user_master"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
