@@ -22,7 +22,7 @@ export function MouseMoveEffect() {
     <motion.div
       className="pointer-events-none fixed inset-0 z-30 transition-opacity"
       animate={{
-        background: `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(204, 255, 0, 0.1), transparent 80%)`,
+        background: `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(137, 196, 244, 0.3), transparent 80%)`,
       }}
     />
   );

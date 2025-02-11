@@ -143,14 +143,14 @@ export default function Footer() {
                 transition={{ delay: 1.2 }}
                 type="email"
                 placeholder="e.g. johndoe@gmail.com"
-                className="md:w-[20rem] w-full text-center px-6 py-3 md:rounded-l-full rounded-t-md bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-[#99FD5D]"
+                className="md:w-[20rem] w-full text-center px-6 py-3 md:rounded-l-full rounded-t-md bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-[#2563EB]"
               />
 
               <motion.button
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 1.4 }}
-                className="font-bold md:w-[20rem] w-full  px-8 py-3 md:rounded-r-full rounded-b-md bg-[#99FD5D] text-black  hover:bg-opacity-90 transition-colors"
+                className="font-bold md:w-[20rem] w-full  px-8 py-3 md:rounded-r-full rounded-b-md bg-[#2563EB] text-black  hover:bg-opacity-90 transition-colors"
               >
                 Subscribe
               </motion.button>
