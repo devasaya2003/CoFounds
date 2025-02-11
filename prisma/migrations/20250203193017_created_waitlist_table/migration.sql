@@ -1,6 +1,3 @@
--- AlterTable
-ALTER TABLE "user_master" ADD COLUMN     "password_hash" TEXT;
-
 -- CreateTable
 CREATE TABLE "wait_list_table" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
