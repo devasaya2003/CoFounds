@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { KanbanBoard } from "../Landing/KanbanBoard";
 
 export default function WhatElse() {
   return (
@@ -26,7 +27,7 @@ export default function WhatElse() {
             Kanban Board
           </span>
         </h2>
-        {/* <KanbanBoard /> */}
+        <KanbanBoard />
       </section>
     </div>
   );
