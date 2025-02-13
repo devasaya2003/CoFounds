@@ -8,8 +8,10 @@ datasource db {
 }
 
 model WaitListTable {
-  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email         String @unique
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String   @unique
+  mailSended Boolean  @default(false) @map("mail_sended")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("wait_list_table")
 }
