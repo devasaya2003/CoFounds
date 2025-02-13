@@ -42,14 +42,13 @@ export default function Navbar() {
         <Link href="/" className="text-xl font-bold">
           <span className="text-black">Co</span>
           <span className="text-[#2563EB]">Founds</span>
-          <span className="text-white">.</span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           {[
-            "Recruiter(Coming Soon)",
-            "Jobs(Coming Soon)",
+            "Recruiter",
+            "Jobs",
             "Newsletter",
             "Resources",
           ].map((item) => (
@@ -131,8 +130,8 @@ export default function Navbar() {
             >
               <motion.div className="flex flex-col p-4 space-y-4">
                 {[
-                  "Recruiter(Coming Soon)",
-                  "Jobs(Coming Soon)",
+                  "Recruiter",
+                  "Jobs",
                   "Newsletter",
                   "Resources",
                 ].map((item) => (
