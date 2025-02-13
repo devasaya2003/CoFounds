@@ -11,14 +11,23 @@ export async function POST(req: Request) {
       );
     }
 
-    const createdWaitlist = await createWaitlist(data);
+    await createWaitlist(data);
 
     return NextResponse.json(
-      { message: "Waitlist created successfully", createdWaitlist },
+      { message: "Registered Successfully" },
       { status: 201 }
     );
   } catch (error) {
     console.error("Error creating waitlist:", error);
+    
+    // Handle unique constraint violation
+    if (error instanceof Error && error.message === "This email already exists!") {
+      return NextResponse.json(
+        { error: "This email already exists!" },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to create waitlist" },
       { status: 500 }

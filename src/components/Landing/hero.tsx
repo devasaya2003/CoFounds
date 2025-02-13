@@ -17,6 +17,7 @@ export default function Hero() {
   const [email, setEmail] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,9 +27,11 @@ export default function Hero() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setIsDisabled(true);
 
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
+      setIsDisabled(false);
       return;
     }
 
@@ -44,11 +47,14 @@ export default function Hero() {
       const data = await response.json();
       if (response.ok) {
         setMessage(data.message);
+        setIsDisabled(false);
       } else {
         setMessage(data.error);
+        setIsDisabled(false);
       }
     } catch (error) {
       setMessage("An error occurred. Please try again.");
+      setIsDisabled(false);
     }
   };
 
@@ -109,8 +115,16 @@ export default function Hero() {
               transition={{ delay: 1.4 }}
               className="w-full"
             >
-              <Button type="submit" className="w-full md:rounded-full">
-                Join WaitList
+              <Button
+                disabled={isDisabled}
+                type="submit"
+                className={`w-full md:rounded-full ${
+                  isDisabled
+                    ? "bg-gray-300 hover:bg-gray-300 cursor-not-allowed"
+                    : "bg-primary hover:bg-primary/90"
+                }`}
+              >
+                {isDisabled ? "Processing..." : "Join WaitList"}
               </Button>
             </motion.div>
           </form>
