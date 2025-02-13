@@ -15,7 +15,7 @@ const OurMission = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-6 py-2 text-base rounded-full bg-[#001F0E] text-[#2563EB] border border-[#2563EB]/20 hover:bg-[#2563EB]/10 transition-colors"
+          className="px-6 py-2 text-base rounded-full  text-[#2563EB] border border-[#2563EB]/20 hover:bg-[#2563EB]/10 transition-colors"
         >
           Our Mission
         </motion.button>

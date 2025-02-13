@@ -77,7 +77,7 @@ export default function Hero() {
             </motion.button>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-md mx-auto py-1   bg-white/10 md:border border-maincolor text-white md:rounded-full md:w-[50rem] pr-2 ">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-md mx-auto py-1   bg-white/10 md:border border-maincolor text-black md:rounded-full md:w-[50rem] pr-2 ">
             <motion.input
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}

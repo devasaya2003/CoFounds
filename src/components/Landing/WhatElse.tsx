@@ -1,5 +1,7 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { KanbanBoard } from "../Landing/KanbanBoard";
+import { motion } from "framer-motion";
 
 export default function WhatElse() {
   return (
@@ -15,9 +17,25 @@ export default function WhatElse() {
           CoFounds is a full-fledged job management platform. Track your
           applications, manage interviews, and land your dream job.
         </p>
-        <Button size="lg" className="mt-8 bg-white text-black font-semibold">
-          Join Waitlist
-        </Button>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-md mx-auto py-1   bg-white/10 md:border border-maincolor text-black md:rounded-full md:w-[50rem] pr-2 mt-5 ">
+          <motion.input
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.2 }}
+            type="email"
+            placeholder="e.g. johndoe@gmail.com"
+            className="md:w-[40rem] text-white  pl-5 md:border-none border w-full py-2 border-maincolor rounded-full bg-transparent text-start placeholder-gray-400 focus:outline-none focus:border-[#2563EB]"
+          />
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.4 }}
+            className="w-full"
+          >
+            <Button className="w-full md:rounded-full">Join WaitList</Button>
+          </motion.div>
+        </div>
       </section>
 
       <section className="container px-4 py-16 mx-auto">

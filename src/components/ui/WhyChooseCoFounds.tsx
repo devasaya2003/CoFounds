@@ -10,6 +10,8 @@ import {
   IconRocket,
   IconAward,
 } from "@tabler/icons-react";
+import NetworkingImage from "./pixeltrue-business-meeting-1.png";
+import SuccessImage from "./afif-ramdhasuma-jl4BQJs87Do-unsplash.jpg";
 
 const TalentPoolAnimation = () => {
   const avatars = [
@@ -122,7 +124,7 @@ const NetworkingAnimation = () => {
       transition={{ duration: 0.5 }}
     >
       <Image
-        src="/networking.jpg"
+        src={NetworkingImage}
         alt="Networking event"
         layout="fill"
         objectFit="cover"
@@ -168,7 +170,7 @@ const SuccessStoriesAnimation = () => {
       transition={{ duration: 0.5 }}
     >
       <Image
-        src="/success-story.jpg"
+        src={SuccessImage}
         alt="Success story"
         layout="fill"
         objectFit="cover"

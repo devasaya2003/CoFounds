@@ -1,6 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+
 import { useState } from "react";
 
 export default function Navbar() {
@@ -46,7 +47,12 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          {["Recruiter", "Jobs", "Newsletter", "Resources"].map((item) => (
+          {[
+            "Recruiter(Coming Soon)",
+            "Jobs(Coming Soon)",
+            "Newsletter",
+            "Resources",
+          ].map((item) => (
             <motion.div
               key={item}
               whileHover={{ scale: 1.05 }}
@@ -65,7 +71,7 @@ export default function Navbar() {
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-4">
           <Link
-            href="/join"
+            href="https://chat.whatsapp.com/FUo2MVMuvSKKsbJwoIldW3"
             className="hidden md:block bg-[#2563EB] text-white px-4 py-2 rounded-full hover:bg-opacity-90 transition-colors"
           >
             Join Our Community
@@ -124,24 +130,27 @@ export default function Navbar() {
               className="md:hidden w-full absolute top-full left-0 right-0 bg-black border border-maincolor backdrop-blur-lg mt-2 rounded-xl shadow-lg overflow-hidden"
             >
               <motion.div className="flex flex-col p-4 space-y-4">
-                {["Recruiter", "Jobs", "Newsletter", "Resources"].map(
-                  (item) => (
-                    <motion.div
-                      key={item}
-                      variants={itemVariants}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.95 }}
+                {[
+                  "Recruiter(Coming Soon)",
+                  "Jobs(Coming Soon)",
+                  "Newsletter",
+                  "Resources",
+                ].map((item) => (
+                  <motion.div
+                    key={item}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Link
+                      href={`/${item.toLowerCase()}`}
+                      className="block py-2 px-4 hover:text-[#2563EB]"
+                      onClick={() => setIsMenuOpen(false)}
                     >
-                      <Link
-                        href={`/${item.toLowerCase()}`}
-                        className="block py-2 px-4 hover:text-[#2563EB]"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {item}
-                      </Link>
-                    </motion.div>
-                  )
-                )}
+                      {item}
+                    </Link>
+                  </motion.div>
+                ))}
                 <motion.div
                   variants={itemVariants}
                   className="pt-4 border-t border-maincolor/50"
