@@ -1,9 +1,6 @@
 import nodemailer from "nodemailer";
 
-export async function sendVerificationEmail(
-  email: string,
-  nameOfCandidate: string
-) {
+export async function sendVerificationEmail(email: string) {
   try {
     const transport = nodemailer.createTransport({
       host: process.env.HOST,
@@ -21,7 +18,7 @@ export async function sendVerificationEmail(
       subject: "Welcome to the Future of Hiring with CoFounds 🚀",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-          <p>Hi ${nameOfCandidate},</p>
+          <p>Hi,</p>
           <p>Thank you for joining our waitlist. We're thrilled to have you join us as we revolutionize the hiring process.</p>
           <p>Let me share why we created CoFounds. We've seen how traditional job hunting has become overwhelming, with companies like Plum receiving over 8,500 applications in just four days for a single position. Talented candidates and companies are struggling in this chaos.</p>
           <p>CoFounds is different. We're not just another job board – we're building a platform where your true potential can shine.</p>

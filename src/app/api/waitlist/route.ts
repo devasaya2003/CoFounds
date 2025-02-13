@@ -5,7 +5,10 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
     if (!data.email) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     const createdWaitlist = await createWaitlist(data);
@@ -16,6 +19,9 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error("Error creating waitlist:", error);
-    return NextResponse.json({ error: "Failed to create waitlist" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create waitlist" },
+      { status: 500 }
+    );
   }
 }
