@@ -1,14 +1,8 @@
+import { CreateCompany } from "@/backend/interfaces/POST/create_company";
 import prisma from "../../../../../prisma/client";
 
 export const createBulkCompanies = async (
-  companies: Array<{
-    name: string;
-    description: string;
-    size: number;
-    url: string;
-    is_active?: boolean;
-    created_by?: string;
-  }>
+  companies: Array<CreateCompany>
 ) => {
   return await prisma.companyMaster.createMany({
     data: companies.map((company) => ({

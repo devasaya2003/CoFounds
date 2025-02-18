@@ -1,13 +1,7 @@
+import { CreateCompany } from "@/backend/interfaces/POST/create_company";
 import prisma from "../../../../../prisma/client";
 
-export const createCompany = async (data: {
-  name: string;
-  size: number;
-  url: string;
-  description: string;
-  is_active?: boolean;
-  created_by: string;
-}) => {
+export const createCompany = async (data: CreateCompany) => {
   return await prisma.companyMaster.create({
     data: {
       name: data.name,

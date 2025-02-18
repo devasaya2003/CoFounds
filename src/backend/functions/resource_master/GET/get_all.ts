@@ -2,6 +2,7 @@ import prisma from "../../../../../prisma/client";
 
 export const getAllResources = async () => {
     return prisma.resourceMaster.findMany({
+      where: {isActive: true},
       select: {
         id: true,
         title: true,

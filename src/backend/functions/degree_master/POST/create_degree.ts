@@ -1,11 +1,7 @@
+import { CreateDegree } from "@/backend/interfaces/POST/create_degree";
 import prisma from "../../../../../prisma/client";
 
-export const createDegree = async (data: {
-  name: string;
-  type: string;
-  is_active?: boolean;
-  created_by: string;
-}) => {
+export const createDegree = async (data: CreateDegree) => {
   return await prisma.degreeMaster.create({
     data: {
       name: data.name,

@@ -1,11 +1,8 @@
+import { CreateSkill } from "@/backend/interfaces/POST/create_skill";
 import prisma from "../../../../../prisma/client";
 
 export const createBulkSkills = async (
-  skills: Array<{
-    name: string;
-    is_active?: boolean;
-    created_by?: string;
-  }>
+  skills: Array<CreateSkill>
 ) => {
   return await prisma.skillMaster.createMany({
     data: skills.map((skill) => ({

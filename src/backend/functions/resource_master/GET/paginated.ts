@@ -7,6 +7,7 @@ export const getPaginatedResources = async (page: number) => {
     const resources = await prisma.resourceMaster.findMany({
       skip: skip,
       take: ITEMS_PER_PAGE,
+      where: {isActive: true},
       orderBy: {
         updatedAt: "desc",
       },
@@ -20,7 +21,7 @@ export const getPaginatedResources = async (page: number) => {
       },
     });
   
-    const totalResources = await prisma.resourceMaster.count();
+    const totalResources = await prisma.resourceMaster.count({where: {isActive: true}});
     return {
       resources,
       totalResources,

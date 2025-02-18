@@ -104,7 +104,7 @@ model CompanyMaster {
 model CompanyRecruiterMap {
   id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   companyId String        @map("company_id") @db.Uuid
-  userId    String        @map("user_id") @db.Uuid
+  userId    String        @map("user_id") @db.Uuid @unique
   isActive  Boolean       @default(true) @map("is_active")
   createdBy String?       @map("created_by") @db.Uuid
   updatedBy String?       @map("updated_by") @db.Uuid
