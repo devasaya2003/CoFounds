@@ -16,7 +16,7 @@ export const updateBulkRecruiter = async (
 
   try {
     const updatePromises = recruiters.map((recruiter) =>
-      prisma.companyMaster.update({
+      prisma.companyRecruiterMap.update({
         where: { id: recruiter.user_id },
         data: {
           ...recruiter.data,
