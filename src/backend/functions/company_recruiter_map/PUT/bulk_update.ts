@@ -5,6 +5,8 @@ import { UUID_REGEX } from "@/backend/constants/constants";
 export const updateBulkRecruiter = async (
   recruiters: UpdateBulkRecruiters[]
 ) => {
+  console.log("\n\n******************BULK UPDATE:\n", recruiters);
+  console.log("\n****************\n\n")
   const invalidIds = recruiters.filter((r) => !UUID_REGEX.test(r.user_id));
   if (invalidIds.length > 0) {
     throw new Error(
@@ -17,7 +19,7 @@ export const updateBulkRecruiter = async (
   try {
     const updatePromises = recruiters.map((recruiter) =>
       prisma.companyRecruiterMap.update({
-        where: { id: recruiter.user_id },
+        where: { userId: recruiter.user_id },
         data: {
           ...recruiter.data,
           updatedAt: new Date(),
