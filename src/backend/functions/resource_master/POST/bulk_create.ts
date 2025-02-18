@@ -1,13 +1,8 @@
+import { CreateResource } from "@/backend/interfaces/POST/create_resource";
 import prisma from "../../../../../prisma/client";
 
 export const createBulkResources = async (
-  resources: Array<{
-    title: string;
-    link?: string;
-    image?: string;
-    is_active?: boolean;
-    created_by?: string;
-  }>
+  resources: Array<CreateResource>
 ) => {
   return await prisma.resourceMaster.createMany({
     data: resources.map((resource) => ({

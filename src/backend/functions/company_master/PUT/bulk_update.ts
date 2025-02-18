@@ -1,19 +1,8 @@
+import { UpdateBulkCompany } from "@/backend/interfaces/PUT/update_bulk_company";
 import prisma from "../../../../../prisma/client";
 import { UUID_REGEX } from "@/backend/constants/constants";
 
-interface UpdateCompanyData {
-  id: string;
-  data: Partial<{
-    name: string;
-    size: number;
-    url: string;
-    description: string;
-    isActive: boolean;
-  }>;
-}
-
-export const updateBulkCompanies = async (companies: UpdateCompanyData[]) => {
-  console.log("************Starting bulk update process...");
+export const updateBulkCompanies = async (companies: UpdateBulkCompany[]) => {
 
   const invalidIds = companies.filter(r => !UUID_REGEX.test(r.id));
   if (invalidIds.length > 0) {

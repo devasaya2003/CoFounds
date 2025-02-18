@@ -1,16 +1,8 @@
 import { UUID_REGEX } from "@/backend/constants/constants";
 import prisma from "../../../../../prisma/client";
+import { UpdateBulkDegree } from "@/backend/interfaces/PUT/update_bulk_degree";
 
-interface UpdateDegreeData {
-    id: string;
-    data: Partial<{
-        name: string;
-        type: string;
-        isAvtive: boolean;
-    }>;
-}
-
-export const updateBulkDegrees = async (degrees: UpdateDegreeData[]) => {
+export const updateBulkDegrees = async (degrees: UpdateBulkDegree[]) => {
     const invalidIds = degrees.filter(degree => !UUID_REGEX.test(degree.id));
     if (invalidIds.length > 0) {
       throw new Error(`Invalid UUID format found for ids: ${invalidIds.map(degree => degree.id).join(', ')}`);

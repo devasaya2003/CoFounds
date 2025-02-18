@@ -1,12 +1,7 @@
+import { CreateResource } from "@/backend/interfaces/POST/create_resource";
 import prisma from "../../../../../prisma/client";
 
-export const createResource = async (data: {
-  title: string;
-  link: string;
-  image: string;
-  is_active?: boolean;
-  created_by: string;
-}) => {
+export const createResource = async (data: CreateResource) => {
   return await prisma.resourceMaster.create({
     data: {
       title: data.title,

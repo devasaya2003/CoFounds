@@ -1,10 +1,7 @@
+import { CreateSkill } from "@/backend/interfaces/POST/create_skill";
 import prisma from "../../../../../prisma/client";
 
-export const createSkill = async (data: {
-  name: string;
-  is_active?: boolean;
-  created_by: string;
-}) => {
+export const createSkill = async (data: CreateSkill) => {
   return await prisma.skillMaster.create({
     data: {
       name: data.name,
