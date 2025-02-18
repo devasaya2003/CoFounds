@@ -7,6 +7,7 @@ export const getPaginatedSkills = async (page: number) => {
   const skills = await prisma.skillMaster.findMany({
     skip: skip,
     take: ITEMS_PER_PAGE,
+    where: {isActive: true},
     orderBy: {
       updatedAt: "desc",
     },
@@ -19,7 +20,7 @@ export const getPaginatedSkills = async (page: number) => {
     },
   });
 
-  const totalSkills = await prisma.skillMaster.count();
+  const totalSkills = await prisma.skillMaster.count({where: {isActive: true}});
 
   return {
     skills,

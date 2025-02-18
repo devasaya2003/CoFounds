@@ -2,7 +2,7 @@ import prisma from "../../../../../prisma/client";
 
 export const getDegreeByType = async (type: string) => {
     return prisma.degreeMaster.findMany({
-        where: {type},
+        where: { type, isActive: true },
         select: {
             id: true,
             name: true,

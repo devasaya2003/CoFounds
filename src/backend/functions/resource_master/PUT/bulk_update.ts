@@ -1,17 +1,8 @@
 import { UUID_REGEX } from "@/backend/constants/constants";
 import prisma from "../../../../../prisma/client";
+import { UpdateBulkResource } from "@/backend/interfaces/PUT/update_bulk_resource";
 
-interface UpdateResourceData {
-  id: string;
-  data: Partial<{
-    title: string;
-    link: string;
-    image: string;
-    isActive: boolean;
-  }>;
-}
-
-export const updateBulkResources = async (resources: UpdateResourceData[]) => {
+export const updateBulkResources = async (resources: UpdateBulkResource[]) => {
   console.log("************Starting bulk update process...");
 
   // Validate all UUIDs first

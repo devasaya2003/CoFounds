@@ -6,6 +6,7 @@ export const getPaginatedCompaniesBySizeRange = async (low: number, high: number
   
     const companies = await prisma.companyMaster.findMany({
       where: {
+        isActive: true,
         size: {
           gte: low,
           lte: high,
@@ -27,6 +28,7 @@ export const getPaginatedCompaniesBySizeRange = async (low: number, high: number
   
     const totalCompanies = await prisma.companyMaster.count({
       where: {
+        isActive: true,
         size: {
           gte: low,
           lte: high,

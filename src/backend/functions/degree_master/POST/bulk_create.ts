@@ -1,12 +1,8 @@
+import { CreateDegree } from "@/backend/interfaces/POST/create_degree";
 import prisma from "../../../../../prisma/client";
 
 export const createBulkDegrees = async (
-  degrees: Array<{
-    name: string;
-    type: string;
-    is_active?: boolean;
-    created_by?: string;
-  }>
+  degrees: Array<CreateDegree>
 ) => {
   return await prisma.degreeMaster.createMany({
     data: degrees.map((degree) => ({

@@ -5,7 +5,7 @@ export const getPaginatedDegreesByType = async (type: string, page: number) => {
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
     const degrees = await prisma.degreeMaster.findMany({
-        where: { type },
+        where: { type, isActive: true },
         select: {
             id: true,
             name: true,
@@ -21,7 +21,7 @@ export const getPaginatedDegreesByType = async (type: string, page: number) => {
         take: ITEMS_PER_PAGE,
     });
 
-    const totalDegrees = await prisma.degreeMaster.count({ where: { type } });
+    const totalDegrees = await prisma.degreeMaster.count({ where: { type, isActive: true } });
 
     return {
         currentPage: page,
