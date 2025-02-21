@@ -1,20 +1,5 @@
+import { CreateSingleJob } from "@/backend/interfaces/POST/create_job";
 import prisma from "../../../../../prisma/client";
-
-interface CreateSingleJob {
-    company_id: string;
-    recruiter_id: string;
-    title: string;
-    job_code: string;
-    job_description: string;
-    package: number;
-    location: string;
-    
-    is_active?: boolean;
-    requested_by?: string;
-    assignment_link?: string;
-    end_at?: Date;
-    created_by?: string;
-}
 
 export const createJob = async (data: CreateSingleJob) => {
     return prisma.jobApplication.create({
