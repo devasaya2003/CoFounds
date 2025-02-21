@@ -5,9 +5,9 @@ import { getByCompanyAndRecruiterID } from "./GET_BY_POST_FUNCTIONS/by_company_r
 
 interface GetJobsByPost {
   type: string;
-  id: string;
+  id: string; // company-id or recruiter-id
   page_no: number;
-  extra_id: Partial<string>;
+  extra_id: Partial<string>; // only when company-id and recruiter-id both required. This will always be recruiter-id
 }
 
 export const getJobsByPost = async (data: GetJobsByPost) => {
