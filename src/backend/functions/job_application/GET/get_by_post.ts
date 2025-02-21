@@ -1,5 +1,7 @@
 import { BOTH, COMPANY, RECRUITER } from "@/backend/constants/constants";
-import prisma from "../../../../../prisma/client";
+import { getByCompanyID } from "./GET_BY_POST_FUNCTIONS/by_company_id";
+import { getByRecruiterID } from "./GET_BY_POST_FUNCTIONS/by_recruiter_id";
+import { getByCompanyAndRecruiterID } from "./GET_BY_POST_FUNCTIONS/by_company_recruiter_id";
 
 interface GetJobsByPost {
   type: string;
@@ -21,130 +23,5 @@ export const getJobsByPost = async (data: GetJobsByPost) => {
       break;
     default:
       return "Wrong identifier!";
-      break;
   }
-};
-
-const getByCompanyID = async (id: string) => {
-  return prisma.jobApplication.findMany({
-    where: { companyId: id, isActive: true },
-    select: {
-      id: true,
-      title: true,
-      jobCode: true,
-      requestedBy: true,
-      assignmentLink: true,
-      location: true,
-      package: true,
-      jobDescription: true,
-      endAt: true,
-      createdAt: true,
-      updatedAt: true,
-      company: {
-        select: {
-          id: true,
-          name: true,
-          url: true,
-          isActive: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
-      recruiter: {
-        select: {
-          id: true,
-          email: true,
-          userName: true,
-          isActive: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
-    },
-  });
-};
-
-const getByRecruiterID = async (id: string) => {
-  return prisma.jobApplication.findMany({
-    where: { recruiterId: id, isActive: true },
-    select: {
-      id: true,
-      title: true,
-      jobCode: true,
-      requestedBy: true,
-      assignmentLink: true,
-      location: true,
-      package: true,
-      jobDescription: true,
-      endAt: true,
-      createdAt: true,
-      updatedAt: true,
-      company: {
-        select: {
-          id: true,
-          name: true,
-          url: true,
-          isActive: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
-      recruiter: {
-        select: {
-          id: true,
-          email: true,
-          userName: true,
-          isActive: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
-    },
-  });
-};
-
-const getByCompanyAndRecruiterID = async (
-  company_id: string,
-  recruiter_id: string
-) => {
-  return prisma.jobApplication.findMany({
-    where: {
-      companyId: company_id,
-      recruiterId: recruiter_id,
-      isActive: true,
-    },
-    select: {
-      id: true,
-      title: true,
-      jobCode: true,
-      requestedBy: true,
-      assignmentLink: true,
-      location: true,
-      package: true,
-      jobDescription: true,
-      endAt: true,
-      createdAt: true,
-      updatedAt: true,
-      company: {
-        select: {
-          id: true,
-          name: true,
-          url: true,
-          isActive: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
-      recruiter: {
-        select: {
-          id: true,
-          email: true,
-          userName: true,
-          isActive: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      },
-    },
-  });
 };
