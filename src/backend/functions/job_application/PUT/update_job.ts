@@ -6,6 +6,7 @@ export const updateJob = async (id: string, data: UpdateJob) => {
         where: {id: id},
         data: {
             ...data.data,
+            recruiterId: data.recruiter_id,
             updatedBy: data.recruiter_id,
             updatedAt: new Date(),
         }
