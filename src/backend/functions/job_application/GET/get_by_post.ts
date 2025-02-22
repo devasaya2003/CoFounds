@@ -14,14 +14,11 @@ export const getJobsByPost = async (data: GetJobsByPost) => {
   const identifier = data.type;
   switch (identifier) {
     case BOTH:
-      getByCompanyAndRecruiterID(data.id, data.extra_id, data.page_no);
-      break;
+      return await getByCompanyAndRecruiterID(data.id, data.extra_id, data.page_no);
     case COMPANY:
-      getByCompanyID(data.id, data.page_no);
-      break;
+      return await getByCompanyID(data.id, data.page_no);
     case RECRUITER:
-      getByRecruiterID(data.id, data.page_no);
-      break;
+      return await getByRecruiterID(data.id, data.page_no);
     default:
       return "Wrong identifier!";
   }

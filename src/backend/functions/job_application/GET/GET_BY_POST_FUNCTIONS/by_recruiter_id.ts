@@ -3,7 +3,7 @@ import prisma from "../../../../../../prisma/client";
 
 export const getByRecruiterID = async (id: string, page: number) => {
   const skip = (page - 1) * ITEMS_PER_PAGE;
-  const jobs = prisma.jobApplication.findMany({
+  const jobs = await prisma.jobApplication.findMany({
     skip: skip,
     take: ITEMS_PER_PAGE,
     where: { recruiterId: id, isActive: true },

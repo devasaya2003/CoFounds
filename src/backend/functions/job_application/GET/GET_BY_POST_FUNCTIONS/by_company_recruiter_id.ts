@@ -7,7 +7,7 @@ export const getByCompanyAndRecruiterID = async (
   page: number
 ) => {
   const skip = (page - 1) * ITEMS_PER_PAGE;
-  const jobs = prisma.jobApplication.findMany({
+  const jobs = await prisma.jobApplication.findMany({
     skip: skip,
     take: ITEMS_PER_PAGE,
     where: {
