@@ -6,7 +6,8 @@ export const config = {
     "/api/v1/companies/:path*",
     "/api/v1/degrees/:path*",
     "/api/v1/skills/:path*",
-    "/api/v1/recruiter/:path*"
+    "/api/v1/recruiter/:path*",
+    "/api/v1/jobs/:path*"
   ],
 };
 
