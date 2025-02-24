@@ -12,6 +12,7 @@ export const buildAddOperation = (
       jobId: job_id,
       skillId,
       skillLevel: skillLevel as SkillLevel,
+      isActive: true,
       createdBy: updatedBy || null,
       updatedBy: updatedBy || null,
       updatedAt: new Date(),

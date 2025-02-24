@@ -11,6 +11,7 @@ export const buildUpdateOperation = (
     where: { jobId: job_id, skillId },
     data: {
       skillLevel: skillLevel as SkillLevel,
+      isActive: true,
       updatedBy: updatedBy || null,
       updatedAt: new Date(),
     },

@@ -1,7 +1,14 @@
 import prisma from "../../../../../prisma/client";
+import { ITEMS_PER_PAGE } from "@/backend/constants/constants";
 
-export const getAllJobSkillsBySkillID = async (skill_id: string) => {
-  return await prisma.applicationSkillMap.findMany({
+export const getAllJobSkillsBySkillIDPaginated = async (
+  skill_id: string,
+  page: number
+) => {
+  const skip = (page - 1) * ITEMS_PER_PAGE;
+  const skills = await prisma.applicationSkillMap.findMany({
+    skip: skip,
+    take: ITEMS_PER_PAGE,
     where: { isActive: true, skillId: skill_id },
     select: {
       id: true,
@@ -36,4 +43,14 @@ export const getAllJobSkillsBySkillID = async (skill_id: string) => {
       updatedAt: true,
     },
   });
+
+  const totalSkills = await prisma.applicationSkillMap.count({
+    where: { isActive: true, skillId: skill_id },
+  });
+  return {
+    skills,
+    totalSkills,
+    totalPages: Math.ceil(totalSkills / ITEMS_PER_PAGE),
+    currentPage: page,
+  };
 };

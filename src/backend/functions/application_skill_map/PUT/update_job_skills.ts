@@ -4,8 +4,11 @@ import { buildAddOperation } from "./operations/add";
 import { buildUpdateOperation } from "./operations/update";
 import { UpdateJobSkills } from "@/backend/interfaces/PUT/update_job_skills";
 
-export const updateJobSkills = async (payload: UpdateJobSkills) => {
-  const { job_id, updatedBy, actions } = payload;
+export const updateJobSkills = async (
+  job_id: string,
+  payload: UpdateJobSkills
+) => {
+  const { updatedBy, actions } = payload;
   const operations = [];
 
   for (const actionDetail of actions) {
@@ -49,7 +52,7 @@ export const updateJobSkills = async (payload: UpdateJobSkills) => {
         );
         break;
       default:
-        return "Unrecognized operation"
+        return "Unrecognized operation";
     }
   }
 

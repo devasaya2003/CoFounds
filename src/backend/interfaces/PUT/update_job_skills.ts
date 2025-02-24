@@ -11,7 +11,6 @@ type UPDATE = { action: "update"; skillId: string; skillLevel: string };
 type UpdateSkillAction = DELETE | ADD | REPLACE | UPDATE;
 
 export interface UpdateJobSkills {
-  job_id: string;
   updatedBy: string | null;
   actions: UpdateSkillAction[];
 }
