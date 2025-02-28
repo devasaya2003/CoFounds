@@ -1,7 +1,7 @@
 import { ITEMS_PER_PAGE } from "@/backend/constants/constants";
 import prisma from "../../../../../prisma/client";
 
-export const getApplicationsByJobId = async (job_id: string, page: number) => {
+export const getApplicationsByJobIdPaginated = async (job_id: string, page: number) => {
   const skip = (page - 1) * ITEMS_PER_PAGE;
   const applications = await prisma.applicationCandidateMap.findMany({
     where: { jobId: job_id, isActive: true },

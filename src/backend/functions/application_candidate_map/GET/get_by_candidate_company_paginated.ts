@@ -1,7 +1,7 @@
 import { ITEMS_PER_PAGE } from "@/backend/constants/constants";
 import prisma from "../../../../../prisma/client";
 
-export const getApplicationsByCandidateAndCompanyId = async (
+export const getApplicationsByCandidateAndCompanyIdPaginated = async (
   candidate_id: string,
   company_id: string,
   page: number
