@@ -3,6 +3,7 @@ import prisma from "../../../../../prisma/client";
 export interface CreateUserExperience {
   user_id: string;
   end_at: Date;
+  started_at: Date;
   company_name: string;
   title: string;
   description: string;
@@ -13,6 +14,7 @@ export const createUserExperience = async (data: CreateUserExperience) => {
   return prisma.userExperience.create({
     data: {
       userId: data.user_id,
+      startedAt: data.started_at,
       endAt: data.end_at,
       companyName: data.company_name,
       title: data.title,

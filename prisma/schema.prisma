@@ -214,6 +214,7 @@ model UserEducation {
   id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String       @map("user_id") @db.Uuid
   degreeId  String       @map("degree_id") @db.Uuid
+  startedAt DateTime?    @map("started_at") @db.Date
   endAt     DateTime?    @map("end_at") @db.Date
   eduFrom   String?      @map("edu_from")
   isActive  Boolean      @default(true) @map("is_active")
@@ -230,6 +231,7 @@ model UserEducation {
 model UserExperience {
   id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId      String     @map("user_id") @db.Uuid
+  startedAt   DateTime?  @map("started_at") @db.Date
   endAt       DateTime?  @map("end_at") @db.Date
   companyName String     @map("company_name")
   title       String
@@ -247,6 +249,7 @@ model UserExperience {
 model UserProjects {
   id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId      String     @map("user_id") @db.Uuid
+  startedAt   DateTime?  @map("started_at") @db.Date
   endAt       DateTime?  @map("end_at") @db.Date
   link        String?
   title       String
