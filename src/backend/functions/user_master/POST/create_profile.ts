@@ -1,0 +1,32 @@
+import prisma from "../../../../../prisma/client";
+
+export interface UserProfile {
+    user_id: string;
+    user_name: string;
+    phone: string;
+    dob: Date;
+    description: string;
+}
+
+export const createUserProfile = async (data: UserProfile) => {
+    return prisma.userMaster.update({
+        where: { id: data.user_id },
+        data: {
+            userName: data.user_name,
+            phone: data.phone,
+            dob: data.dob,
+            description: data.description,
+            isActive: true,
+            verified: false,
+            createdBy: data.user_id,
+            updatedBy: data.user_id
+        },
+        select: {
+            id: true,
+            userName: true,
+            phone: true,
+            dob: true,
+            description: true
+        }
+    });
+}
