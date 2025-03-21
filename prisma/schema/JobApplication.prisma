@@ -1,0 +1,26 @@
+model JobApplication {
+  id             String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId      String                    @map("company_id") @db.Uuid
+  recruiterId    String                    @map("recruiter_id") @db.Uuid
+  requestedBy    String?                   @map("requested_by")
+  jobCode        String                    @map("job_code")
+  location       String?
+  title          String
+  jobDescription String?                   @map("job_description")
+  package        Decimal?
+  assignmentLink String?                   @map("assignment_link")
+  endAt          DateTime?                 @map("end_at") @db.Date
+  isActive       Boolean                   @default(true) @map("is_active")
+  createdBy      String?                   @map("created_by") @db.Uuid
+  updatedBy      String?                   @map("updated_by") @db.Uuid
+  createdAt      DateTime                  @default(now()) @map("created_at")
+  updatedAt      DateTime                  @updatedAt @map("updated_at")
+  applications   ApplicationCandidateMap[]
+  skillMap       ApplicationSkillMap[]
+  extraAnswers   ExtraAnswers[]
+  extraQuestions ExtraQuestions[]
+  company        CompanyMaster             @relation(fields: [companyId], references: [id])
+  recruiter      UserMaster                @relation("RecruiterToJob", fields: [recruiterId], references: [id])
+
+  @@map("job_application")
+}

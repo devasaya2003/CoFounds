@@ -1,0 +1,14 @@
+model CompanyRecruiterMap {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String        @map("company_id") @db.Uuid
+  userId    String        @unique @map("user_id") @db.Uuid
+  isActive  Boolean       @default(true) @map("is_active")
+  createdBy String?       @map("created_by") @db.Uuid
+  updatedBy String?       @map("updated_by") @db.Uuid
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  company   CompanyMaster @relation(fields: [companyId], references: [id])
+  user      UserMaster    @relation(fields: [userId], references: [id])
+
+  @@map("company_recruiter_map")
+}
