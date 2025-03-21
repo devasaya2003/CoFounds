@@ -1,0 +1,14 @@
+model ExtraQuestions {
+  id        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jobId     String         @map("job_id") @db.Uuid
+  question  String
+  isActive  Boolean        @default(true) @map("is_active")
+  createdBy String?        @map("created_by") @db.Uuid
+  updatedBy String?        @map("updated_by") @db.Uuid
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  answers   ExtraAnswers[]
+  job       JobApplication @relation(fields: [jobId], references: [id])
+
+  @@map("extra_questions")
+}

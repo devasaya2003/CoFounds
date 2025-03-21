@@ -1,0 +1,26 @@
+model UserMaster {
+  id                 String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email              String                    @unique
+  passwordHash       String?                   @map("password_hash")
+  phone              String?                   @unique
+  userName           String?                   @unique @map("user_name")
+  dob                DateTime?                 @db.Date
+  role               UserRole
+  verified           Boolean                   @default(false)
+  description        String?
+  isActive           Boolean                   @default(true) @map("is_active")
+  createdBy          String?                   @map("created_by") @db.Uuid
+  updatedBy          String?                   @map("updated_by") @db.Uuid
+  createdAt          DateTime                  @default(now()) @map("created_at")
+  updatedAt          DateTime                  @updatedAt @map("updated_at")
+  applications       ApplicationCandidateMap[]
+  recruiterCompanies CompanyRecruiterMap?
+  jobApplications    JobApplication[]          @relation("RecruiterToJob")
+  certificates       UserCertificates[]
+  education          UserEducation[]
+  experience         UserExperience[]
+  projects           UserProjects[]
+  skillset           UserSkillset[]
+
+  @@map("user_master")
+}

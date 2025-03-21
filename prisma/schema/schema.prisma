@@ -1,0 +1,29 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  candidate
+  recruiter
+}
+
+enum ApplicationStatus {
+  applied
+  under_review
+  rejected
+  inprogress
+  closed
+}
+
+enum SkillLevel {
+  beginner
+  intermediate
+  advanced
+}
