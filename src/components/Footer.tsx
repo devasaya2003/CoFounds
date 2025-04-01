@@ -1,163 +1,74 @@
 "use client";
-import Link from "next/link";
-import { Twitter, Instagram, Linkedin, Youtube, Facebook } from "lucide-react";
+import { JoinCommunity } from "@/app/utils/joinCommunity";
 import { Button } from "@/components/ui/button";
-import { motion } from "motion/react";
+import { MessageSquare } from "lucide-react";
 
-export default function Footer() {
+const Footer = () => {
   return (
-    <footer className="bg-black text-white py-16 bottom-0 flex justify-center align-middle items-center">
-      <div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:px-20 px-5 ">
-        {/* Company Description & Social */}
-        <div className="space-y-4">
-          <p className="text-gray-300 max-w-sm">
-            CoFounds is a platform that helps talented individuals get hired
-            fast with proof of work and community support.
-          </p>
-          <div className="flex gap-4">
-            <Link href="#" className="hover:text-[#9BF348] transition-colors">
-              <Twitter className="h-5 w-5" />
-              <span className="sr-only">Twitter</span>
-            </Link>
-            <Link href="#" className="hover:text-[#9BF348] transition-colors">
-              <Instagram className="h-5 w-5" />
-              <span className="sr-only">Instagram</span>
-            </Link>
-            <Link href="#" className="hover:text-[#9BF348] transition-colors">
-              <Linkedin className="h-5 w-5" />
-              <span className="sr-only">LinkedIn</span>
-            </Link>
-            <Link href="#" className="hover:text-[#9BF348] transition-colors">
-              <Youtube className="h-5 w-5" />
-              <span className="sr-only">YouTube</span>
-            </Link>
-            <Link href="#" className="hover:text-[#9BF348] transition-colors">
-              <Facebook className="h-5 w-5" />
-              <span className="sr-only">Facebook</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Company Links */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">COMPANY</h3>
-          <ul className="space-y-2">
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                About us
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Privacy policy
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Terms & conditions
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Contact us
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Quick Links */}
-        <div className="space-y-4">
-          <h3 className="font-semibold text-lg">QUICK LINKS</h3>
-          <ul className="space-y-2">
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Hire talent
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Find work
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Projects
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Community
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="text-gray-300 hover:text-[#9BF348] transition-colors"
-              >
-                Resources
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Download Section */}
-        <div className="space-y-4">
-          <div className="pt-2">
-            <p className="text-gray-300">
-              Are you hiring?{" "}
-              <Link href="#" className="text-[#9BF348] hover:underline">
-                Find Talent
-              </Link>
+    <footer className="bg-gray-50 py-16">
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
+          <div className="md:col-span-2">
+            <h2 className="text-xl font-display font-bold mb-4">Cofounds</h2>
+            <p className="text-gray-600 max-w-md">
+              Get hired based on your proof of work and community connections.
+              Join our exclusive network of professionals.
             </p>
+            <Button className="mt-6 bg-black text-white hover:bg-black/90"
+            onClick={JoinCommunity}
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Join Our WhatsApp Community
+            </Button>
           </div>
-          <div className="text-lg">
-            <h2>Join Our Newsletter for latest update</h2>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-0 max-w-md mx-auto py-4 text-base">
-              <motion.input
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1.2 }}
-                type="email"
-                placeholder="e.g. johndoe@gmail.com"
-                className="md:w-[20rem] w-full text-center px-6 py-3 md:rounded-l-full rounded-t-md bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-[#2563EB]"
-              />
-
-              <motion.button
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1.4 }}
-                className="font-bold md:w-[20rem] w-full  px-8 py-3 md:rounded-r-full rounded-b-md bg-[#2563EB] text-black  hover:bg-opacity-90 transition-colors"
-              >
-                Subscribe
-              </motion.button>
-            </div>
+          
+          <div>
+            <h3 className="font-medium mb-4">Sections</h3>
+            <ul className="space-y-2">
+              <li>
+                <a href="#jobs" className="text-gray-600 hover:text-gray-900 text-sm">Jobs</a>
+              </li>
+              <li>
+                <a href="#reviews" className="text-gray-600 hover:text-gray-900 text-sm">Reviews</a>
+              </li>
+              <li>
+                <a href="#stories" className="text-gray-600 hover:text-gray-900 text-sm">Success Stories</a>
+              </li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="font-medium mb-4">Company</h3>
+            <ul className="space-y-2">
+              <li>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">About</a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Privacy</a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Terms</a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">Contact</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="border-t border-gray-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-500 text-sm">
+            © {new Date().getFullYear()} Cofounds. All rights reserved.
+          </p>
+          <div className="flex space-x-6 mt-4 md:mt-0">
+            <a href="https://www.linkedin.com/company/cofounds/" className="text-gray-400 hover:text-gray-600">
+              LinkedIn
+            </a>
           </div>
         </div>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { signInUser } from "@/backend/functions/user_master/GET/sign_user_in";
+import { signInUser } from "@/backend/functions/user_master/POST/sign_user_in";
 
 export async function POST(req: NextRequest) {
   try {

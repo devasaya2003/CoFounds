@@ -1,0 +1,17 @@
+model ExtraAnswers {
+  id            String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jobId         String                  @map("job_id") @db.Uuid
+  applicationId String                  @map("application_id") @db.Uuid
+  questionId    String                  @map("question_id") @db.Uuid
+  answer        String
+  isActive      Boolean                 @default(true) @map("is_active")
+  createdBy     String?                 @map("created_by") @db.Uuid
+  updatedBy     String?                 @map("updated_by") @db.Uuid
+  createdAt     DateTime                @default(now()) @map("created_at")
+  updatedAt     DateTime                @updatedAt @map("updated_at")
+  application   ApplicationCandidateMap @relation(fields: [applicationId], references: [id])
+  job           JobApplication          @relation(fields: [jobId], references: [id])
+  question      ExtraQuestions          @relation(fields: [questionId], references: [id])
+
+  @@map("extra_answers")
+}

@@ -1,0 +1,13 @@
+model DegreeMaster {
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String          @unique
+  type      String
+  isActive  Boolean         @default(true) @map("is_active")
+  createdBy String?         @map("created_by") @db.Uuid
+  updatedBy String?         @map("updated_by") @db.Uuid
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  education UserEducation[]
+
+  @@map("degree_master")
+}

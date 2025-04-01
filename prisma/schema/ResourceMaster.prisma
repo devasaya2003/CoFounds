@@ -1,0 +1,13 @@
+model ResourceMaster {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  image     String?  @unique
+  title     String   @unique
+  link      String?  @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdBy String?  @map("created_by") @db.Uuid
+  updatedBy String?  @map("updated_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("resource_master")
+}
