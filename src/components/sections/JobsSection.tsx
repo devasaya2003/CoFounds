@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import JobCard from "@/components/JobCard";
 import { Job } from "@/data/jobs";
+import { OpenPositions } from '@/app/utils/openPositions';
 
 interface JobsSectionProps {
   jobsRef: React.RefObject<HTMLDivElement> | React.MutableRefObject<HTMLDivElement | null>;
@@ -28,6 +29,7 @@ export default function JobsSection({ jobsRef, jobs }: JobsSectionProps) {
           <Button 
             variant="link" 
             className="hidden md:flex items-center mt-4 md:mt-0 text-black"
+            onClick={OpenPositions}
           >
             View all positions
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -44,7 +46,7 @@ export default function JobsSection({ jobsRef, jobs }: JobsSectionProps) {
               salary={job.salary}
               tags={job.tags}
               isNew={job.isNew}
-              className={job.color}
+              colorIndex={index}
             />
           ))}
         </div>

@@ -27,10 +27,10 @@ const TestimonialsSection = dynamic(() => import('@/components/sections/Testimon
   loading: () => <div></div>
 });
 
-const StoriesSection = dynamic(() => import('@/components/sections/StoriesSection'), { 
-  ssr: false,
-  loading: () => <div></div>
-});
+// const StoriesSection = dynamic(() => import('@/components/sections/StoriesSection'), { 
+//   ssr: false,
+//   loading: () => <div></div>
+// });
 
 const CTASection = dynamic(() => import('@/components/sections/CTASection'), { 
   ssr: false,
@@ -101,11 +101,6 @@ export default function ClientSections() {
                     <TestimonialsSection
                       reviewsRef={reviewsRef}
                       testimonials={testimonials}
-                    />
-                    
-                    <StoriesSection 
-                      storiesRef={storiesRef}
-                      stories={stories}
                     />
                     
                     <CTASection />

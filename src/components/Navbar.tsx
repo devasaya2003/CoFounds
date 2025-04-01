@@ -56,12 +56,12 @@ const Navbar = () => {
           >
             Reviews
           </button>
-          <button 
+          {/* <button 
             onClick={() => scrollToSection('stories')}
             className="text-sm font-medium hover:text-purple-600 transition-colors"
           >
             Stories
-          </button>
+          </button> */}
         </div>
         
         <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90 border-0"

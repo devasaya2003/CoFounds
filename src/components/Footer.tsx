@@ -1,4 +1,5 @@
 "use client";
+import { JoinCommunity } from "@/app/utils/joinCommunity";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 
@@ -13,7 +14,9 @@ const Footer = () => {
               Get hired based on your proof of work and community connections.
               Join our exclusive network of professionals.
             </p>
-            <Button className="mt-6 bg-black text-white hover:bg-black/90">
+            <Button className="mt-6 bg-black text-white hover:bg-black/90"
+            onClick={JoinCommunity}
+            >
               <MessageSquare className="h-4 w-4 mr-2" />
               Join Our WhatsApp Community
             </Button>
@@ -58,14 +61,8 @@ const Footer = () => {
             © {new Date().getFullYear()} Cofounds. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-gray-600">
-              Twitter
-            </a>
-            <a href="#" className="text-gray-400 hover:text-gray-600">
+            <a href="https://www.linkedin.com/company/cofounds/" className="text-gray-400 hover:text-gray-600">
               LinkedIn
-            </a>
-            <a href="#" className="text-gray-400 hover:text-gray-600">
-              Instagram
             </a>
           </div>
         </div>

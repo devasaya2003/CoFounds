@@ -19,6 +19,9 @@ export const TextGenerateEffect = ({
   const wordsArray = words.split(" ");
 
   useEffect(() => {
+    // Store a reference to the current element
+    const currentElement = scope.current;
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -30,16 +33,17 @@ export const TextGenerateEffect = ({
       }
     );
 
-    if (scope.current) {
-      observer.observe(scope.current);
+    if (currentElement) {
+      observer.observe(currentElement);
     }
 
     return () => {
-      if (scope.current) {
-        observer.unobserve(scope.current);
+      // Use the stored reference in the cleanup function
+      if (currentElement) {
+        observer.unobserve(currentElement);
       }
     };
-  }, [scope]);
+  }, [scope]); // scope is still needed in the dependency array
 
   useEffect(() => {
     if (isInView) {
@@ -80,7 +84,7 @@ export const TextGenerateEffect = ({
   return (
     <div className={cn("font-bold", className)}>
       <div className="mt-4">
-        <div className="dark:text-white text-black  leading-snug tracking-wide">
+        <div className="dark:text-white text-black leading-snug tracking-wide">
           {renderWords()}
         </div>
       </div>
