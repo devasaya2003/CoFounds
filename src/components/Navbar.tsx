@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
+import { JoinCommunity } from '@/app/utils/joinCommunity';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -63,7 +64,9 @@ const Navbar = () => {
           </button>
         </div>
         
-        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90 border-0">
+        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90 border-0"
+        onClick={JoinCommunity}
+        >
           <MessageSquare className="h-4 w-4 mr-2" />
           Join Community
         </Button>

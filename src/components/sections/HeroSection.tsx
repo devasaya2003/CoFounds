@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { MessageSquare, ChevronDown } from "lucide-react";
+import { JoinCommunity } from '@/app/utils/joinCommunity';
 
 interface HeroSectionProps {
   scrollToSection: (id: string) => void;
@@ -29,7 +30,9 @@ export default function HeroSection({ scrollToSection, heroRef }: HeroSectionPro
           Join our vibrant community where your actual work speaks louder than resumes. Connect with forward-thinking companies seeking proven talent.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90 px-6 border-0">
+          <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90 px-6 border-0"
+          onClick={JoinCommunity}
+          >
             <MessageSquare className="h-5 w-5 mr-2" />
             Join Our WhatsApp Community
           </Button>
