@@ -8,3 +8,12 @@ export const OpenPositions = () => {
     }
   }, 0);
 };
+
+export const ApplyToPosition = (application_link: string) => {
+  setTimeout(() => {
+    const newWindow = window.open(application_link, '_blank');
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      window.location.href = NotionDocLink;
+    }
+  }, 0);
+};

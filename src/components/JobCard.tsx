@@ -8,7 +8,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OpenPositions } from '@/app/utils/openPositions';
+import { ApplyToPosition, OpenPositions } from '@/app/utils/openPositions';
 
 interface JobCardProps {
   title: string;
@@ -18,6 +18,7 @@ interface JobCardProps {
   tags: string[];
   isNew?: boolean;
   colorIndex: number;
+  applicationLink: string;
 }
 
 const colorOptions = [
@@ -40,7 +41,8 @@ const JobCard: React.FC<JobCardProps> = ({
   salary, 
   tags, 
   isNew = false,
-  colorIndex
+  colorIndex,
+  applicationLink,
 }) => {
 
   const cardColor = colorOptions[colorIndex % colorOptions.length];
@@ -76,7 +78,7 @@ const JobCard: React.FC<JobCardProps> = ({
         variant="outline"
         size="sm"
         className="w-full"
-        onClick={OpenPositions}
+        onClick={() => ApplyToPosition(applicationLink)}
         >
           Apply Now
         </Button>

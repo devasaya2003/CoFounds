@@ -47,6 +47,7 @@ export default function JobsSection({ jobsRef, jobs }: JobsSectionProps) {
               tags={job.tags}
               isNew={job.isNew}
               colorIndex={index}
+              applicationLink={job.application_link}
             />
           ))}
         </div>
