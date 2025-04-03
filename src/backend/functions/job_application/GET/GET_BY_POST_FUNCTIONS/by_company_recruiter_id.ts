@@ -7,6 +7,8 @@ export const getByCompanyAndRecruiterID = async (
   page: number
 ) => {
   const skip = (page - 1) * ITEMS_PER_PAGE;
+  
+  // Get jobs with their applications
   const jobs = await prisma.jobApplication.findMany({
     skip: skip,
     take: ITEMS_PER_PAGE,
@@ -30,6 +32,12 @@ export const getByCompanyAndRecruiterID = async (
       endAt: true,
       createdAt: true,
       updatedAt: true,
+      applications: {
+        select: {
+          id: true,
+          status: true
+        }
+      },
       company: {
         select: {
           id: true,
@@ -53,6 +61,32 @@ export const getByCompanyAndRecruiterID = async (
     },
   });
 
+  // Process jobs to include status counts
+  const jobsWithStatusCounts = jobs.map(job => {
+    // Initialize counts for all statuses
+    const statusCounts = {
+      applied: 0,
+      under_review: 0,
+      inprogress: 0,
+      rejected: 0,
+      closed: 0
+    };
+    
+    // Count applications by status
+    job.applications.forEach(app => {
+      if (statusCounts[app.status] !== undefined) {
+        statusCounts[app.status]++;
+      }
+    });
+    
+    // Return job with status counts but without applications array
+    const { applications, ...jobWithoutApplications } = job;
+    return {
+      ...jobWithoutApplications,
+      statusCounts
+    };
+  });
+
   const totalJobs = await prisma.jobApplication.count({
     where: {
       companyId: company_id,
@@ -60,8 +94,9 @@ export const getByCompanyAndRecruiterID = async (
       isActive: true,
     },
   });
+  
   return {
-    jobs,
+    jobs: jobsWithStatusCounts,
     totalJobs,
     totalPages: Math.ceil(totalJobs / ITEMS_PER_PAGE),
     currentPage: page,

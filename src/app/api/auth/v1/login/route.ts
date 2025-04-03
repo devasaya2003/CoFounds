@@ -8,16 +8,32 @@ export async function POST(req: NextRequest) {
     const { email, password } = await req.json();
     
     if (!email || !password) {
-      console.log("**** ERROR: Missing email or password");
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
     const { user, token } = await signInUser(email, password);
-
     console.log("**** Sign-in successful:", user.email);
-    return NextResponse.json({ token, user }, { status: 200 });
+    
+    // Create the response
+    const response = NextResponse.json({
+      user,
+      token,
+      success: true
+    });
+    
+    // Set the cookie securely
+    response.cookies.set({
+      name: "auth_token",
+      value: token,
+      path: "/",
+      maxAge: 60 * 60 * 24, // 1 day
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production"
+    });
+    
+    return response;
   } catch (error) {
-    console.error("**** ERROR during sign-in:", error);
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    console.error("**** Sign-in error:", error);
+    return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
   }
 }

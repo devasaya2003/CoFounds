@@ -8,6 +8,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ApplyToPosition, OpenPositions } from '@/app/utils/openPositions';
 
 interface JobCardProps {
   title: string;
@@ -16,21 +17,21 @@ interface JobCardProps {
   salary: string;
   tags: string[];
   isNew?: boolean;
-  colorIndex: number; // Add colorIndex prop
+  colorIndex: number;
+  applicationLink: string;
 }
 
-// Define an array of 10 different color combinations
 const colorOptions = [
-  'bg-blue-50 border-blue-100',       // Light blue
-  'bg-purple-50 border-purple-100',   // Light purple
-  'bg-green-50 border-green-100',     // Light green
-  'bg-pink-50 border-pink-100',       // Light pink
-  'bg-yellow-50 border-yellow-100',   // Light yellow
-  'bg-indigo-50 border-indigo-100',   // Light indigo
-  'bg-red-50 border-red-100',         // Light red
-  'bg-teal-50 border-teal-100',       // Light teal
-  'bg-orange-50 border-orange-100',   // Light orange
-  'bg-cyan-50 border-cyan-100'        // Light cyan
+  'bg-blue-50 border-blue-100',
+  'bg-purple-50 border-purple-100',
+  'bg-green-50 border-green-100',
+  'bg-pink-50 border-pink-100',
+  'bg-yellow-50 border-yellow-100',
+  'bg-indigo-50 border-indigo-100',
+  'bg-red-50 border-red-100',
+  'bg-teal-50 border-teal-100',
+  'bg-orange-50 border-orange-100',
+  'bg-cyan-50 border-cyan-100'
 ];
 
 const JobCard: React.FC<JobCardProps> = ({ 
@@ -40,9 +41,10 @@ const JobCard: React.FC<JobCardProps> = ({
   salary, 
   tags, 
   isNew = false,
-  colorIndex
+  colorIndex,
+  applicationLink,
 }) => {
-  // Get color from colorOptions array using modulo to ensure it wraps around
+
   const cardColor = colorOptions[colorIndex % colorOptions.length];
   
   return (
@@ -72,7 +74,12 @@ const JobCard: React.FC<JobCardProps> = ({
         </div>
       </CardContent>
       <CardFooter className="border-t pt-4">
-        <Button variant="outline" size="sm" className="w-full">
+        <Button
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={() => ApplyToPosition(applicationLink)}
+        >
           Apply Now
         </Button>
       </CardFooter>

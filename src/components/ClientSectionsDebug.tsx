@@ -10,7 +10,6 @@ export default function ClientSectionsDebug() {
   
   useEffect(() => {
     setIsClient(true);
-    console.log("ClientSectionsDebug mounted");
   }, []);
 
   return (
