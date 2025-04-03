@@ -1,18 +1,7 @@
+import { Job } from "@/types/job";
+
 interface JobCardProps {
-  job: {
-    id: string;
-    title: string;
-    jobCode: string;
-    recruiterName: string;
-    requestedBy: string;
-    status: {
-      applied: number;
-      underReview: number;
-      inProgress: number;
-      rejected: number;
-      closed: number;
-    };
-  };
+  job: Job;
 }
 
 export default function JobCard({ job }: JobCardProps) {
@@ -24,7 +13,7 @@ export default function JobCard({ job }: JobCardProps) {
         
         <div className="mb-2">
           <span className="text-sm text-gray-600">Created By: </span>
-          <span className="text-sm font-medium text-gray-900">{job.recruiterName}</span>
+          <span className="text-sm font-medium text-gray-900">{job.recruiter.userName}</span>
         </div>
         
         <div className="mb-4">
@@ -33,11 +22,11 @@ export default function JobCard({ job }: JobCardProps) {
         </div>
         
         <div className="grid grid-cols-3 gap-2">
-          <StatusBadge label="Applied" count={job.status.applied} color="blue" />
-          <StatusBadge label="Under-Review" count={job.status.underReview} color="orange" />
-          <StatusBadge label="In-Progress" count={job.status.inProgress} color="gray" />
-          <StatusBadge label="Rejected" count={job.status.rejected} color="red" />
-          <StatusBadge label="Closed" count={job.status.closed} color="green" />
+          <StatusBadge label="Applied" count={job.statusCounts.applied} color="blue" />
+          <StatusBadge label="Under-Review" count={job.statusCounts.under_review} color="orange" />
+          <StatusBadge label="In-Progress" count={job.statusCounts.inprogress} color="gray" />
+          <StatusBadge label="Rejected" count={job.statusCounts.rejected} color="red" />
+          <StatusBadge label="Closed" count={job.statusCounts.closed} color="green" />
         </div>
       </div>
     </div>

@@ -49,7 +49,6 @@ export default function ClientSections() {
   
   useEffect(() => {
     setIsClient(true);
-    console.log("ClientSections mounted");
   }, []);
 
   const handleError = (error: Error) => {
@@ -84,7 +83,6 @@ export default function ClientSections() {
         <AnimationProvider>
           <ScrollAnimationHook>
             {({ heroRef, jobsRef, reviewsRef, storiesRef, scrollToSection }) => {
-              console.log("Rendering sections with refs:", { heroRef, jobsRef, reviewsRef, storiesRef });
               try {
                 return (
                   <>

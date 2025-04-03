@@ -1,3 +1,5 @@
+import { useRouter } from "next/navigation";
+
 interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;

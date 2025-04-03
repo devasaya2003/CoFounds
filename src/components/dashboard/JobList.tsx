@@ -1,19 +1,5 @@
 import JobCard from "./JobCard";
-
-interface Job {
-  id: string;
-  title: string;
-  jobCode: string;
-  recruiterName: string;
-  requestedBy: string;
-  status: {
-    applied: number;
-    underReview: number;
-    inProgress: number;
-    rejected: number;
-    closed: number;
-  };
-}
+import { Job } from "@/types/job";
 
 interface JobListProps {
   jobs: Job[];
