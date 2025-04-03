@@ -4,6 +4,13 @@ import { RootState } from "../store";
 import { COMPANY, RECRUITER } from "@/backend/constants/constants";
 import { Job } from "@/types/job";
 
+// Define request payload interfaces
+interface JobsRequestPayload {
+  type: string;
+  id: string;
+  page_no: number;
+}
+
 interface FetchJobsResponse {
   fetchedJobs: {
     jobs: Job[];
@@ -52,13 +59,15 @@ export const fetchJobsByCompany = createAsyncThunk(
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
-      const response = await fetchWithAuth_POST<FetchJobsResponse, any>(
+      const requestPayload: JobsRequestPayload = {
+        type: COMPANY,
+        id: companyId,
+        page_no: state.jobs.currentPage,
+      };
+
+      const response = await fetchWithAuth_POST<FetchJobsResponse, JobsRequestPayload>(
         `${baseUrl}/jobs/identifier`,
-        {
-          type: COMPANY,
-          id: companyId,
-          page_no: state.jobs.currentPage,
-        }
+        requestPayload
       );
 
       return response.fetchedJobs;
@@ -76,13 +85,15 @@ export const fetchJobsByRecruiter = createAsyncThunk(
       const state = getState() as RootState;
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
-      const response = await fetchWithAuth_POST<FetchJobsResponse, any>(
+      const requestPayload: JobsRequestPayload = {
+        type: RECRUITER,
+        id: recruiterId,
+        page_no: state.jobs.currentPage,
+      };
+
+      const response = await fetchWithAuth_POST<FetchJobsResponse, JobsRequestPayload>(
         `${baseUrl}/jobs/identifier`,
-        {
-          type: RECRUITER,
-          id: recruiterId,
-          page_no: state.jobs.currentPage,
-        }
+        requestPayload
       );
 
       return response.fetchedJobs;

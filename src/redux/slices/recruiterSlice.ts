@@ -12,6 +12,21 @@ interface RecruiterProfile {
   error: string | null;
 }
 
+// Define API response interface
+interface RecruiterApiResponse {
+  user: {
+    id: string;
+    email: string;
+    userName: string;
+    // Add other possible user fields if needed
+  };
+  company: {
+    id: string;
+    name: string;
+    // Add other possible company fields if needed
+  };
+}
+
 // Initial state
 const initialState: RecruiterProfile = {
   userId: "",
@@ -29,7 +44,7 @@ export const fetchRecruiterProfile = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
-      const response = await fetchWithAuth_GET<any>(`${baseUrl}/recruiter/user/${userId}`);
+      const response = await fetchWithAuth_GET<RecruiterApiResponse>(`${baseUrl}/recruiter/user/${userId}`);
       
       return {
         userId: response.user.id,
