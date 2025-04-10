@@ -2,13 +2,18 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import jobsReducer from "./slices/jobsSlice";
 import recruiterReducer from "./slices/recruiterSlice";
+import companyReducer from "./slices/companySlice"
+import skillReducer from "./slices/skillSlice";
+import degreeReducer from "./slices/degreeSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     jobs: jobsReducer,
     recruiter: recruiterReducer,
-    // Add other reducers here
+    company: companyReducer,
+    skill: skillReducer,
+    degree: degreeReducer,
   },
 });
 

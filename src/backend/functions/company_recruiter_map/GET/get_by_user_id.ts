@@ -13,6 +13,8 @@ export const getByUserID = async (user_Id: string) => {
           id: true,
           email: true,
           userName: true,
+          firstName: true,
+          lastName: true,
           isActive: true,
           createdAt: true,
           updatedAt: true,

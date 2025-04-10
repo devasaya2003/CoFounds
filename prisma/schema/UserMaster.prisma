@@ -1,6 +1,8 @@
 model UserMaster {
   id                 String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email              String                    @unique
+  firstName          String?                   @map("first_name")
+  lastName           String?                   @map("last_name")
   passwordHash       String?                   @map("password_hash")
   phone              String?                   @unique
   userName           String?                   @unique @map("user_name")

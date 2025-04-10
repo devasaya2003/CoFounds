@@ -5,6 +5,14 @@ interface JobCardProps {
 }
 
 export default function JobCard({ job }: JobCardProps) {
+  // Create a helper function to get the recruiter's full name
+  const getRecruiterFullName = () => {
+    if (job.recruiter.firstName || job.recruiter.lastName) {
+      return `${job.recruiter.firstName || ""} ${job.recruiter.lastName || ""}`.trim();
+    }
+    return job.recruiter.userName || "";
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="p-5">
@@ -13,7 +21,7 @@ export default function JobCard({ job }: JobCardProps) {
         
         <div className="mb-2">
           <span className="text-sm text-gray-600">Created By: </span>
-          <span className="text-sm font-medium text-gray-900">{job.recruiter.userName}</span>
+          <span className="text-sm font-medium text-gray-900">{getRecruiterFullName()}</span>
         </div>
         
         <div className="mb-4">

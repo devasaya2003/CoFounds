@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useAppSelector } from "@/redux/hooks";
 
 export default function TopBar() {
-  const { userName, companyName } = useAppSelector(state => state.recruiter);
+  const { firstName, lastName, companyName } = useAppSelector(state => state.recruiter);
   
   return (
     <header className="bg-white shadow-sm">
@@ -15,7 +15,7 @@ export default function TopBar() {
         
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-600">
-            Welcome, <span className="font-semibold">{userName || 'Recruiter'}</span>
+            Welcome, <span className="font-semibold">{`${firstName} ${lastName}` || 'Recruiter'}</span>
           </span>
           <Link 
             href="/recruiter/app/company-profile" 

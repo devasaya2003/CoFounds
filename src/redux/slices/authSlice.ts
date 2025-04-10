@@ -7,8 +7,11 @@ interface UserProfile {
   role: string;
   verified: boolean;
   userName?: string | null;
+  firstName?: string | null; // Add firstName field
+  lastName?: string | null;  // Add lastName field
   phone?: string | null;
   description?: string | null;
+  dob?: string | null;       // Add dob field
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -121,6 +124,18 @@ export const forgotPassword = createAsyncThunk(
     }
   }
 );
+
+// Add selector to get full name
+export const getFullName = (user: UserProfile | null): string => {
+  if (!user) return "";
+  
+  // Use firstName and lastName if available, fallback to userName
+  if (user.firstName || user.lastName) {
+    return `${user.firstName || ""} ${user.lastName || ""}`.trim();
+  }
+  
+  return user.userName || "";
+};
 
 export const authSlice = createSlice({
   name: "auth",

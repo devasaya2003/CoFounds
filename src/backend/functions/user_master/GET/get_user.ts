@@ -7,6 +7,8 @@ export const getUserDetails = async (id: string) => {
             id: true,
             email: true,
             userName: true,
+            firstName: true,
+            lastName: true,
             phone: true,
             dob: true,
             description: true,

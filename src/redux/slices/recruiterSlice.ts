@@ -7,7 +7,12 @@ interface RecruiterProfile {
   companyId: string;
   email: string;
   userName: string;
+  firstName: string; // Add firstName
+  lastName: string;  // Add lastName
   companyName: string;
+  phone: string | null;
+  description: string | null;
+  dob: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -18,6 +23,11 @@ interface RecruiterApiResponse {
     id: string;
     email: string;
     userName: string;
+    firstName: string; // Add firstName
+    lastName: string;  // Add lastName
+    phone: string | null;
+    dob: string | null;
+    description: string | null;
     // Add other possible user fields if needed
   };
   company: {
@@ -33,9 +43,22 @@ const initialState: RecruiterProfile = {
   companyId: "",
   email: "",
   userName: "",
+  firstName: "",   // Initialize firstName
+  lastName: "",    // Initialize lastName
   companyName: "",
+  phone: null,
+  description: null,
+  dob: null,
   isLoading: false,
   error: null,
+};
+
+// Helper function to get full name
+export const getRecruiterFullName = (recruiter: RecruiterProfile): string => {
+  if (recruiter.firstName || recruiter.lastName) {
+    return `${recruiter.firstName || ""} ${recruiter.lastName || ""}`.trim();
+  }
+  return recruiter.userName || "";
 };
 
 // Async thunk to fetch recruiter profile
@@ -51,7 +74,12 @@ export const fetchRecruiterProfile = createAsyncThunk(
         companyId: response.company.id,
         email: response.user.email,
         userName: response.user.userName,
+        firstName: response.user.firstName,  // Extract firstName
+        lastName: response.user.lastName,    // Extract lastName
         companyName: response.company.name,
+        phone: response.user.phone,
+        description: response.user.description,
+        dob: response.user.dob,
       };
     } catch (error) {
       return rejectWithValue("Failed to fetch recruiter profile");
@@ -78,7 +106,12 @@ const recruiterSlice = createSlice({
         state.companyId = action.payload.companyId;
         state.email = action.payload.email;
         state.userName = action.payload.userName;
+        state.firstName = action.payload.firstName;  // Set firstName
+        state.lastName = action.payload.lastName;    // Set lastName
         state.companyName = action.payload.companyName;
+        state.phone = action.payload.phone;
+        state.description = action.payload.description;
+        state.dob = action.payload.dob;
       })
       .addCase(fetchRecruiterProfile.rejected, (state, action) => {
         state.isLoading = false;

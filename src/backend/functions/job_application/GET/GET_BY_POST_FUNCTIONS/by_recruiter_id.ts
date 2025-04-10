@@ -43,6 +43,8 @@ export const getByRecruiterID = async (id: string, page: number) => {
           id: true,
           email: true,
           userName: true,
+          firstName: true,
+          lastName: true,
           isActive: true,
           createdAt: true,
           updatedAt: true,

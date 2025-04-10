@@ -3,6 +3,8 @@ import prisma from "../../../../../prisma/client";
 export interface UserProfile {
     user_id: string;
     user_name: string;
+    first_name: string;
+    last_name: string;
     phone: string;
     dob: Date;
     description: string;
@@ -13,6 +15,8 @@ export const createUserProfile = async (data: UserProfile) => {
         where: { id: data.user_id },
         data: {
             userName: data.user_name,
+            firstName: data.first_name,
+            lastName: data.last_name,
             phone: data.phone,
             dob: data.dob,
             description: data.description,
@@ -24,6 +28,8 @@ export const createUserProfile = async (data: UserProfile) => {
         select: {
             id: true,
             userName: true,
+            firstName: true,
+            lastName: true,
             phone: true,
             dob: true,
             description: true

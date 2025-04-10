@@ -53,6 +53,8 @@ export const getByCompanyAndRecruiterID = async (
           id: true,
           email: true,
           userName: true,
+          firstName: true,
+          lastName: true,
           isActive: true,
           createdAt: true,
           updatedAt: true,

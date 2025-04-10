@@ -29,14 +29,36 @@ export interface Job {
   title: string;
   jobCode: string;
   requestedBy: string;
-  assignmentLink: string;
-  location: string;
-  package: string;
-  jobDescription: string;
-  endAt: string;
+  assignmentLink?: string;
+  location?: string;
+  package?: string;
+  jobDescription?: string;
+  endAt?: string;
   createdAt: string;
   updatedAt: string;
-  company: Company;
-  recruiter: Recruiter;
-  statusCounts: JobStatus;
+  company: {
+    id: string;
+    name: string;
+    url?: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  recruiter: {
+    id: string;
+    email: string;
+    userName: string;
+    firstName: string; // Add firstName
+    lastName: string;  // Add lastName
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+  statusCounts: {
+    applied: number;
+    under_review: number;
+    inprogress: number;
+    rejected: number;
+    closed: number;
+  };
 }
