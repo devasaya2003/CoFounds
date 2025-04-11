@@ -15,7 +15,7 @@ export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
   
   return (
     <aside className="bg-white w-64 shadow-md hidden md:block">
-      <div className="h-16 flex items-center justify-center border-b">
+      <div className="h-16 flex items-center justify-center">
       <span className="text-xl font-display font-bold text-gradient">Cofounds</span>
       </div>
       <nav className="mt-5">

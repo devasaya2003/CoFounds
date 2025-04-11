@@ -36,6 +36,8 @@ export default function RecruiterLayout({
     if (path.includes('/jobs/')) return 'jobs-created';
     if (path.includes('/create')) return 'create-job';
     if (path.includes('/kanban')) return 'kanban';
+    if (path.includes('/your-profile')) return 'your-profile';
+    if (path.includes('/company-profile')) return 'company-profile';
     return 'all-jobs';
   };
   
@@ -86,6 +88,17 @@ export default function RecruiterLayout({
     }
   };
   
+  // Handle top bar navigation
+  const handleTopBarNavigation = (view: string) => {
+    if (view !== activeView) {
+      if (view === 'your-profile') {
+        router.push('/recruiter/app/your-profile');
+      } else if (view === 'company-profile') {
+        router.push('/recruiter/app/company-profile');
+      }
+    }
+  };
+  
   // Auth loading state
   if (authLoading) {
     return (
@@ -107,7 +120,7 @@ export default function RecruiterLayout({
       <Sidebar activeView={activeView} onViewChange={handleSidebarNavigation} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar />
+        <TopBar activeView={activeView} onViewChange={handleTopBarNavigation} />
         <main className="flex-1 overflow-y-auto p-6">
           {profileLoading ? (
             <div className="flex flex-col items-center justify-center h-[80vh]">
