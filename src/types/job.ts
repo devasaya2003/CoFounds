@@ -62,3 +62,32 @@ export interface Job {
     closed: number;
   };
 }
+
+export interface JobFormData {
+  jobTitle: string;
+  jobCode: string;
+  jobDescription: string;
+  assignmentLink?: string;
+  requiredSkills: string[];
+  lastDateToApply: {
+    year: string;
+    month: string;
+    day: string;
+  };
+  additionalQuestions: {
+    question: string;
+    type: 'text' | 'multipleChoice';
+    options?: string[];
+  }[];
+}
+
+export const SKILL_OPTIONS = [
+  'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 
+  'Python', 'Django', 'Flask', 'Java', 'Spring', 
+  'C#', '.NET', 'PHP', 'Laravel', 'Ruby', 
+  'Ruby on Rails', 'Go', 'Rust', 'Swift', 'Kotlin',
+  'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis',
+  'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes',
+  'GraphQL', 'REST API', 'HTML', 'CSS', 'Sass',
+  'TailwindCSS', 'Bootstrap', 'Material UI', 'Git', 'CI/CD'
+];
