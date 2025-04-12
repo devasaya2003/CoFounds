@@ -16,21 +16,23 @@ export default function RecruiterLayout({
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // Auth state
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector(
     (state) => state.auth
   );
-  
+
   // Recruiter state
   const { userId, isLoading: profileLoading } = useAppSelector(
     (state) => state.recruiter
   );
-  
+
   // Track initialization
   const [authInitialized, setAuthInitialized] = useState(false);
   const [profileInitialized, setProfileInitialized] = useState(false);
-  
+  const [showDebug, setShowDebug] = useState(false);
+  const formState = useAppSelector(state => state.forms.jobCreation);
+
   // Determine active view from pathname
   const getActiveViewFromPath = (path: string) => {
     if (path.includes('/jobs/')) return 'jobs-created';
@@ -40,9 +42,9 @@ export default function RecruiterLayout({
     if (path.includes('/company-profile')) return 'company-profile';
     return 'all-jobs';
   };
-  
+
   const activeView = getActiveViewFromPath(pathname);
-  
+
   // Step 1: Initialize auth when component mounts
   useEffect(() => {
     if (!authInitialized) {
@@ -50,7 +52,7 @@ export default function RecruiterLayout({
       setAuthInitialized(true);
     }
   }, [dispatch, authInitialized]);
-  
+
   // Step 2: Load profile data once authentication is complete
   useEffect(() => {
     const loadProfile = async () => {
@@ -68,10 +70,10 @@ export default function RecruiterLayout({
         }
       }
     };
-    
+
     loadProfile();
   }, [dispatch, isAuthenticated, user, profileInitialized, profileLoading]);
-  
+
   // Handle navigation
   const handleSidebarNavigation = (view: string) => {
     // Only navigate if the view is different from current
@@ -87,7 +89,7 @@ export default function RecruiterLayout({
       }
     }
   };
-  
+
   // Handle top bar navigation
   const handleTopBarNavigation = (view: string) => {
     if (view !== activeView) {
@@ -98,7 +100,7 @@ export default function RecruiterLayout({
       }
     }
   };
-  
+
   // Auth loading state
   if (authLoading) {
     return (
@@ -108,17 +110,17 @@ export default function RecruiterLayout({
       </div>
     );
   }
-  
+
   // Auth error state
   if (authInitialized && !authLoading && !isAuthenticated) {
     router.push('/auth/recruiter-sign-in');
     return null;
   }
-  
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar activeView={activeView} onViewChange={handleSidebarNavigation} />
-      
+
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar activeView={activeView} onViewChange={handleTopBarNavigation} />
         <main className="flex-1 overflow-y-auto p-6">
@@ -131,6 +133,26 @@ export default function RecruiterLayout({
             children
           )}
         </main>
+        {process.env.NODE_ENV !== 'production' && (
+          <div className="mt-8 border-t pt-4">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-medium text-gray-700">Redux State Debug</h2>
+              <button
+                type="button"
+                onClick={() => setShowDebug(!showDebug)}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                {showDebug ? 'Hide' : 'Show'} Debug Data
+              </button>
+            </div>
+
+            {showDebug && (
+              <div className="bg-gray-100 p-4 rounded-md overflow-auto max-h-[500px]">
+                <pre className="text-xs">{JSON.stringify(formState, null, 2)}</pre>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
