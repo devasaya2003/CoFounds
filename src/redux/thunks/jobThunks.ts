@@ -32,15 +32,17 @@ export const submitJobForm = createAsyncThunk(
       }));
       
       return response;
-    } catch (error: any) {
-      // Set error status
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create job';
+      
+      // And then use errorMessage instead of error.message
       dispatch(setFormStatus({
         formType: 'jobCreation',
         status: 'error',
-        error: error.message || 'Failed to create job'
+        error: errorMessage
       }));
       
-      return rejectWithValue(error.message || 'Failed to create job');
+      return rejectWithValue(errorMessage);
     }
   }
 );

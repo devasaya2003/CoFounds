@@ -24,7 +24,7 @@ export default function AdditionalQuestionsStep({
   const addQuestion = () => {
     // Check if fields is defined and append is available
     if (fields && fields.length < 5 && append) {
-      const newQuestion = { question: '', type: "text" as "text", options: [''] };
+      const newQuestion = { question: '', type: "text" as const, options: [''] };
       append(newQuestion);
     }
   };

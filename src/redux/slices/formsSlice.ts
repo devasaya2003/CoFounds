@@ -4,6 +4,19 @@ import { JobFormData } from '@/types/job';
 // Define form types
 export type FormType = 'jobCreation' | 'companyProfile' | 'recruiterProfile';
 
+// Define these interface updates at the top of your file:
+interface CompanyProfileData {
+  // Add your company profile fields here
+  name: string;
+  // Add more fields as needed
+}
+
+interface RecruiterProfileData {
+  // Add your recruiter profile fields here
+  name: string;
+  // Add more fields as needed
+}
+
 // Define interfaces for different form types
 export interface FormState {
   jobCreation?: {
@@ -14,15 +27,13 @@ export interface FormState {
     isDirty: boolean;
   };
   companyProfile?: {
-    // Add company profile form data structure when needed
-    data: any;
+    data: CompanyProfileData;
     status: 'idle' | 'submitting' | 'success' | 'error';
     error: string | null;
     isDirty: boolean;
   };
   recruiterProfile?: {
-    // Add recruiter profile form data structure when needed
-    data: any;
+    data: RecruiterProfileData;
     status: 'idle' | 'submitting' | 'success' | 'error';
     error: string | null;
     isDirty: boolean;
@@ -64,7 +75,7 @@ const formsSlice = createSlice({
       action: PayloadAction<{
         formType: FormType;
         fieldPath: string;
-        value: any;
+        value: unknown;
       }>
     ) => {
       const { formType, fieldPath, value } = action.payload;
@@ -73,11 +84,15 @@ const formsSlice = createSlice({
       
       // Parse the field path (e.g., "lastDateToApply.year" or "requiredSkills")
       const pathParts = fieldPath.split('.');
-      let currentObj = state[formType]!.data as any;
+      let currentObj: Record<string, unknown> = state[formType]!.data as Record<string, unknown>;
       
       // Navigate to the nested property, except the last one
       for (let i = 0; i < pathParts.length - 1; i++) {
-        currentObj = currentObj[pathParts[i]];
+        const key = pathParts[i];
+        if (typeof currentObj[key] !== 'object' || currentObj[key] === null) {
+          currentObj[key] = {};
+        }
+        currentObj = currentObj[key] as Record<string, unknown>;
       }
       
       // Set the value to the last property
@@ -97,7 +112,7 @@ const formsSlice = createSlice({
     ) => {
       const { formType, step } = action.payload;
       if (state[formType] && 'currentStep' in state[formType]!) {
-        (state[formType] as any).currentStep = step;
+        (state[formType] as { currentStep: number }).currentStep = step;
       }
     },
     
@@ -150,7 +165,7 @@ const formsSlice = createSlice({
       action: PayloadAction<{
         formType: FormType;
         fieldPath: string;
-        item: any;
+        item: unknown;
       }>
     ) => {
       const { formType, fieldPath, item } = action.payload;
@@ -159,19 +174,22 @@ const formsSlice = createSlice({
       
       // Navigate to the array field
       const pathParts = fieldPath.split('.');
-      let currentObj = state[formType]!.data as any;
+      let currentObj: Record<string, unknown> = state[formType]!.data as Record<string, unknown>;
       
       for (let i = 0; i < pathParts.length; i++) {
-        currentObj = currentObj[pathParts[i]];
+        const key = pathParts[i];
+        currentObj = currentObj[key] as Record<string, unknown>;
       }
       
       // Check if it's already there (for skills)
-      if (Array.isArray(currentObj) && typeof item === 'string') {
-        if (!currentObj.includes(item)) {
+      if (Array.isArray(currentObj)) {
+        if (typeof item === 'string') {
+          if (!currentObj.includes(item)) {
+            currentObj.push(item);
+          }
+        } else {
           currentObj.push(item);
         }
-      } else if (Array.isArray(currentObj)) {
-        currentObj.push(item);
       }
       
       // Mark form as dirty
@@ -194,10 +212,16 @@ const formsSlice = createSlice({
       
       // Navigate to the array field
       const pathParts = fieldPath.split('.');
-      let currentObj = state[formType]!.data as any;
+      let currentObj: unknown = state[formType]!.data;
       
       for (let i = 0; i < pathParts.length; i++) {
-        currentObj = currentObj[pathParts[i]];
+        const key = pathParts[i];
+        if (typeof currentObj === 'object' && currentObj !== null) {
+          currentObj = (currentObj as Record<string, unknown>)[key];
+        } else {
+          // If we can't navigate further, return early
+          return;
+        }
       }
       
       // Remove the item

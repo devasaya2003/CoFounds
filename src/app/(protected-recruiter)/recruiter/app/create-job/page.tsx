@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { updateFormData, setFormStep, addArrayItem, removeArrayItem, setFormStatus } from '@/redux/slices/formsSlice';
 import JobDetailsStep from './components/JobDetailsStep';
 import AdditionalQuestionsStep from './components/AdditionalQuestionsStep';
+import { JobFormData } from '@/types/job';
 
 export default function CreateJobPage() {
   const [showAlert, setShowAlert] = useState(false);
@@ -56,7 +57,7 @@ export default function CreateJobPage() {
   }, [formData, setValue]);
   
   // Handle form field changes
-  const handleFieldChange = (fieldPath: string, value: any) => {
+  const handleFieldChange = (fieldPath: string, value: unknown) => {
     dispatch(updateFormData({
       formType: 'jobCreation',
       fieldPath,
@@ -65,7 +66,7 @@ export default function CreateJobPage() {
   };
 
   // Handle form submission
-  const onSubmit: SubmitHandler<any> = (data) => {
+  const onSubmit: SubmitHandler<JobFormData> = (data) => {
     dispatch(setFormStatus({
       formType: 'jobCreation',
       status: 'submitting'
@@ -83,7 +84,7 @@ export default function CreateJobPage() {
   };
   
   // Helper for adding array items
-  const handleAddArrayItem = (fieldPath: string, item: any) => {
+  const handleAddArrayItem = (fieldPath: string, item: unknown) => {
     dispatch(addArrayItem({
       formType: 'jobCreation',
       fieldPath,
@@ -177,7 +178,7 @@ export default function CreateJobPage() {
             goToPreviousStep={goToPreviousStep}
             fields={fields}
             append={(question) => {
-              append(question);
+              append(question as { question: string; type: "text" | "multipleChoice"; options?: string[] });
               handleAddArrayItem('additionalQuestions', question);
             }}
             remove={remove}
