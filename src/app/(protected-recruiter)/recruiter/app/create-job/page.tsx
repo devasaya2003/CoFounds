@@ -20,8 +20,13 @@ import {
   updateQuestion,
   setStep,
   setStatus,
-  SkillWithId
+  SkillWithId,
+  setLocation,
+  setRequestedBy,
+  setPackage,
+  updateSkillLevel
 } from '@/redux/slices/jobCreationSlice';
+import { createJobWithSkillsAndQuestions } from '@/redux/thunks/jobCreationThunks';
 import JobDetailsStep from './components/JobDetailsStep';
 import AdditionalQuestionsStep from './components/AdditionalQuestionsStep';
 import { JobFormFields } from './components/types';
@@ -39,6 +44,7 @@ export default function CreateJobPage() {
   
   // Get form data from Redux
   const jobCreation = useAppSelector(state => state.jobCreation);
+  const auth = useAppSelector(state => state.auth); // Assume you have auth state with user info
   
   // Initialize date from ISO string with zero time
   const lastDateObj = new Date(jobCreation.last_date_to_apply);
@@ -53,7 +59,10 @@ export default function CreateJobPage() {
       month: (lastDateObj.getMonth() + 1).toString().padStart(2, '0'),
       day: lastDateObj.getDate().toString().padStart(2, '0')
     },
-    additional_questions: jobCreation.additional_questions
+    additional_questions: jobCreation.additional_questions,
+    location: jobCreation.location,
+    requested_by: jobCreation.requested_by,
+    package: jobCreation.package
   };
   
   // Form handling with React Hook Form
@@ -120,19 +129,19 @@ export default function CreateJobPage() {
   
   // Handle form submission
   const onSubmit: SubmitHandler<JobFormFields> = (data) => {
-    dispatch(setStatus({
-      status: 'submitting'
-    }));
-    
-    // Set all form data to Redux
+    // Update Redux state with form data
     dispatch(setTitle(data.title));
     dispatch(setJobCode(data.job_code));
     dispatch(setJobDesc(data.job_desc));
     dispatch(setAssignmentLink(data.assignment_link));
     dispatch(setLastDateToApply(data.last_date_to_apply));
+    dispatch(setLocation(data.location));
+    dispatch(setRequestedBy(data.requested_by));
+    dispatch(setPackage(data.package));
 
+    // Log data for debugging
     console.log('Form data submitted:', data);
-    console.log('Current Redux state:', {
+    console.log('Current Redux state before API calls:', {
       title: jobCreation.title,
       job_code: jobCreation.job_code,
       job_desc: jobCreation.job_desc,
@@ -140,16 +149,23 @@ export default function CreateJobPage() {
       required_skills: jobCreation.required_skills,
       last_date_to_apply: jobCreation.last_date_to_apply,
       additional_questions: jobCreation.additional_questions,
+      location: jobCreation.location,
+      requested_by: jobCreation.requested_by,
+      package: jobCreation.package,
       status: jobCreation.status
     });
     
-    // Simulate API call
-    setTimeout(() => {
-      dispatch(setStatus({
-        status: 'success'
-      }));
-      router.push('/recruiter/app');
-    }, 1500);
+    // Call the thunk to handle API requests
+    dispatch(createJobWithSkillsAndQuestions())
+      .unwrap()
+      .then((result) => {
+        console.log('Job creation successful:', result);
+        router.push('/recruiter/app');
+      })
+      .catch((error) => {
+        console.error('Job creation failed:', error);
+        // Error already handled by thunk
+      });
   };
   
   // Step navigation helpers
@@ -158,6 +174,8 @@ export default function CreateJobPage() {
     if (!watchedValues.title || 
         !watchedValues.job_code || 
         !watchedValues.job_desc || 
+        !watchedValues.location ||
+        !watchedValues.requested_by ||
         !(watchedValues.required_skills || []).length) {
       setShowAlert(true);
       return false;
@@ -210,9 +228,15 @@ export default function CreateJobPage() {
             onJobCodeChange={(value) => dispatch(setJobCode(value))}
             onJobDescChange={(value) => dispatch(setJobDesc(value))}
             onAssignmentLinkChange={(value) => dispatch(setAssignmentLink(value))}
+            onLocationChange={(value) => dispatch(setLocation(value))}
+            onRequestedByChange={(value) => dispatch(setRequestedBy(value))}
+            onPackageChange={(value) => dispatch(setPackage(value))}
             onDateChange={(date) => dispatch(setLastDateToApply(date))}
             onAddSkill={(skill: SkillWithId) => dispatch(addSkill(skill))}
             onRemoveSkill={(skillId: string) => dispatch(removeSkill(skillId))}
+            onSkillLevelChange={(skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => 
+              dispatch(updateSkillLevel({ skillId, skill_level: level }))
+            }
             goToNextStep={goToNextStep}
           />
         )}

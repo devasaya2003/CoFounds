@@ -18,9 +18,13 @@ export default function JobDetailsStep({
   onJobCodeChange,
   onJobDescChange,
   onAssignmentLinkChange,
+  onLocationChange,
+  onRequestedByChange,
+  onPackageChange,
   onDateChange,
   onAddSkill,
   onRemoveSkill,
+  onSkillLevelChange,
   goToNextStep
 }: JobDetailsStepProps) {
   const selectedSkills = watch('required_skills') || [];
@@ -28,6 +32,12 @@ export default function JobDetailsStep({
   const handleEditorChange = (html: string) => {
     setValue('job_desc', html);
     onJobDescChange(html);
+  };
+
+  const handlePackageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setValue('package', value);
+    onPackageChange(value);
   };
   
   // Generate year, month, and day options
@@ -82,6 +92,42 @@ export default function JobDetailsStep({
           </p>
         )}
       </div>
+      
+      {/* New Field: Location */}
+      <FormInput
+        id="location"
+        label="Location"
+        required
+        type="text"
+        error={errors.location?.message}
+        {...register('location', { required: 'Location is required' })}
+        onChange={(e) => onLocationChange(e.target.value)}
+      />
+
+      {/* New Field: Requested By */}
+      <FormInput
+        id="requested_by"
+        label="Requested By"
+        required
+        type="text"
+        error={errors.requested_by?.message}
+        {...register('requested_by', { required: 'Requested by is required' })}
+        onChange={(e) => onRequestedByChange(e.target.value)}
+      />
+
+      {/* New Field: Package */}
+      <FormInput
+        id="package"
+        label="Package (in INR)"
+        required
+        type="number"
+        error={errors.package?.message}
+        {...register('package', { 
+          required: 'Package is required',
+          min: { value: 0, message: 'Package must be greater than 0' }
+        })}
+        onChange={handlePackageChange}
+      />
       
       <FormInput
         id="assignment_link"
@@ -147,6 +193,13 @@ export default function JobDetailsStep({
             const updatedSkills = selectedSkills.filter(s => s.id !== skillId);
             setValue('required_skills', updatedSkills);
             onRemoveSkill(skillId);
+          }}
+          onSkillLevelChange={(skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => {
+            const updatedSkills = selectedSkills.map(skill => 
+              skill.id === skillId ? { ...skill, skill_level: level } : skill
+            );
+            setValue('required_skills', updatedSkills);
+            onSkillLevelChange(skillId, level);
           }}
           error={errors.required_skills?.message}
         />

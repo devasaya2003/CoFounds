@@ -4,6 +4,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface SkillWithId {
   id: string;
   name: string;
+  skill_level: 'beginner' | 'intermediate' | 'advanced';
 }
 
 export interface JobCreationState {
@@ -11,9 +12,12 @@ export interface JobCreationState {
   job_code: string;
   job_desc: string;
   assignment_link: string;
-  required_skills: SkillWithId[]; // Changed from string[] to SkillWithId[]
+  required_skills: SkillWithId[];
   last_date_to_apply: string; // ISO string
   additional_questions: string[];
+  location: string; // Added new field
+  requested_by: string; // Added new field
+  package: number; // Added new field
   status: 'idle' | 'submitting' | 'success' | 'error';
   currentStep: number;
   error: string | null;
@@ -29,6 +33,9 @@ const initialState: JobCreationState = {
   // Set date to midnight (00:00:00.000Z)
   last_date_to_apply: new Date().toISOString().split('T')[0] + 'T00:00:00.000Z',
   additional_questions: [],
+  location: '', // Default empty
+  requested_by: '', // Default empty
+  package: 0, // Default value
   status: 'idle',
   currentStep: 1,
   error: null,
@@ -39,7 +46,23 @@ const jobCreationSlice = createSlice({
   name: 'jobCreation',
   initialState,
   reducers: {
-    // Basic field setters remain the same
+    // Add new field setters
+    setLocation: (state, action: PayloadAction<string>) => {
+      state.location = action.payload;
+      state.isDirty = true;
+    },
+    
+    setRequestedBy: (state, action: PayloadAction<string>) => {
+      state.requested_by = action.payload;
+      state.isDirty = true;
+    },
+    
+    setPackage: (state, action: PayloadAction<number>) => {
+      state.package = action.payload;
+      state.isDirty = true;
+    },
+    
+    // Existing field setters
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;
       state.isDirty = true;
@@ -73,7 +96,7 @@ const jobCreationSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Skills management updated for SkillWithId
+    // Skills management updated for SkillWithId with skill level
     addSkill: (state, action: PayloadAction<SkillWithId>) => {
       const skill = action.payload;
       // Check if skill already exists by ID
@@ -89,6 +112,19 @@ const jobCreationSlice = createSlice({
         skill => skill.id !== action.payload
       );
       state.isDirty = true;
+    },
+    
+    // Add a new reducer to update skill level
+    updateSkillLevel: (state, action: PayloadAction<{
+      skillId: string;
+      skill_level: 'beginner' | 'intermediate' | 'advanced';
+    }>) => {
+      const { skillId, skill_level } = action.payload;
+      const skillIndex = state.required_skills.findIndex(skill => skill.id === skillId);
+      if (skillIndex !== -1) {
+        state.required_skills[skillIndex].skill_level = skill_level;
+        state.isDirty = true;
+      }
     },
     
     // Additional questions management remains the same
@@ -151,7 +187,11 @@ export const {
   updateQuestion,
   setStep,
   setStatus,
-  resetForm
+  resetForm,
+  setLocation,
+  setRequestedBy,
+  setPackage,
+  updateSkillLevel
 } = jobCreationSlice.actions;
 
 export default jobCreationSlice.reducer;

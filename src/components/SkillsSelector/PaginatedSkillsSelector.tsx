@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { AlertCircle, ChevronDown, X, Loader2 } from 'lucide-react';
+import { AlertCircle, ChevronDown, X, Loader2, Settings } from 'lucide-react';
 import { fetchSkillsPaginated } from '@/redux/masters/skillMaster';
 import { useAppDispatch } from '@/redux/hooks';
 import { SkillWithId } from '@/redux/slices/jobCreationSlice';
@@ -10,6 +10,7 @@ interface PaginatedSkillsSelectorProps {
   selectedSkills: SkillWithId[];
   onSkillSelect: (skill: SkillWithId) => void;
   onSkillRemove: (skillId: string) => void;
+  onSkillLevelChange?: (skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => void;
   error?: string;
 }
 
@@ -17,15 +18,18 @@ export default function PaginatedSkillsSelector({
   selectedSkills,
   onSkillSelect,
   onSkillRemove,
+  onSkillLevelChange,
   error
 }: PaginatedSkillsSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [availableSkills, setAvailableSkills] = useState<SkillWithId[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<{id: string, name: string}[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [skillLevelMenuOpen, setSkillLevelMenuOpen] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const dispatch = useAppDispatch();
 
   // Load skills when component mounts and when page changes
@@ -34,12 +38,13 @@ export default function PaginatedSkillsSelector({
       setIsLoading(true);
       try {
         const result = await dispatch(fetchSkillsPaginated(currentPage)).unwrap();
-        // Convert API response to SkillWithId format
+        // Convert API response to basic skill format
         const skillsWithId = result.skills.map(skill => ({
           id: skill.id,
           name: skill.name
         }));
-
+        
+        // On first page, replace skills; on subsequent pages, append
         if (currentPage === 1) {
           setAvailableSkills(skillsWithId);
         } else {
@@ -63,13 +68,21 @@ export default function PaginatedSkillsSelector({
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
+      
+      // Only close level menu if click is outside the menu
+      if (skillLevelMenuOpen) {
+        const menuRef = menuRefs.current[skillLevelMenuOpen];
+        if (menuRef && !menuRef.contains(event.target as Node)) {
+          setSkillLevelMenuOpen(null);
+        }
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [skillLevelMenuOpen]);
 
   // Filter skills based on search term
   const filteredSkills = searchTerm
@@ -88,6 +101,34 @@ export default function PaginatedSkillsSelector({
     }
   };
 
+  // Handle skill selection with default level beginner
+  const handleSkillSelect = (skill: {id: string, name: string}) => {
+    const skillWithLevel: SkillWithId = {
+      id: skill.id,
+      name: skill.name,
+      skill_level: 'beginner' // Default level
+    };
+    onSkillSelect(skillWithLevel);
+    setSearchTerm('');
+    setIsOpen(false);
+  };
+
+  // Handle skill level change
+  const handleSkillLevelChange = (skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => {
+    console.log('Changing skill level:', skillId, level);
+    if (onSkillLevelChange) {
+      onSkillLevelChange(skillId, level);
+    }
+    setSkillLevelMenuOpen(null);
+  };
+
+  // Toggle skill level menu
+  const toggleSkillLevelMenu = (skillId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setSkillLevelMenuOpen(skillLevelMenuOpen === skillId ? null : skillId);
+  };
+
   return (
     <div className="space-y-2 relative">
       {/* Selected skills display */}
@@ -97,7 +138,50 @@ export default function PaginatedSkillsSelector({
             key={skill.id}
             className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm flex items-center"
           >
-            {skill.name}
+            <span className="mr-2">{skill.name}</span>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={(e) => toggleSkillLevelMenu(skill.id, e)}
+                className="inline-flex items-center text-xs px-1.5 py-0.5 bg-indigo-200 rounded-full hover:bg-indigo-300"
+              >
+                <span>{skill.skill_level}</span>
+                <Settings className="h-3 w-3 ml-1" />
+              </button>
+              
+              {/* Skill level dropdown menu */}
+              {skillLevelMenuOpen === skill.id && (
+                <div 
+                  ref={el => { menuRefs.current[skill.id] = el; }}
+                  className="absolute z-50 mt-1 right-0 bg-white shadow-lg rounded-md overflow-hidden border border-gray-200 w-32"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      className={`block w-full text-left px-4 py-1.5 text-sm ${skill.skill_level === 'beginner' ? 'bg-indigo-100' : 'hover:bg-gray-50'}`}
+                      onClick={() => handleSkillLevelChange(skill.id, 'beginner')}
+                    >
+                      Beginner
+                    </button>
+                    <button
+                      type="button"
+                      className={`block w-full text-left px-4 py-1.5 text-sm ${skill.skill_level === 'intermediate' ? 'bg-indigo-100' : 'hover:bg-gray-50'}`}
+                      onClick={() => handleSkillLevelChange(skill.id, 'intermediate')}
+                    >
+                      Intermediate
+                    </button>
+                    <button
+                      type="button"
+                      className={`block w-full text-left px-4 py-1.5 text-sm ${skill.skill_level === 'advanced' ? 'bg-indigo-100' : 'hover:bg-gray-50'}`}
+                      onClick={() => handleSkillLevelChange(skill.id, 'advanced')}
+                    >
+                      Advanced
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             <button 
               type="button"
               onClick={() => onSkillRemove(skill.id)}
@@ -151,10 +235,7 @@ export default function PaginatedSkillsSelector({
                 <button
                   key={skill.id}
                   type="button"
-                  onClick={() => {
-                    onSkillSelect(skill);
-                    setSearchTerm('');
-                  }}
+                  onClick={() => handleSkillSelect(skill)}
                   className="w-full text-left px-4 py-2 hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none"
                 >
                   {skill.name}

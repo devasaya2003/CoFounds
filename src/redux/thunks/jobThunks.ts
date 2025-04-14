@@ -7,7 +7,6 @@ export const submitJobForm = createAsyncThunk(
   'jobs/submitJob',
   async (_, { getState, dispatch, rejectWithValue }) => {
     try {
-      // Get the job form data from the redux store
       const state = getState() as RootState;
       const jobFormData = state.forms.jobCreation?.data;
       
