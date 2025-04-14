@@ -12,6 +12,9 @@ export const getPaginatedCompaniesBySizeRange = async (low: number, high: number
           lte: high,
         },
       },
+      orderBy: {
+        name: "desc",
+      },
       select: {
         id: true,
         name: true,

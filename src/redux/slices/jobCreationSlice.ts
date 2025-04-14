@@ -1,11 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+// Define interface for skills with ID
+export interface SkillWithId {
+  id: string;
+  name: string;
+}
+
 export interface JobCreationState {
   title: string;
   job_code: string;
   job_desc: string;
   assignment_link: string;
-  required_skills: string[];
+  required_skills: SkillWithId[]; // Changed from string[] to SkillWithId[]
   last_date_to_apply: string; // ISO string
   additional_questions: string[];
   status: 'idle' | 'submitting' | 'success' | 'error';
@@ -20,7 +26,8 @@ const initialState: JobCreationState = {
   job_desc: '',
   assignment_link: '',
   required_skills: [],
-  last_date_to_apply: new Date().toISOString(),
+  // Set date to midnight (00:00:00.000Z)
+  last_date_to_apply: new Date().toISOString().split('T')[0] + 'T00:00:00.000Z',
   additional_questions: [],
   status: 'idle',
   currentStep: 1,
@@ -32,7 +39,7 @@ const jobCreationSlice = createSlice({
   name: 'jobCreation',
   initialState,
   reducers: {
-    // Update basic field values
+    // Basic field setters remain the same
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;
       state.isDirty = true;
@@ -53,42 +60,43 @@ const jobCreationSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Date handling
+    // Updated date handling to ensure midnight time
     setLastDateToApply: (state, action: PayloadAction<{
       year: string;
       month: string;
       day: string;
     }>) => {
       const { year, month, day } = action.payload;
-      // Create ISO string date
-      const date = new Date(`${year}-${month}-${day}T00:00:00.000Z`);
-      state.last_date_to_apply = date.toISOString();
+      // Create ISO string date with time set to midnight
+      const dateStr = `${year}-${month}-${day}T00:00:00.000Z`;
+      state.last_date_to_apply = dateStr;
       state.isDirty = true;
     },
     
-    // Skills management
-    addSkill: (state, action: PayloadAction<string>) => {
+    // Skills management updated for SkillWithId
+    addSkill: (state, action: PayloadAction<SkillWithId>) => {
       const skill = action.payload;
-      if (!state.required_skills.includes(skill)) {
+      // Check if skill already exists by ID
+      if (!state.required_skills.some(s => s.id === skill.id)) {
         state.required_skills.push(skill);
         state.isDirty = true;
       }
     },
     
     removeSkill: (state, action: PayloadAction<string>) => {
+      // Now removing by ID instead of string value
       state.required_skills = state.required_skills.filter(
-        skill => skill !== action.payload
+        skill => skill.id !== action.payload
       );
       state.isDirty = true;
     },
     
-    // Additional questions management
+    // Additional questions management remains the same
     addQuestion: (state, action: PayloadAction<string>) => {
       state.additional_questions.push(action.payload);
       state.isDirty = true;
     },
     
-    // THIS IS THE FIX: Change from void to PayloadAction<number>
     removeQuestionAction: (state, action: PayloadAction<number>) => {
       state.additional_questions.splice(action.payload, 1);
       state.isDirty = true;
@@ -124,7 +132,7 @@ const jobCreationSlice = createSlice({
     resetForm: (state) => {
       return {
         ...initialState,
-        last_date_to_apply: new Date().toISOString()
+        last_date_to_apply: new Date().toISOString().split('T')[0] + 'T00:00:00.000Z'
       };
     }
   }

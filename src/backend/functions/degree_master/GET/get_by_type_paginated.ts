@@ -15,7 +15,7 @@ export const getPaginatedDegreesByType = async (type: string, page: number) => {
             updatedAt: true,
         },
         orderBy: {
-            updatedAt: "desc",
+            name: "desc",
           },
         skip: skip,
         take: ITEMS_PER_PAGE,

@@ -1,12 +1,13 @@
 import { FieldErrors, UseFormRegister, UseFormWatch, UseFormSetValue } from "react-hook-form";
+import { SkillWithId } from "@/redux/slices/jobCreationSlice";
 
-// Form fields interface
+// Form fields interface - updated required_skills to handle IDs
 export interface JobFormFields {
   title: string;
   job_code: string;
   job_desc: string;
   assignment_link: string;
-  required_skills: string[];
+  required_skills: SkillWithId[]; // Changed from string[] to SkillWithId[]
   last_date_to_apply: {
     year: string;
     month: string;
@@ -21,7 +22,7 @@ export interface QuestionFieldWithId {
   value: string;
 }
 
-// JobDetailsStep props
+// JobDetailsStep props - updated for the new skill structure
 export interface JobDetailsStepProps {
   formState: JobFormFields;
   errors: FieldErrors<JobFormFields>;
@@ -33,12 +34,12 @@ export interface JobDetailsStepProps {
   onJobDescChange: (value: string) => void;
   onAssignmentLinkChange: (value: string) => void;
   onDateChange: (date: { year: string; month: string; day: string }) => void;
-  onAddSkill: (skill: string) => void;
-  onRemoveSkill: (skill: string) => void;
+  onAddSkill: (skill: SkillWithId) => void;
+  onRemoveSkill: (skillId: string) => void;
   goToNextStep: () => void;
 }
 
-// AdditionalQuestionsStep props
+// AdditionalQuestionsStep props remain the same
 export interface AdditionalQuestionsStepProps {
   questions: string[];
   errors: FieldErrors<JobFormFields>;

@@ -19,25 +19,12 @@ import {
   removeQuestionAction,
   updateQuestion,
   setStep,
-  setStatus
+  setStatus,
+  SkillWithId
 } from '@/redux/slices/jobCreationSlice';
 import JobDetailsStep from './components/JobDetailsStep';
 import AdditionalQuestionsStep from './components/AdditionalQuestionsStep';
-
-// Define a type for the form data that will be used with React Hook Form
-interface JobFormFields {
-  title: string;
-  job_code: string;
-  job_desc: string;
-  assignment_link: string;
-  required_skills: string[];
-  last_date_to_apply: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  additional_questions: string[];
-}
+import { JobFormFields } from './components/types';
 
 // Define a custom field type that includes an ID for React keys
 interface QuestionFieldWithId {
@@ -53,7 +40,7 @@ export default function CreateJobPage() {
   // Get form data from Redux
   const jobCreation = useAppSelector(state => state.jobCreation);
   
-  // Initialize date from ISO string
+  // Initialize date from ISO string with zero time
   const lastDateObj = new Date(jobCreation.last_date_to_apply);
   const formInitialValues: JobFormFields = {
     title: jobCreation.title,
@@ -104,7 +91,7 @@ export default function CreateJobPage() {
     const newQuestions = [...watch('additional_questions')];
     newQuestions.splice(index, 1);
     setValue('additional_questions', newQuestions);
-    dispatch(removeQuestionAction(index)); // Use the renamed action
+    dispatch(removeQuestionAction(index));
   };
   
   const updateQuestionValue = (index: number, value: string) => {
@@ -224,8 +211,8 @@ export default function CreateJobPage() {
             onJobDescChange={(value) => dispatch(setJobDesc(value))}
             onAssignmentLinkChange={(value) => dispatch(setAssignmentLink(value))}
             onDateChange={(date) => dispatch(setLastDateToApply(date))}
-            onAddSkill={(skill) => dispatch(addSkill(skill))}
-            onRemoveSkill={(skill) => dispatch(removeSkill(skill))}
+            onAddSkill={(skill: SkillWithId) => dispatch(addSkill(skill))}
+            onRemoveSkill={(skillId: string) => dispatch(removeSkill(skillId))}
             goToNextStep={goToNextStep}
           />
         )}

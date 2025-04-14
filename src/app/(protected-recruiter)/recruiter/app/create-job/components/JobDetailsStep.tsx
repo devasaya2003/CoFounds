@@ -4,9 +4,9 @@ import { AlertCircle, ChevronRight } from 'lucide-react';
 import FormInput from '@/components/FormElements/FormInput';
 import RichTextEditor from '@/components/RichTextEditor/RichTextEditor';
 import DateSelector from '@/components/DateSelector/DateSelector';
-import SkillsSelector from '@/components/SkillsSelector/SkillsSelector';
-import { SKILL_OPTIONS } from '@/types/job';
+import PaginatedSkillsSelector from '@/components/SkillsSelector/PaginatedSkillsSelector';
 import { JobDetailsStepProps } from './types';
+import { SkillWithId } from '@/redux/slices/jobCreationSlice';
 
 export default function JobDetailsStep({ 
   formState, 
@@ -28,20 +28,6 @@ export default function JobDetailsStep({
   const handleEditorChange = (html: string) => {
     setValue('job_desc', html);
     onJobDescChange(html);
-  };
-  
-  const addSkill = (skill: string) => {
-    if (!selectedSkills.includes(skill)) {
-      const updatedSkills = [...selectedSkills, skill];
-      setValue('required_skills', updatedSkills);
-      onAddSkill(skill);
-    }
-  };
-  
-  const removeSkill = (skill: string) => {
-    const updatedSkills = selectedSkills.filter(s => s !== skill);
-    setValue('required_skills', updatedSkills);
-    onRemoveSkill(skill);
   };
   
   // Generate year, month, and day options
@@ -150,11 +136,18 @@ export default function JobDetailsStep({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Required Skills<span className="text-red-500 ml-1">*</span>
         </label>
-        <SkillsSelector
-          availableSkills={SKILL_OPTIONS}
+        <PaginatedSkillsSelector
           selectedSkills={selectedSkills}
-          onSkillSelect={addSkill}
-          onSkillRemove={removeSkill}
+          onSkillSelect={(skill: SkillWithId) => {
+            const updatedSkills = [...selectedSkills, skill];
+            setValue('required_skills', updatedSkills);
+            onAddSkill(skill);
+          }}
+          onSkillRemove={(skillId: string) => {
+            const updatedSkills = selectedSkills.filter(s => s.id !== skillId);
+            setValue('required_skills', updatedSkills);
+            onRemoveSkill(skillId);
+          }}
           error={errors.required_skills?.message}
         />
       </div>

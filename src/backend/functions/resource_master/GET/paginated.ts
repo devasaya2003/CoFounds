@@ -9,7 +9,7 @@ export const getPaginatedResources = async (page: number) => {
       take: ITEMS_PER_PAGE,
       where: {isActive: true},
       orderBy: {
-        updatedAt: "desc",
+        title: "desc",
       },
       select: {
         id: true,

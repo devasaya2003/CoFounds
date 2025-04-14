@@ -9,7 +9,7 @@ export const getPaginatedDegrees = async (page: number) => {
     take: ITEMS_PER_PAGE,
     where: {isActive: true},
     orderBy: {
-      updatedAt: "desc",
+      name: "desc",
     },
     select: {
       id: true,
