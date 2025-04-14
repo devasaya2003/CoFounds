@@ -1,16 +1,49 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 
 import StepIndicator from '@/components/StepIndicator/StepIndicator';
 import Alert from '@/components/Alert/Alert';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { updateFormData, setFormStep, addArrayItem, removeArrayItem, setFormStatus } from '@/redux/slices/formsSlice';
+import {
+  setTitle,
+  setJobCode,
+  setJobDesc,
+  setAssignmentLink,
+  setLastDateToApply,
+  addSkill,
+  removeSkill,
+  addQuestion,
+  removeQuestionAction,
+  updateQuestion,
+  setStep,
+  setStatus
+} from '@/redux/slices/jobCreationSlice';
 import JobDetailsStep from './components/JobDetailsStep';
 import AdditionalQuestionsStep from './components/AdditionalQuestionsStep';
-import { JobFormData } from '@/types/job';
+
+// Define a type for the form data that will be used with React Hook Form
+interface JobFormFields {
+  title: string;
+  job_code: string;
+  job_desc: string;
+  assignment_link: string;
+  required_skills: string[];
+  last_date_to_apply: {
+    year: string;
+    month: string;
+    day: string;
+  };
+  additional_questions: string[];
+}
+
+// Define a custom field type that includes an ID for React keys
+interface QuestionFieldWithId {
+  id: string;
+  value: string;
+}
 
 export default function CreateJobPage() {
   const [showAlert, setShowAlert] = useState(false);
@@ -18,96 +51,127 @@ export default function CreateJobPage() {
   const dispatch = useAppDispatch();
   
   // Get form data from Redux
-  const { data: formData, currentStep: step, status, error } = useAppSelector(
-    state => state.forms.jobCreation!
-  ) || {};
+  const jobCreation = useAppSelector(state => state.jobCreation);
+  
+  // Initialize date from ISO string
+  const lastDateObj = new Date(jobCreation.last_date_to_apply);
+  const formInitialValues: JobFormFields = {
+    title: jobCreation.title,
+    job_code: jobCreation.job_code,
+    job_desc: jobCreation.job_desc,
+    assignment_link: jobCreation.assignment_link,
+    required_skills: jobCreation.required_skills,
+    last_date_to_apply: {
+      year: lastDateObj.getFullYear().toString(),
+      month: (lastDateObj.getMonth() + 1).toString().padStart(2, '0'),
+      day: lastDateObj.getDate().toString().padStart(2, '0')
+    },
+    additional_questions: jobCreation.additional_questions
+  };
   
   // Form handling with React Hook Form
-  const { register, control, handleSubmit, watch, setValue, formState: { errors, isValid } } = useForm({
-    defaultValues: formData,
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<JobFormFields>({
+    defaultValues: formInitialValues,
     mode: 'onChange'
   });
+
+  // Create our own fields array with IDs for React keys
+  const [questionFields, setQuestionFields] = useState<QuestionFieldWithId[]>(
+    jobCreation.additional_questions.map(q => ({
+      id: crypto.randomUUID(),
+      value: q
+    }))
+  );
   
-  // Setup field array for additional questions
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "additionalQuestions"
-  });
+  // Create our own append/remove functions
+  const appendQuestion = (question: string) => {
+    const newField = { id: crypto.randomUUID(), value: question };
+    setQuestionFields([...questionFields, newField]);
+    
+    // Update form value and Redux
+    const newQuestions = [...(watch('additional_questions') || []), question];
+    setValue('additional_questions', newQuestions);
+    dispatch(addQuestion(question));
+  };
   
-  // Sync form data with Redux state
+  const removeQuestion = (index: number) => {
+    // Update our fields
+    const newFields = [...questionFields];
+    newFields.splice(index, 1);
+    setQuestionFields(newFields);
+    
+    // Update form value and Redux
+    const newQuestions = [...watch('additional_questions')];
+    newQuestions.splice(index, 1);
+    setValue('additional_questions', newQuestions);
+    dispatch(removeQuestionAction(index)); // Use the renamed action
+  };
+  
+  const updateQuestionValue = (index: number, value: string) => {
+    // Update our fields
+    const newFields = [...questionFields];
+    newFields[index].value = value;
+    setQuestionFields(newFields);
+    
+    // Update form value and Redux
+    const newQuestions = [...watch('additional_questions')];
+    newQuestions[index] = value;
+    setValue('additional_questions', newQuestions);
+    dispatch(updateQuestion({ index, question: value }));
+  };
+  
+  // Register custom validation
   useEffect(() => {
-    register('requiredSkills', { 
+    register('required_skills', { 
       validate: value => (value && value.length > 0) || 'At least one skill is required' 
     });
     
-    register('jobDescription', {
+    register('job_desc', {
       required: 'Job description is required'
     });
   }, [register]);
   
-  // Update form values from Redux on initial load
-  useEffect(() => {
-    setValue('jobTitle', formData.jobTitle);
-    setValue('jobCode', formData.jobCode);
-    setValue('jobDescription', formData.jobDescription);
-    setValue('assignmentLink', formData.assignmentLink);
-    setValue('requiredSkills', formData.requiredSkills);
-    setValue('lastDateToApply', formData.lastDateToApply);
-    setValue('additionalQuestions', formData.additionalQuestions);
-  }, [formData, setValue]);
-  
-  // Handle form field changes
-  const handleFieldChange = (fieldPath: string, value: unknown) => {
-    dispatch(updateFormData({
-      formType: 'jobCreation',
-      fieldPath,
-      value
-    }));
-  };
-
   // Handle form submission
-  const onSubmit: SubmitHandler<JobFormData> = (data) => {
-    dispatch(setFormStatus({
-      formType: 'jobCreation',
+  const onSubmit: SubmitHandler<JobFormFields> = (data) => {
+    dispatch(setStatus({
       status: 'submitting'
     }));
     
+    // Set all form data to Redux
+    dispatch(setTitle(data.title));
+    dispatch(setJobCode(data.job_code));
+    dispatch(setJobDesc(data.job_desc));
+    dispatch(setAssignmentLink(data.assignment_link));
+    dispatch(setLastDateToApply(data.last_date_to_apply));
+
+    console.log('Form data submitted:', data);
+    console.log('Current Redux state:', {
+      title: jobCreation.title,
+      job_code: jobCreation.job_code,
+      job_desc: jobCreation.job_desc,
+      assignment_link: jobCreation.assignment_link,
+      required_skills: jobCreation.required_skills,
+      last_date_to_apply: jobCreation.last_date_to_apply,
+      additional_questions: jobCreation.additional_questions,
+      status: jobCreation.status
+    });
+    
     // Simulate API call
     setTimeout(() => {
-      dispatch(setFormStatus({
-        formType: 'jobCreation',
+      dispatch(setStatus({
         status: 'success'
       }));
-      
       router.push('/recruiter/app');
     }, 1500);
-  };
-  
-  // Helper for adding array items
-  const handleAddArrayItem = (fieldPath: string, item: unknown) => {
-    dispatch(addArrayItem({
-      formType: 'jobCreation',
-      fieldPath,
-      item
-    }));
-  };
-  
-  // Helper for removing array items
-  const handleRemoveArrayItem = (fieldPath: string, index: number) => {
-    dispatch(removeArrayItem({
-      formType: 'jobCreation',
-      fieldPath,
-      index
-    }));
   };
   
   // Step navigation helpers
   const validateStep1 = () => {
     const watchedValues = watch();
-    if (!watchedValues.jobTitle || 
-        !watchedValues.jobCode || 
-        !watchedValues.jobDescription || 
-        !(watchedValues.requiredSkills || []).length) {
+    if (!watchedValues.title || 
+        !watchedValues.job_code || 
+        !watchedValues.job_desc || 
+        !(watchedValues.required_skills || []).length) {
       setShowAlert(true);
       return false;
     }
@@ -116,18 +180,12 @@ export default function CreateJobPage() {
   
   const goToNextStep = () => {
     if (validateStep1()) {
-      dispatch(setFormStep({
-        formType: 'jobCreation',
-        step: 2
-      }));
+      dispatch(setStep(2));
     }
   };
   
   const goToPreviousStep = () => {
-    dispatch(setFormStep({
-      formType: 'jobCreation',
-      step: 1
-    }));
+    dispatch(setStep(1));
   };
   
   return (
@@ -141,49 +199,49 @@ export default function CreateJobPage() {
         />
       )}
       
-      {status === 'error' && (
+      {jobCreation.status === 'error' && (
         <Alert 
-          message={error || "An error occurred while submitting the form."}
+          message={jobCreation.error || "An error occurred while submitting the form."}
           type="error"
-          onClose={() => dispatch(setFormStatus({
-            formType: 'jobCreation',
+          onClose={() => dispatch(setStatus({
             status: 'idle'
           }))} 
         />
       )}
       
-      <StepIndicator currentStep={step} totalSteps={2} />
+      <StepIndicator currentStep={jobCreation.currentStep} totalSteps={2} />
       
       <form onSubmit={handleSubmit(onSubmit)}>
-        {step === 1 && (
+        {jobCreation.currentStep === 1 && (
           <JobDetailsStep
-            formData={formData}
+            formState={formInitialValues}
             errors={errors}
             register={register}
             watch={watch}
             setValue={setValue}
-            handleFieldChange={handleFieldChange}
+            onTitleChange={(value) => dispatch(setTitle(value))}
+            onJobCodeChange={(value) => dispatch(setJobCode(value))}
+            onJobDescChange={(value) => dispatch(setJobDesc(value))}
+            onAssignmentLinkChange={(value) => dispatch(setAssignmentLink(value))}
+            onDateChange={(date) => dispatch(setLastDateToApply(date))}
+            onAddSkill={(skill) => dispatch(addSkill(skill))}
+            onRemoveSkill={(skill) => dispatch(removeSkill(skill))}
             goToNextStep={goToNextStep}
           />
         )}
         
-        {step === 2 && (
+        {jobCreation.currentStep === 2 && (
           <AdditionalQuestionsStep
-            formData={formData}
+            questions={formInitialValues.additional_questions}
             errors={errors}
             register={register}
-            watch={watch}
             setValue={setValue}
-            handleFieldChange={handleFieldChange}
+            fields={questionFields}
+            append={appendQuestion}
+            remove={removeQuestion}
+            onQuestionChange={updateQuestionValue}
+            status={jobCreation.status}
             goToPreviousStep={goToPreviousStep}
-            fields={fields}
-            append={(question) => {
-              append(question as { question: string; type: "text" | "multipleChoice"; options?: string[] });
-              handleAddArrayItem('additionalQuestions', question);
-            }}
-            remove={remove}
-            status={status}
-            removeArrayItem={handleRemoveArrayItem}
           />
         )}
       </form>

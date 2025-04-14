@@ -1,31 +1,26 @@
 'use client';
 
-import { ChevronLeft, Plus } from 'lucide-react';
-import AdditionalQuestionItem from '@/components/AdditionalQuestion/AdditionalQuestionItem';
-import { JobFormStepProps } from './types';
+import { ChevronLeft, Plus, X } from 'lucide-react';
+import { AdditionalQuestionsStepProps } from './types';
 
 export default function AdditionalQuestionsStep({
-  formData,
+  questions,
   errors,
   register,
-  watch,
   setValue,
-  handleFieldChange,
-  goToPreviousStep,
-  fields = [], // Provide default empty array
+  fields,
   append,
   remove,
+  onQuestionChange,
   status,
-  removeArrayItem
-}: JobFormStepProps) {
+  goToPreviousStep
+}: AdditionalQuestionsStepProps) {
   // Check if fields is defined before accessing its length
-  const canAddMoreQuestions = fields && fields.length < 5;
+  const canAddMoreQuestions = fields.length < 5;
   
   const addQuestion = () => {
-    // Check if fields is defined and append is available
-    if (fields && fields.length < 5 && append) {
-      const newQuestion = { question: '', type: "text" as const, options: [''] };
-      append(newQuestion);
+    if (fields.length < 5) {
+      append('');
     }
   };
   
@@ -45,11 +40,11 @@ export default function AdditionalQuestionsStep({
             disabled={!canAddMoreQuestions}
           >
             <Plus className="h-4 w-4 mr-1" />
-            Add Question ({fields ? fields.length : 0}/5)
+            Add Question ({fields.length}/5)
           </button>
         </div>
         
-        {(!fields || fields.length === 0) && (
+        {fields.length === 0 && (
           <div className="text-center py-6 bg-gray-50 rounded-md border border-dashed border-gray-300">
             <p className="text-gray-500">No additional questions added yet.</p>
             <button
@@ -63,21 +58,24 @@ export default function AdditionalQuestionsStep({
         )}
         
         <div className="space-y-4">
-          {fields && fields.map((field, index) => (
-            <AdditionalQuestionItem
-              key={field.id}
-              index={index}
-              register={register}
-              watch={watch}
-              setValue={(name, value) => {
-                setValue(name, value);
-                handleFieldChange(`additionalQuestions.${index}.${name.split('.').pop()}`, value);
-              }}
-              onRemove={() => {
-                if (remove) remove(index);
-                if (removeArrayItem) removeArrayItem('additionalQuestions', index);
-              }}
-            />
+          {fields.map((field, index) => (
+            <div key={field.id} className="relative border border-gray-200 rounded-md p-4 pr-12">
+              <input
+                className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                placeholder="Enter your question here"
+                value={field.value}
+                onChange={(e) => {
+                  onQuestionChange(index, e.target.value);
+                }}
+              />
+              <button
+                type="button"
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+                onClick={() => remove(index)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           ))}
         </div>
       </div>

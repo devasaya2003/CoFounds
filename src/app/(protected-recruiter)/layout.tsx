@@ -31,7 +31,6 @@ export default function RecruiterLayout({
   const [authInitialized, setAuthInitialized] = useState(false);
   const [profileInitialized, setProfileInitialized] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const formState = useAppSelector(state => state.forms.jobCreation);
 
   // Determine active view from pathname
   const getActiveViewFromPath = (path: string) => {
@@ -133,26 +132,6 @@ export default function RecruiterLayout({
             children
           )}
         </main>
-        {process.env.NODE_ENV !== 'production' && (
-          <div className="mt-8 border-t pt-4">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-lg font-medium text-gray-700">Redux State Debug</h2>
-              <button
-                type="button"
-                onClick={() => setShowDebug(!showDebug)}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                {showDebug ? 'Hide' : 'Show'} Debug Data
-              </button>
-            </div>
-
-            {showDebug && (
-              <div className="bg-gray-100 p-4 rounded-md overflow-auto max-h-[500px]">
-                <pre className="text-xs">{JSON.stringify(formState, null, 2)}</pre>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

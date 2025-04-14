@@ -1,38 +1,53 @@
-import { FieldErrors, UseFormRegister, UseFormWatch, UseFormSetValue, FieldArrayWithId } from "react-hook-form";
-import { JobFormData } from "@/types/job";
+import { FieldErrors, UseFormRegister, UseFormWatch, UseFormSetValue } from "react-hook-form";
 
-// Base props for all form steps
-export interface BaseFormStepProps {
-  formData: JobFormData;
-  errors: FieldErrors<JobFormData>;
-  register: UseFormRegister<JobFormData>;
-  watch: UseFormWatch<JobFormData>;
-  setValue: UseFormSetValue<JobFormData>;
-  handleFieldChange: (fieldPath: string, value: unknown) => void;
+// Form fields interface
+export interface JobFormFields {
+  title: string;
+  job_code: string;
+  job_desc: string;
+  assignment_link: string;
+  required_skills: string[];
+  last_date_to_apply: {
+    year: string;
+    month: string;
+    day: string;
+  };
+  additional_questions: string[];
 }
 
-// Props specific to JobDetailsStep
-export interface JobDetailsStepProps extends BaseFormStepProps {
+// Custom question field with ID
+export interface QuestionFieldWithId {
+  id: string;
+  value: string;
+}
+
+// JobDetailsStep props
+export interface JobDetailsStepProps {
+  formState: JobFormFields;
+  errors: FieldErrors<JobFormFields>;
+  register: UseFormRegister<JobFormFields>;
+  watch: UseFormWatch<JobFormFields>;
+  setValue: UseFormSetValue<JobFormFields>;
+  onTitleChange: (value: string) => void;
+  onJobCodeChange: (value: string) => void;
+  onJobDescChange: (value: string) => void;
+  onAssignmentLinkChange: (value: string) => void;
+  onDateChange: (date: { year: string; month: string; day: string }) => void;
+  onAddSkill: (skill: string) => void;
+  onRemoveSkill: (skill: string) => void;
   goToNextStep: () => void;
 }
 
-// Props specific to AdditionalQuestionsStep
-export interface AdditionalQuestionsStepProps extends BaseFormStepProps {
-  goToPreviousStep: () => void;
-  fields: FieldArrayWithId<JobFormData, "additionalQuestions", "id">[];
-  append: (value: Record<string, unknown>) => void;
+// AdditionalQuestionsStep props
+export interface AdditionalQuestionsStepProps {
+  questions: string[];
+  errors: FieldErrors<JobFormFields>;
+  register: UseFormRegister<JobFormFields>;
+  setValue: UseFormSetValue<JobFormFields>;
+  fields: QuestionFieldWithId[];
+  append: (value: string) => void;
   remove: (index: number) => void;
+  onQuestionChange: (index: number, value: string) => void;
   status: string;
-  removeArrayItem: (fieldPath: string, index: number) => void;
+  goToPreviousStep: () => void;
 }
-
-// Combined props type with optional step-specific properties
-export type JobFormStepProps = BaseFormStepProps & {
-  goToNextStep?: () => void;
-  goToPreviousStep?: () => void;
-  fields?: FieldArrayWithId<JobFormData, "additionalQuestions", "id">[];
-  append?: (value: Record<string, unknown>) => void;
-  remove?: (index: number) => void;
-  status?: string;
-  removeArrayItem?: (fieldPath: string, index: number) => void;
-};

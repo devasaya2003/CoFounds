@@ -6,35 +6,42 @@ import RichTextEditor from '@/components/RichTextEditor/RichTextEditor';
 import DateSelector from '@/components/DateSelector/DateSelector';
 import SkillsSelector from '@/components/SkillsSelector/SkillsSelector';
 import { SKILL_OPTIONS } from '@/types/job';
-import { JobFormStepProps } from './types';
+import { JobDetailsStepProps } from './types';
 
 export default function JobDetailsStep({ 
-  formData, 
+  formState, 
   errors, 
   register, 
   watch,
   setValue, 
-  handleFieldChange,
+  onTitleChange,
+  onJobCodeChange,
+  onJobDescChange,
+  onAssignmentLinkChange,
+  onDateChange,
+  onAddSkill,
+  onRemoveSkill,
   goToNextStep
-}: JobFormStepProps) {
-  const selectedSkills = watch('requiredSkills') || [];
+}: JobDetailsStepProps) {
+  const selectedSkills = watch('required_skills') || [];
   
   const handleEditorChange = (html: string) => {
-    setValue('jobDescription', html);
-    handleFieldChange('jobDescription', html);
+    setValue('job_desc', html);
+    onJobDescChange(html);
   };
   
   const addSkill = (skill: string) => {
     if (!selectedSkills.includes(skill)) {
-      setValue('requiredSkills', [...selectedSkills, skill]);
-      handleFieldChange('requiredSkills', [...selectedSkills, skill]);
+      const updatedSkills = [...selectedSkills, skill];
+      setValue('required_skills', updatedSkills);
+      onAddSkill(skill);
     }
   };
   
   const removeSkill = (skill: string) => {
     const updatedSkills = selectedSkills.filter(s => s !== skill);
-    setValue('requiredSkills', updatedSkills);
-    handleFieldChange('requiredSkills', updatedSkills);
+    setValue('required_skills', updatedSkills);
+    onRemoveSkill(skill);
   };
   
   // Generate year, month, and day options
@@ -53,79 +60,88 @@ export default function JobDetailsStep({
   return (
     <div className="space-y-6">
       <FormInput
-        id="jobTitle"
+        id="title"
         label="Job Title"
         required
         type="text"
-        error={errors.jobTitle?.message}
-        {...register('jobTitle', { required: 'Job title is required' })}
-        onChange={(e) => handleFieldChange('jobTitle', e.target.value)}
+        error={errors.title?.message}
+        {...register('title', { required: 'Job title is required' })}
+        onChange={(e) => onTitleChange(e.target.value)}
       />
       
       <FormInput
-        id="jobCode"
+        id="job_code"
         label="Job Code"
         required
         type="text"
-        error={errors.jobCode?.message}
-        {...register('jobCode', { required: 'Job code is required' })}
-        onChange={(e) => handleFieldChange('jobCode', e.target.value)}
+        error={errors.job_code?.message}
+        {...register('job_code', { required: 'Job code is required' })}
+        onChange={(e) => onJobCodeChange(e.target.value)}
       />
       
       <div>
         <div className="flex justify-between items-center mb-1">
-          <label htmlFor="jobDescription" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="job_desc" className="block text-sm font-medium text-gray-700">
             Job Description<span className="text-red-500 ml-1">*</span>
           </label>
         </div>
         <RichTextEditor 
-          initialValue={formData.jobDescription}
+          initialValue={formState.job_desc}
           onChange={handleEditorChange}
         />
-        {errors.jobDescription && (
+        {errors.job_desc && (
           <p className="mt-1 text-sm text-red-600 flex items-center">
             <AlertCircle className="h-4 w-4 mr-1" />
-            {errors.jobDescription.message}
+            {errors.job_desc.message}
           </p>
         )}
       </div>
       
       <FormInput
-        id="assignmentLink"
+        id="assignment_link"
         label="Assignment Link (Optional)"
         type="url"
-        error={errors.assignmentLink?.message}
-        {...register('assignmentLink', { 
+        error={errors.assignment_link?.message}
+        {...register('assignment_link', { 
           pattern: {
             value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
             message: 'Please enter a valid URL'
           }
         })}
-        onChange={(e) => handleFieldChange('assignmentLink', e.target.value)}
+        onChange={(e) => onAssignmentLinkChange(e.target.value)}
       />
       
       <div>
-        <label htmlFor="lastDateToApply" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="last_date_to_apply" className="block text-sm font-medium text-gray-700 mb-1">
           Last Date to Apply<span className="text-red-500 ml-1">*</span>
         </label>
         <DateSelector
           years={years}
           months={months}
           days={days}
-          selectedYear={formData.lastDateToApply.year}
-          selectedMonth={formData.lastDateToApply.month}
-          selectedDay={formData.lastDateToApply.day}
+          selectedYear={formState.last_date_to_apply.year}
+          selectedMonth={formState.last_date_to_apply.month}
+          selectedDay={formState.last_date_to_apply.day}
           onYearChange={(year) => {
-            setValue('lastDateToApply.year', year);
-            handleFieldChange('lastDateToApply.year', year);
+            setValue('last_date_to_apply.year', year);
+            onDateChange({
+              ...formState.last_date_to_apply,
+              year
+            });
           }}
           onMonthChange={(month) => {
-            setValue('lastDateToApply.month', month);
-            handleFieldChange('lastDateToApply.month', month);
+            setValue('last_date_to_apply.month', month);
+            onDateChange({
+              ...formState.last_date_to_apply,
+              month
+            });
           }}
           onDayChange={(day) => {
-            setValue('lastDateToApply.day', day);
-            handleFieldChange('lastDateToApply.day', day);
+            setValue('last_date_to_apply.day', day);
+            onDateChange({
+              ...formState.last_date_to_apply,
+              day
+            });
           }}
         />
       </div>
@@ -139,7 +155,7 @@ export default function JobDetailsStep({
           selectedSkills={selectedSkills}
           onSkillSelect={addSkill}
           onSkillRemove={removeSkill}
-          error={errors.requiredSkills?.message}
+          error={errors.required_skills?.message}
         />
       </div>
       
