@@ -1,27 +1,67 @@
 'use client';
 
 import { ChevronLeft, Plus, X } from 'lucide-react';
+import { useAppDispatch } from '@/redux/hooks';
+import { 
+  addQuestion, 
+  removeQuestionAction, 
+  updateQuestion, 
+  setStep 
+} from '@/redux/slices/jobCreationSlice';
 import { AdditionalQuestionsStepProps } from './types';
 
 export default function AdditionalQuestionsStep({
-  questions,
+  fields,
   errors,
   register,
   setValue,
-  fields,
-  append,
-  remove,
-  onQuestionChange,
-  status,
-  goToPreviousStep
+  watch,
+  status
 }: AdditionalQuestionsStepProps) {
+  const dispatch = useAppDispatch();
+  
   // Check if fields is defined before accessing its length
   const canAddMoreQuestions = fields.length < 5;
   
-  const addQuestion = () => {
+  const appendQuestion = () => {
     if (fields.length < 5) {
-      append('');
+      const newQuestion = '';
+      const newField = { id: crypto.randomUUID(), value: newQuestion };
+      
+      // Update local fields state
+      const newFields = [...fields, newField];
+      
+      // Update form value 
+      const newQuestions = [...(watch('additional_questions') || []), newQuestion];
+      setValue('additional_questions', newQuestions);
+      
+      // Update Redux
+      dispatch(addQuestion(newQuestion));
     }
+  };
+  
+  const removeQuestion = (index: number) => {
+    // Update Redux
+    dispatch(removeQuestionAction(index));
+    
+    // Update form value
+    const newQuestions = [...watch('additional_questions')];
+    newQuestions.splice(index, 1);
+    setValue('additional_questions', newQuestions);
+  };
+  
+  const updateQuestionValue = (index: number, value: string) => {
+    // Update Redux
+    dispatch(updateQuestion({ index, question: value }));
+    
+    // Update form value
+    const newQuestions = [...watch('additional_questions')];
+    newQuestions[index] = value;
+    setValue('additional_questions', newQuestions);
+  };
+  
+  const goToPreviousStep = () => {
+    dispatch(setStep(1));
   };
   
   return (
@@ -36,7 +76,7 @@ export default function AdditionalQuestionsStep({
                 ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
-            onClick={addQuestion}
+            onClick={appendQuestion}
             disabled={!canAddMoreQuestions}
           >
             <Plus className="h-4 w-4 mr-1" />
@@ -50,7 +90,7 @@ export default function AdditionalQuestionsStep({
             <button
               type="button"
               className="mt-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-              onClick={addQuestion}
+              onClick={appendQuestion}
             >
               + Add your first question
             </button>
@@ -65,13 +105,13 @@ export default function AdditionalQuestionsStep({
                 placeholder="Enter your question here"
                 value={field.value}
                 onChange={(e) => {
-                  onQuestionChange(index, e.target.value);
+                  updateQuestionValue(index, e.target.value);
                 }}
               />
               <button
                 type="button"
                 className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-                onClick={() => remove(index)}
+                onClick={() => removeQuestion(index)}
               >
                 <X className="h-5 w-5" />
               </button>

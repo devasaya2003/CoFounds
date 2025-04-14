@@ -13,38 +13,27 @@ import {
   setJobDesc,
   setAssignmentLink,
   setLastDateToApply,
-  addSkill,
-  removeSkill,
-  addQuestion,
-  removeQuestionAction,
-  updateQuestion,
   setStep,
   setStatus,
-  SkillWithId,
   setLocation,
   setRequestedBy,
   setPackage,
-  updateSkillLevel
+  resetForm
 } from '@/redux/slices/jobCreationSlice';
 import { createJobWithSkillsAndQuestions } from '@/redux/thunks/jobCreationThunks';
 import JobDetailsStep from './components/JobDetailsStep';
 import AdditionalQuestionsStep from './components/AdditionalQuestionsStep';
-import { JobFormFields } from './components/types';
-
-// Define a custom field type that includes an ID for React keys
-interface QuestionFieldWithId {
-  id: string;
-  value: string;
-}
+import { JobFormFields, QuestionFieldWithId } from './components/types';
 
 export default function CreateJobPage() {
   const [showAlert, setShowAlert] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("Please fill all required fields before proceeding.");
   const router = useRouter();
   const dispatch = useAppDispatch();
   
   // Get form data from Redux
   const jobCreation = useAppSelector(state => state.jobCreation);
-  const auth = useAppSelector(state => state.auth); // Assume you have auth state with user info
   
   // Initialize date from ISO string with zero time
   const lastDateObj = new Date(jobCreation.last_date_to_apply);
@@ -66,7 +55,7 @@ export default function CreateJobPage() {
   };
   
   // Form handling with React Hook Form
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<JobFormFields>({
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<JobFormFields>({
     defaultValues: formInitialValues,
     mode: 'onChange'
   });
@@ -78,43 +67,15 @@ export default function CreateJobPage() {
       value: q
     }))
   );
-  
-  // Create our own append/remove functions
-  const appendQuestion = (question: string) => {
-    const newField = { id: crypto.randomUUID(), value: question };
-    setQuestionFields([...questionFields, newField]);
-    
-    // Update form value and Redux
-    const newQuestions = [...(watch('additional_questions') || []), question];
-    setValue('additional_questions', newQuestions);
-    dispatch(addQuestion(question));
-  };
-  
-  const removeQuestion = (index: number) => {
-    // Update our fields
-    const newFields = [...questionFields];
-    newFields.splice(index, 1);
-    setQuestionFields(newFields);
-    
-    // Update form value and Redux
-    const newQuestions = [...watch('additional_questions')];
-    newQuestions.splice(index, 1);
-    setValue('additional_questions', newQuestions);
-    dispatch(removeQuestionAction(index));
-  };
-  
-  const updateQuestionValue = (index: number, value: string) => {
-    // Update our fields
-    const newFields = [...questionFields];
-    newFields[index].value = value;
-    setQuestionFields(newFields);
-    
-    // Update form value and Redux
-    const newQuestions = [...watch('additional_questions')];
-    newQuestions[index] = value;
-    setValue('additional_questions', newQuestions);
-    dispatch(updateQuestion({ index, question: value }));
-  };
+
+  useEffect(() => {
+    setQuestionFields((prevFields) =>
+      jobCreation.additional_questions.map((q, index) => ({
+        id: prevFields[index]?.id || crypto.randomUUID(),
+        value: q
+      }))
+    );
+  }, [jobCreation.additional_questions]);
   
   // Register custom validation
   useEffect(() => {
@@ -126,6 +87,38 @@ export default function CreateJobPage() {
       required: 'Job description is required'
     });
   }, [register]);
+  
+  // Complete reset function - resets Redux and local state
+  const completeFormReset = () => {
+    // Reset Redux state
+    dispatch(resetForm());
+    
+    // Reset React Hook Form
+    const emptyForm: JobFormFields = {
+      title: '',
+      job_code: '',
+      job_desc: '',
+      assignment_link: '',
+      required_skills: [],
+      last_date_to_apply: {
+        year: new Date().getFullYear().toString(),
+        month: (new Date().getMonth() + 1).toString().padStart(2, '0'),
+        day: new Date().getDate().toString().padStart(2, '0')
+      },
+      additional_questions: [],
+      location: '',
+      requested_by: '',
+      package: 0
+    };
+    
+    reset(emptyForm);
+    
+    // Reset local state
+    setQuestionFields([]);
+    setShowAlert(false);
+    setShowSuccessAlert(false);
+    dispatch(setStep(1));
+  };
   
   // Handle form submission
   const onSubmit: SubmitHandler<JobFormFields> = (data) => {
@@ -141,56 +134,49 @@ export default function CreateJobPage() {
 
     // Log data for debugging
     console.log('Form data submitted:', data);
-    console.log('Current Redux state before API calls:', {
-      title: jobCreation.title,
-      job_code: jobCreation.job_code,
-      job_desc: jobCreation.job_desc,
-      assignment_link: jobCreation.assignment_link,
-      required_skills: jobCreation.required_skills,
-      last_date_to_apply: jobCreation.last_date_to_apply,
-      additional_questions: jobCreation.additional_questions,
-      location: jobCreation.location,
-      requested_by: jobCreation.requested_by,
-      package: jobCreation.package,
-      status: jobCreation.status
-    });
     
     // Call the thunk to handle API requests
     dispatch(createJobWithSkillsAndQuestions())
       .unwrap()
       .then((result) => {
         console.log('Job creation successful:', result);
+
+        setShowSuccessAlert(true);
+
+        completeFormReset();
         router.push('/recruiter/app');
       })
       .catch((error) => {
         console.error('Job creation failed:', error);
-        // Error already handled by thunk
+        setAlertMessage("Failed to create job. Please try again.");
+        setShowAlert(true);
       });
   };
   
-  // Step navigation helpers
-  const validateStep1 = () => {
-    const watchedValues = watch();
-    if (!watchedValues.title || 
-        !watchedValues.job_code || 
-        !watchedValues.job_desc || 
-        !watchedValues.location ||
-        !watchedValues.requested_by ||
-        !(watchedValues.required_skills || []).length) {
+  // Step navigation validation - fixed to correctly validate
+  const validateAndGoToNextStep = () => {
+    const formData = watch();
+    const validationErrors = [];
+    
+    // Check all required fields
+    if (!formData.title) validationErrors.push("Job title is required");
+    if (!formData.job_code) validationErrors.push("Job code is required");
+    if (!formData.job_desc) validationErrors.push("Job description is required");
+    if (!formData.location) validationErrors.push("Location is required");
+    if (!formData.requested_by) validationErrors.push("Requested by is required");
+    if (!formData.package) validationErrors.push("Package is required");
+    if (!(formData.required_skills || []).length) validationErrors.push("At least one skill is required");
+
+    if (validationErrors.length > 0) {
+      // Set appropriate error message
+      setAlertMessage(validationErrors.join(", "));
       setShowAlert(true);
       return false;
     }
+    
+    // All validation passed, proceed to next step
+    dispatch(setStep(2));
     return true;
-  };
-  
-  const goToNextStep = () => {
-    if (validateStep1()) {
-      dispatch(setStep(2));
-    }
-  };
-  
-  const goToPreviousStep = () => {
-    dispatch(setStep(1));
   };
   
   return (
@@ -199,8 +185,17 @@ export default function CreateJobPage() {
       
       {showAlert && (
         <Alert 
-          message="Please fill all required fields before proceeding." 
+          message={alertMessage}
+          type="error"
           onClose={() => setShowAlert(false)} 
+        />
+      )}
+      
+      {showSuccessAlert && (
+        <Alert 
+          message="Job created successfully! Redirecting to job listings..."
+          type="success"
+          onClose={() => setShowSuccessAlert(false)} 
         />
       )}
       
@@ -208,9 +203,7 @@ export default function CreateJobPage() {
         <Alert 
           message={jobCreation.error || "An error occurred while submitting the form."}
           type="error"
-          onClose={() => dispatch(setStatus({
-            status: 'idle'
-          }))} 
+          onClose={() => dispatch(setStatus({ status: 'idle' }))} 
         />
       )}
       
@@ -224,38 +217,34 @@ export default function CreateJobPage() {
             register={register}
             watch={watch}
             setValue={setValue}
-            onTitleChange={(value) => dispatch(setTitle(value))}
-            onJobCodeChange={(value) => dispatch(setJobCode(value))}
-            onJobDescChange={(value) => dispatch(setJobDesc(value))}
-            onAssignmentLinkChange={(value) => dispatch(setAssignmentLink(value))}
-            onLocationChange={(value) => dispatch(setLocation(value))}
-            onRequestedByChange={(value) => dispatch(setRequestedBy(value))}
-            onPackageChange={(value) => dispatch(setPackage(value))}
-            onDateChange={(date) => dispatch(setLastDateToApply(date))}
-            onAddSkill={(skill: SkillWithId) => dispatch(addSkill(skill))}
-            onRemoveSkill={(skillId: string) => dispatch(removeSkill(skillId))}
-            onSkillLevelChange={(skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => 
-              dispatch(updateSkillLevel({ skillId, skill_level: level }))
-            }
-            goToNextStep={goToNextStep}
+            onNextStep={validateAndGoToNextStep} // Connect validation function
           />
         )}
         
         {jobCreation.currentStep === 2 && (
           <AdditionalQuestionsStep
-            questions={formInitialValues.additional_questions}
+            fields={questionFields}
             errors={errors}
             register={register}
             setValue={setValue}
-            fields={questionFields}
-            append={appendQuestion}
-            remove={removeQuestion}
-            onQuestionChange={updateQuestionValue}
+            watch={watch}
             status={jobCreation.status}
-            goToPreviousStep={goToPreviousStep}
           />
         )}
       </form>
+      
+      {/* Optional: Add a reset button */}
+      {jobCreation.isDirty && (
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={completeFormReset}
+            className="text-sm text-gray-500 hover:text-gray-700"
+          >
+            Reset Form
+          </button>
+        </div>
+      )}
     </div>
   );
 }
