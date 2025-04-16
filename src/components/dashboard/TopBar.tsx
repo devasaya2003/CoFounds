@@ -10,7 +10,7 @@ interface TopBarProps {
 
 export default function TopBar({ activeView, onViewChange }: TopBarProps) {
   const [profileOpen, setProfileOpen] = useState(false);
-  const { firstName, lastName } = useAppSelector(state => state.recruiter);
+  const { firstName, lastName, companyName } = useAppSelector(state => state.recruiter);
   
   const handleProfileOption = (view: string) => {
     if (onViewChange) {
@@ -23,7 +23,7 @@ export default function TopBar({ activeView, onViewChange }: TopBarProps) {
     <header className="bg-white border-b border-gray-200 px-6 py-3">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-semibold text-gray-800">Recruiter Dashboard</h1>
+          <h1 className="text-xl font-semibold text-gray-800">{companyName} Recruiter Dashboard</h1>
         </div>
         
         <div className="relative">
