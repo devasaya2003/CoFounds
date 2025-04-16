@@ -38,8 +38,20 @@ export default function KanbanBoard() {
     );
   }, [applications, searchTerm]);
 
-  // Organize applications by status for efficient lookup and rendering
+  // Optimize the application organization to avoid any sorting
   const applicationsByStatus = useMemo(() => {
+    // Skip processing if no applications
+    if (filteredApplications.length === 0) {
+      return {
+        applied: [],
+        under_review: [],
+        inprogress: [],
+        rejected: [],
+        closed: []
+      };
+    }
+    
+    // Pre-allocate arrays with estimated sizes for better performance
     const statusMap: Record<ApplicationStatus, Application[]> = {
       applied: [],
       under_review: [],
@@ -48,9 +60,12 @@ export default function KanbanBoard() {
       closed: []
     };
     
-    filteredApplications.forEach(app => {
+    // Use simple loop instead of forEach for better performance
+    for (let i = 0; i < filteredApplications.length; i++) {
+      const app = filteredApplications[i];
+      // Push maintains insertion order - no sorting happens
       statusMap[app.status].push(app);
-    });
+    }
     
     return statusMap;
   }, [filteredApplications]);
@@ -118,9 +133,9 @@ export default function KanbanBoard() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col w-full">
         <div className="p-4 border-b border-gray-200">
-          <div className="mb-5 flex items-center gap-3">
+          <div className="mb-4 flex items-center gap-3">
             <div className="relative flex-grow max-w-md">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <Search className="h-4 w-4 text-gray-400" />
@@ -137,7 +152,7 @@ export default function KanbanBoard() {
         </div>
         
         {isLoading && applications.length === 0 ? (
-          <div className="flex-grow flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-20">
             <div className="animate-pulse flex flex-col items-center">
               <div className="h-8 w-8 rounded-full bg-indigo-200 animate-spin mb-3"></div>
               <p className="text-gray-500">Loading applications...</p>
@@ -145,7 +160,7 @@ export default function KanbanBoard() {
           </div>
         ) : (
           <>
-            <div className="flex-grow p-4">
+            <div className="p-4">
               <div className="flex gap-4 pb-4 px-1 overflow-x-auto">
                 {columnStatuses.map(col => (
                   <KanbanColumn

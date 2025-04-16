@@ -81,24 +81,24 @@ export default function KanbanColumn({
         </h3>
       </div>
 
-      <div className="flex-grow space-y-3 px-0.5 pb-2">
-        {applications.map(application => (
-          <ApplicationCard 
-            key={application.id} 
-            application={application} 
-            onStatusChange={onStatusChange}
-            onDelete={onDelete}
-          />
-        ))}
-
-        {applications.length === 0 && (
+      <div className="flex-grow space-y-3">
+        {applications.length === 0 ? (
           <div className="bg-white rounded-lg p-4 border border-dashed border-gray-300 text-center text-gray-500 text-sm">
             Drop applications here
           </div>
+        ) : (
+          applications.map(application => (
+            <ApplicationCard
+              key={application.id}
+              application={application}
+              onStatusChange={onStatusChange}
+              onDelete={onDelete}
+            />
+          ))
         )}
 
         {isOver && (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-blue-50/50 text-center text-sm text-gray-500">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-blue-50/50 text-center text-sm text-gray-500 mt-3">
             Drop to move here
           </div>
         )}

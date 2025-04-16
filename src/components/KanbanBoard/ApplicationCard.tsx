@@ -1,7 +1,7 @@
 'use client';
 
 import { useDrag } from 'react-dnd';
-import { useRef } from 'react';
+import { useRef, memo } from 'react';
 import { Application, ApplicationStatus } from './types';
 import { CalendarDays, MapPin, Package, Building, Trash2 } from 'lucide-react';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '../ui/select';
@@ -12,7 +12,8 @@ interface ApplicationCardProps {
   onDelete?: (applicationId: string) => void;
 }
 
-export default function ApplicationCard({ application, onStatusChange, onDelete }: ApplicationCardProps) {
+// Wrap the component with React.memo to prevent unnecessary re-renders
+export default memo(function ApplicationCard({ application, onStatusChange, onDelete }: ApplicationCardProps) {
   // Create a ref that we'll combine with the drag ref
   const cardRef = useRef<HTMLDivElement>(null);
   
@@ -152,4 +153,4 @@ export default function ApplicationCard({ application, onStatusChange, onDelete 
       </div>
     </div>
   );
-}
+});
