@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppSelector, useAppDispatch } from '@/redux/hooks';
-import { Briefcase, Mail, Phone, Calendar, ChevronRight, MapPin, User } from 'lucide-react';
-import { fetchJobsByRecruiter } from '@/redux/slices/jobsSlice';
+import { useAppSelector } from '@/redux/hooks';
+import { useEffect } from 'react';
+import { Briefcase, Mail, Phone, ChevronRight } from 'lucide-react';
 import { getRecruiterFullName } from '@/redux/slices/recruiterSlice';
-import { Editor } from '@tiptap/react';
-import { useEditor } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import JobList from '@/components/dashboard/JobList';
 
 interface UserProfileProps {
   profileType: 'recruiter' | 'candidate' | 'admin';
@@ -16,11 +15,14 @@ interface UserProfileProps {
 
 export default function UserProfile({ profileType }: UserProfileProps) {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  
+  // Get recruiter data from the existing Redux store
   const recruiter = useAppSelector((state) => state.recruiter);
-  const { filteredJobs, isLoading } = useAppSelector((state) => state.jobs);
-  const [recentJobs, setRecentJobs] = useState<any[]>([]);
-
+  const { 
+    filteredJobs, 
+    isLoading: jobsLoading 
+  } = useAppSelector((state) => state.jobs);
+  
   // Set up TipTap editor for rendering markdown description
   const editor = useEditor({
     extensions: [StarterKit],
@@ -35,26 +37,19 @@ export default function UserProfile({ profileType }: UserProfileProps) {
     }
   }, [editor, recruiter.description]);
 
-  useEffect(() => {
-    if (profileType === 'recruiter' && recruiter.userId) {
-      dispatch(fetchJobsByRecruiter(recruiter.userId));
-    }
-  }, [dispatch, profileType, recruiter.userId]);
+  // Get only the first 3 jobs for the recent jobs section
+  const recentJobs = filteredJobs.slice(0, 3);
 
-  useEffect(() => {
-    // Get only the first 3 jobs
-    setRecentJobs(filteredJobs.slice(0, 3));
-  }, [filteredJobs]);
+  // Handle View All Jobs button click
+  const handleViewAllJobs = () => {
+    router.push(`/recruiter/app/jobs/${encodeURIComponent(recruiter.userName)}`);
+  };
 
   if (profileType !== 'recruiter') {
     return <div className="p-8 text-center text-gray-500">Profile not available</div>;
   }
 
   const fullName = getRecruiterFullName(recruiter);
-  
-  const handleViewAllJobs = () => {
-    router.push(`/recruiter/app/jobs/${encodeURIComponent(recruiter.userName)}`);
-  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -101,7 +96,7 @@ export default function UserProfile({ profileType }: UserProfileProps) {
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">About</h3>
             <div className="bg-gray-50 rounded-lg p-4 prose prose-sm max-w-none">
-              <div className="ProseMirror">{editor.getHTML()}</div>
+              <EditorContent editor={editor} className="tiptap-content" />
             </div>
           </div>
         )}
@@ -119,37 +114,12 @@ export default function UserProfile({ profileType }: UserProfileProps) {
             </button>
           </div>
 
-          {isLoading ? (
+          {jobsLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-4 border-t-indigo-500 border-indigo-200"></div>
             </div>
           ) : recentJobs.length > 0 ? (
-            <div className="space-y-4">
-              {recentJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/recruiter/app/jobs/${job.id}`)}
-                >
-                  <div className="flex justify-between">
-                    <h4 className="font-medium text-gray-800">{job.title}</h4>
-                    <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">
-                      {job.applicationsCount || 0} applications
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <div className="text-sm text-gray-500 flex items-center">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {job.location || 'Remote'}
-                    </div>
-                    <div className="text-sm text-gray-500 flex items-center ml-3">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(job.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <JobList jobs={recentJobs} />
           ) : (
             <div className="bg-gray-50 rounded-lg p-6 text-center">
               <p className="text-gray-500">No jobs created yet</p>
