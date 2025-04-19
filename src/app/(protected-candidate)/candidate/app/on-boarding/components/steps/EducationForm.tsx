@@ -1,0 +1,212 @@
+'use client';
+
+import { X, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import DateSelector from '@/components/DateSelector/DateSelector';
+import { Education, EducationFieldErrors } from '../types';
+import { UseFormRegister, UseFormWatch, UseFormSetValue } from 'react-hook-form';
+import { OnboardingFormFields } from '../types';
+
+interface EducationFormProps {
+  education: Education;
+  index: number;
+  register: UseFormRegister<OnboardingFormFields>;
+  watch: UseFormWatch<OnboardingFormFields>;
+  setValue: UseFormSetValue<OnboardingFormFields>;
+  onRemove: () => void;
+  onUpdate: (updates: Partial<Education>) => void;
+  years: string[];
+  months: { value: string; label: string }[];
+  days: string[];
+  errors?: EducationFieldErrors; // Use specific type instead of any
+  currentlyStudying: boolean;
+  onCurrentlyStudyingChange: (checked: boolean) => void;
+  degrees: { id: string; name: string }[];
+  isLoadingDegrees: boolean;
+}
+
+export default function EducationForm({
+  education,
+  index,
+  register,
+  watch,
+  setValue,
+  onRemove,
+  onUpdate,
+  years,
+  months,
+  days,
+  errors,
+  currentlyStudying,
+  onCurrentlyStudyingChange,
+  degrees,
+  isLoadingDegrees
+}: EducationFormProps) {
+  const handleInstitutionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate({ institution: e.target.value });
+  };
+  
+  const handleDegreeChange = (value: string) => {
+    onUpdate({ degree: value });
+    setValue(`education.${index}.degree`, value);
+  };
+  
+  return (
+    <div className="p-5 border border-gray-200 rounded-lg relative">
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      
+      <div className="mb-4">
+        <Label htmlFor={`education.${index}.institution`} className="mb-1 block">
+          Institution<span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id={`education.${index}.institution`}
+          {...register(`education.${index}.institution`, { required: "Institution name is required" })}
+          placeholder="Enter your school/college name"
+          value={education.institution}
+          onChange={handleInstitutionChange}
+          className={errors?.institution ? "border-red-500" : ""}
+        />
+        {errors?.institution && (
+          <p className="mt-1 text-sm text-red-600">
+            {errors.institution.message}
+          </p>
+        )}
+      </div>
+      
+      <div className="mb-4">
+        <Label htmlFor={`education.${index}.degree`} className="mb-1 block">
+          Degree<span className="text-red-500">*</span>
+        </Label>
+        <Select
+          value={education.degree}
+          onValueChange={handleDegreeChange}
+          disabled={isLoadingDegrees}
+        >
+          <SelectTrigger 
+            id={`education.${index}.degree`}
+            className={errors?.degree ? "border-red-500" : ""}
+          >
+            <SelectValue placeholder="Select a degree" />
+          </SelectTrigger>
+          <SelectContent>
+            {isLoadingDegrees ? (
+              <SelectItem value="loading" disabled>
+                Loading degrees...
+              </SelectItem>
+            ) : (
+              <>
+                <SelectItem value="high_school">High School (10+2)</SelectItem>
+                {degrees.map(degree => (
+                  <SelectItem key={degree.id} value={degree.id}>
+                    {degree.name}
+                  </SelectItem>
+                ))}
+              </>
+            )}
+          </SelectContent>
+        </Select>
+        {errors?.degree && (
+          <p className="mt-1 text-sm text-red-600">
+            {errors.degree.message}
+          </p>
+        )}
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label className="mb-1 block">
+            Start Date<span className="text-red-500">*</span>
+          </Label>
+          <DateSelector
+            years={years}
+            months={months}
+            days={days}
+            selectedYear={education.startDate.year}
+            selectedMonth={education.startDate.month}
+            selectedDay={education.startDate.day}
+            onYearChange={(year) => {
+              onUpdate({
+                startDate: { ...education.startDate, year }
+              });
+              setValue(`education.${index}.startDate.year`, year);
+            }}
+            onMonthChange={(month) => {
+              onUpdate({
+                startDate: { ...education.startDate, month }
+              });
+              setValue(`education.${index}.startDate.month`, month);
+            }}
+            onDayChange={(day) => {
+              onUpdate({
+                startDate: { ...education.startDate, day }
+              });
+              setValue(`education.${index}.startDate.day`, day);
+            }}
+          />
+        </div>
+        
+        <div>
+          <Label className="mb-1 block">
+            End Date{!currentlyStudying && <span className="text-red-500">*</span>}
+          </Label>
+          {currentlyStudying ? (
+            <div className="h-10 flex items-center text-gray-500 italic">
+              Currently studying
+            </div>
+          ) : (
+            <DateSelector
+              years={years}
+              months={months}
+              days={days}
+              selectedYear={education.endDate?.year || ""}
+              selectedMonth={education.endDate?.month || ""}
+              selectedDay={education.endDate?.day || ""}
+              onYearChange={(year) => {
+                onUpdate({
+                  endDate: { ...(education.endDate || { year: "", month: "", day: "" }), year }
+                });
+                setValue(`education.${index}.endDate.year`, year);
+              }}
+              onMonthChange={(month) => {
+                onUpdate({
+                  endDate: { ...(education.endDate || { year: "", month: "", day: "" }), month }
+                });
+                setValue(`education.${index}.endDate.month`, month);
+              }}
+              onDayChange={(day) => {
+                onUpdate({
+                  endDate: { ...(education.endDate || { year: "", month: "", day: "" }), day }
+                });
+                setValue(`education.${index}.endDate.day`, day);
+              }}
+            />
+          )}
+        </div>
+      </div>
+      
+      <div className="mt-4 flex items-center">
+        <Checkbox
+          id={`education.${index}.currentlyStudying`}
+          checked={currentlyStudying}
+          onCheckedChange={onCurrentlyStudyingChange}
+        />
+        <Label
+          htmlFor={`education.${index}.currentlyStudying`}
+          className="ml-2 text-sm font-medium"
+        >
+          Currently studying here
+        </Label>
+      </div>
+    </div>
+  );
+}

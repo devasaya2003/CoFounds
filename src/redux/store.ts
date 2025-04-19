@@ -6,6 +6,7 @@ import companyReducer from "./slices/companySlice"
 import skillReducer from "./slices/skillSlice";
 import degreeReducer from "./slices/degreeSlice";
 import jobCreationReducer from './slices/jobCreationSlice';
+import candidateOnboardingReducer from './slices/candidateOnboardingSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     skill: skillReducer,
     degree: degreeReducer,
     jobCreation: jobCreationReducer,
+    candidateOnboarding: candidateOnboardingReducer,
   },
 });
 

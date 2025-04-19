@@ -14,6 +14,7 @@ export const config = {
 // Pages that don't require authentication
 const PUBLIC_PATHS = [
   "/auth/sign-in",
+  "/auth/sign-up",
   "/auth/recruiter-sign-in",
   "/auth/forgot-password",
   "/auth/reset-password",

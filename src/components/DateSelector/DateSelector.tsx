@@ -2,7 +2,7 @@
 
 import { ChevronDown } from 'lucide-react';
 
-interface DateSelectorProps {
+export interface DateSelectorProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
@@ -12,6 +12,10 @@ interface DateSelectorProps {
   onYearChange: (year: string) => void;
   onMonthChange: (month: string) => void;
   onDayChange: (day: string) => void;
+  label?: string;
+  disabled?: boolean;
+  required?: boolean;
+  error?: string;
 }
 
 export default function DateSelector({

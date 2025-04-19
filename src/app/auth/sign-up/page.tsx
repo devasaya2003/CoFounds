@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import EmailInput from "@/components/auth/EmailInput";
@@ -9,20 +11,47 @@ import PasswordInput from "@/components/auth/PasswordInput";
 import AuthButton from "@/components/auth/AuthButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { signUp } from "@/redux/slices/authSlice";
+import { RootState, AppDispatch } from "@/redux/store";
+import { validateSignupForm } from "@/utils/auth_utils";
 
 export default function SignUpPage() {
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
+    role: "candidate", // Default role is candidate
   });
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    terms?: string;
+  }>({});
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/candidate/app");
+    }
+  }, [isAuthenticated, router]);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       email: e.target.value,
     }));
+    // Clear error when user starts typing
+    if (formErrors.email) {
+      setFormErrors((prev) => ({ ...prev, email: undefined }));
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +59,9 @@ export default function SignUpPage() {
       ...prev,
       password: e.target.value,
     }));
+    if (formErrors.password) {
+      setFormErrors((prev) => ({ ...prev, password: undefined }));
+    }
   };
 
   const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,12 +69,33 @@ export default function SignUpPage() {
       ...prev,
       confirmPassword: e.target.value,
     }));
+    if (formErrors.confirmPassword) {
+      setFormErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const { errors, isValid } = validateSignupForm(formData, agreedToTerms);
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Submission logic would go here
-    console.log("Form submitted:", formData);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    const { email, password, role } = formData;
+    
+    try {
+      await dispatch(signUp({ email, password, role })).unwrap();
+      // Success - redirect will happen via the useEffect above
+    } catch (err) {
+      // Error is already handled in the Redux slice
+      console.error("Signup error:", err);
+    }
   };
 
   return (
@@ -50,15 +103,21 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">Sign Up for the best hiring platform ever</CardTitle>
-          <CardDescription>Create an account to get started</CardDescription>
+          <CardDescription>Create a candidate account to get started</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
-
             <EmailInput
               value={formData.email}
               onChange={handleEmailChange}
               disabled={isLoading}
+              error={formErrors.email}
             />
             
             <PasswordInput
@@ -67,6 +126,7 @@ export default function SignUpPage() {
               disabled={isLoading}
               id="password"
               label="Password"
+              error={formErrors.password}
             />
             
             <PasswordInput
@@ -75,10 +135,16 @@ export default function SignUpPage() {
               disabled={isLoading}
               id="confirmPassword"
               label="Confirm Password"
+              error={formErrors.confirmPassword}
             />
             
             <div className="flex items-center space-x-2">
-              <Checkbox id="terms" disabled={isLoading} />
+              <Checkbox 
+                id="terms" 
+                disabled={isLoading} 
+                checked={agreedToTerms}
+                onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+              />
               <label
                 htmlFor="terms"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -93,12 +159,13 @@ export default function SignUpPage() {
                 </Link>
               </label>
             </div>
+            {formErrors.terms && <p className="text-sm text-red-500">{formErrors.terms}</p>}
             
             <AuthButton 
               isLoading={isLoading}
               loadingText="Creating account..."
             >
-              Create Account
+              Create Candidate Account
             </AuthButton>
           </form>
           

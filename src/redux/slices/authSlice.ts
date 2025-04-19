@@ -17,6 +17,12 @@ interface UserProfile {
   updatedAt?: string;
 }
 
+interface SignUpData {
+  email: string;
+  password: string;
+  role: string;
+}
+
 interface AuthState {
   email: string;
   password: string;
@@ -125,6 +131,42 @@ export const forgotPassword = createAsyncThunk(
   }
 );
 
+export const signUp = createAsyncThunk(
+  "auth/signUp",
+  async (signupData: SignUpData, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/auth/v1/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(signupData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue(errorData.error || "Signup failed");
+      }
+
+      const data = await response.json();
+
+      if (data.token) {
+        localStorage.setItem("auth_token", data.token);
+        document.cookie = `auth_token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+      }
+
+      return {
+        success: true,
+        role: data.user.role,
+        token: data.token,
+        user: data.user,
+      };
+    } catch (error) {
+      return rejectWithValue("Signup failed. Please try again.");
+    }
+  }
+);
+
 // Add selector to get full name
 export const getFullName = (user: UserProfile | null): string => {
   if (!user) return "";
@@ -209,6 +251,21 @@ export const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+      })
+      .addCase(signUp.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signUp.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.userRole = action.payload.role;
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+      })
+      .addCase(signUp.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });

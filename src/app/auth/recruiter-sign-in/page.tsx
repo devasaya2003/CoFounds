@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { setEmail, setPassword, clearError, signIn, setToken } from "@/redux/slices/authSlice";
@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JoinCommunity } from "@/app/utils/joinCommunity";
+import { validateSigninForm } from "@/utils/auth_utils";
 
 export default function RecruiterSignIn() {
   const dispatch = useAppDispatch();
@@ -26,6 +27,12 @@ export default function RecruiterSignIn() {
     (state) => state.auth
   );
   const router = useRouter();
+  
+  // Local state for form errors
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
   
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
@@ -46,17 +53,36 @@ export default function RecruiterSignIn() {
     }
   }, [isAuthenticated, userRole, router]);
 
+  const validateForm = () => {
+    const { errors, isValid } = validateSigninForm(email, password);
+    setFormErrors(errors);
+    return isValid;
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+    
     dispatch(signIn());
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setEmail(e.target.value));
+    // Clear error when user starts typing
+    if (formErrors.email) {
+      setFormErrors((prev) => ({ ...prev, email: undefined }));
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setPassword(e.target.value));
+    if (formErrors.password) {
+      setFormErrors((prev) => ({ ...prev, password: undefined }));
+    }
   };
 
   return (
@@ -83,6 +109,7 @@ export default function RecruiterSignIn() {
               value={email} 
               onChange={handleEmailChange} 
               disabled={isLoading} 
+              error={formErrors.email}
             />
 
             <PasswordInput 
@@ -90,6 +117,7 @@ export default function RecruiterSignIn() {
               onChange={handlePasswordChange} 
               disabled={isLoading}
               forgotPasswordLink={true}
+              error={formErrors.password}
             />
 
             <AuthButton 

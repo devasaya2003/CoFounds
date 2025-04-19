@@ -14,6 +14,7 @@ interface PasswordInputProps {
   required?: boolean;
   label?: string;
   forgotPasswordLink?: boolean;
+  error?: string; // Add the error prop
 }
 
 const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -25,6 +26,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   required = true,
   label = "Password",
   forgotPasswordLink = false,
+  error, // Include error in the function props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -44,7 +46,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           onChange={onChange}
           required={required}
           disabled={disabled}
-          className="pr-10"
+          className={`pr-10 ${error ? "border-red-500" : ""}`}
         />
         <button
           type="button"
@@ -59,6 +61,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           )}
         </button>
       </div>
+      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
       {forgotPasswordLink && (
         <div className="flex justify-end">
           <a
