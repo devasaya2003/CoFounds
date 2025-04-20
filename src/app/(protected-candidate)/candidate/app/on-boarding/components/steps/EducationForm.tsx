@@ -27,6 +27,7 @@ interface EducationFormProps {
   degrees: { id: string; name: string }[];
   isLoadingDegrees: boolean;
   onUpdateDegrees: (updatedDegrees: { id: string; name: string }[]) => void;
+  excludeDegreeIds?: string[]; // Add this new prop
 }
 
 export default function EducationForm({
@@ -45,7 +46,8 @@ export default function EducationForm({
   onCurrentlyStudyingChange,
   degrees,
   isLoadingDegrees,
-  onUpdateDegrees
+  onUpdateDegrees,
+  excludeDegreeIds = [], // Default to empty array
 }: EducationFormProps) {
   const handleInstitutionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onUpdate({ institution: e.target.value });
@@ -61,15 +63,23 @@ export default function EducationForm({
     setValue(`education.${index}.degree`, '');
   };
 
+  const isHighSchool = () => {
+    if (!education.degree) return false;
+    const degree = degrees.find(d => d.id === education.degree);
+    return degree && degree.name.toLowerCase().includes('high school');
+  };
+
   return (
     <div className="p-5 border border-gray-200 rounded-lg relative">
-      <button
-        type="button"
-        onClick={onRemove}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-      >
-        <X className="h-5 w-5" />
-      </button>
+      {!isHighSchool() && (
+        <button
+          type="button"
+          onClick={onRemove}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      )}
 
       <div className="mb-4">
         <Label htmlFor={`education.${index}.institution`} className="mb-1 block py-3">
@@ -101,6 +111,7 @@ export default function EducationForm({
           error={errors?.degree?.message}
           isLoading={isLoadingDegrees}
           initialDegrees={degrees}
+          excludeDegreeIds={excludeDegreeIds} // Pass the excluded IDs
         />
       </div>
 

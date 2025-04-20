@@ -17,6 +17,7 @@ interface PaginatedDegreeSelectorProps {
   error?: string;
   isLoading?: boolean;
   initialDegrees?: Degree[];
+  excludeDegreeIds?: string[]; // Add this new prop
 }
 
 export default function PaginatedDegreeSelector({
@@ -25,7 +26,8 @@ export default function PaginatedDegreeSelector({
   onClear,
   error,
   isLoading: externalLoading,
-  initialDegrees = []
+  initialDegrees = [],
+  excludeDegreeIds = [] // Default to empty array
 }: PaginatedDegreeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,13 +42,12 @@ export default function PaginatedDegreeSelector({
   // Look up selected degree name when component loads or selection changes
   useEffect(() => {
     if (selectedDegree) {
-      // First check our loaded degrees
+      // Find the degree in our loaded degrees
       const found = degrees.find(d => d.id === selectedDegree);
       if (found) {
         setSelectedDegreeName(found.name);
-      } else if (selectedDegree === 'high_school') {
-        // Special case for high school
-        setSelectedDegreeName('High School (10+2)');
+      } else {
+        setSelectedDegreeName('');
       }
     } else {
       setSelectedDegreeName('');
@@ -92,12 +93,15 @@ export default function PaginatedDegreeSelector({
     };
   }, []);
 
-  // Filter degrees based on search term
+  // Filter degrees based on search term and exclusions
   const filteredDegrees = searchTerm
     ? [...degrees].filter(degree => 
-        degree.name.toLowerCase().includes(searchTerm.toLowerCase())
+        degree.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+        (degree.id === selectedDegree || !excludeDegreeIds.includes(degree.id))
       )
-    : [...degrees];
+    : [...degrees].filter(degree => 
+        degree.id === selectedDegree || !excludeDegreeIds.includes(degree.id)
+      );
 
   // Load more degrees
   const loadMoreDegrees = () => {
@@ -145,25 +149,11 @@ export default function PaginatedDegreeSelector({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                autoFocus
               />
             </div>
             
             <div className="max-h-60 overflow-y-auto">
-              {/* High School Option (always available) */}
-              <button
-                type="button"
-                onClick={() => {
-                  onDegreeSelect('high_school', 'High School (10+2)');
-                  setSearchTerm('');
-                  setIsOpen(false);
-                }}
-                className={`w-full text-left px-4 py-2 hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none ${
-                  selectedDegree === 'high_school' ? 'bg-indigo-100' : ''
-                }`}
-              >
-                High School (10+2)
-              </button>
-              
               {filteredDegrees.length === 0 && !isLoading && searchTerm && (
                 <div className="px-4 py-2 text-gray-500">
                   No degrees found. Try a different search.

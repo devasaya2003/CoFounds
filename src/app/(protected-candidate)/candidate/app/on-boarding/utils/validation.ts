@@ -1,6 +1,17 @@
 import { OnboardingFormFields } from '../components/types';
 
-export function validateStep(step: number, formData: OnboardingFormFields): { isValid: boolean; errors: string[] } {
+// Define a type for the degree
+interface Degree {
+  id: string;
+  name: string;
+}
+
+// Updated to accept degrees as a parameter
+export function validateStep(
+  step: number, 
+  formData: OnboardingFormFields,
+  degreesData?: Degree[] // Optional parameter for degrees
+): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   
   switch(step) {
@@ -49,9 +60,16 @@ export function validateStep(step: number, formData: OnboardingFormFields): { is
         errors.push("At least one education entry is required");
       } else {
         // Check if at least one entry is high school (10+2)
-        const hasHighSchool = educations.some(edu => edu.degree === 'high_school');
-        if (!hasHighSchool) {
-          errors.push("10+2 or 12th Standard education is required");
+        // Only perform this check if degrees are available
+        if (degreesData && degreesData.length > 0) {
+          const hasHighSchool = educations.some(edu => {
+            const degree = degreesData.find((d: Degree) => d.id === edu.degree);
+            return degree && degree.name.toLowerCase().includes('high school');
+          });
+          
+          if (!hasHighSchool) {
+            errors.push("10+2 or 12th Standard education is required");
+          }
         }
 
         // Check for required fields in each entry
