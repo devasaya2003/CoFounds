@@ -104,6 +104,7 @@ interface CandidateOnboardingState {
   // Step 2: Personal Info
   firstName: string;
   lastName: string;
+  dateOfBirth: DateField | null; // Add this line
   description: string;
   skills: SkillWithId[];
   
@@ -131,6 +132,7 @@ const initialState: CandidateOnboardingState = {
   
   firstName: '',
   lastName: '',
+  dateOfBirth: null, // Add this line
   description: '',
   skills: [],
   
@@ -171,6 +173,10 @@ export const candidateOnboardingSlice = createSlice({
     },
     setLastName: (state, action: PayloadAction<string>) => {
       state.lastName = action.payload;
+      state.isDirty = true;
+    },
+    setDateOfBirth: (state, action: PayloadAction<DateField>) => {
+      state.dateOfBirth = action.payload;
       state.isDirty = true;
     },
     setDescription: (state, action: PayloadAction<string>) => {
@@ -285,6 +291,7 @@ export const {
   setUserName,
   setFirstName,
   setLastName,
+  setDateOfBirth, // Export the new action
   setDescription,
   addSkill,
   removeSkill,

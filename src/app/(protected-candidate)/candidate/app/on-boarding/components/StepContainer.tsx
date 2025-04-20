@@ -105,7 +105,7 @@ export default function StepContainer({
             onAddEducation={() => {}}
             onRemoveEducation={() => {}}
             onUpdateEducation={() => {}}
-            maxEducationEntries={3}
+            maxEducationEntries={5}
           />
         );
       default:

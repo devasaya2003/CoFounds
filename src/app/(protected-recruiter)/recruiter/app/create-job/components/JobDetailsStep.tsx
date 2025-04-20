@@ -143,7 +143,6 @@ export default function JobDetailsStep({
         <DateSelector
           years={years}
           months={months}
-          days={days}
           selectedYear={formState.last_date_to_apply.year}
           selectedMonth={formState.last_date_to_apply.month}
           selectedDay={formState.last_date_to_apply.day}

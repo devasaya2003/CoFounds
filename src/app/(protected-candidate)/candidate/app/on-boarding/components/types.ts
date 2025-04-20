@@ -45,6 +45,7 @@ export interface OnboardingFormFields {
   // Step 2
   firstName: string;
   lastName: string;
+  dateOfBirth: DateField;
   description: string;
   skills: SkillWithId[];
   
@@ -77,13 +78,19 @@ export interface UsernameStepProps extends StepComponentProps {
 }
 
 // Step 2: Personal Info props
-export interface PersonalInfoStepProps extends StepComponentProps {
+export interface PersonalInfoStepProps {
   formState: {
     firstName: string;
     lastName: string;
+    dateOfBirth?: DateField;
     description: string;
     skills: SkillWithId[];
   };
+  errors: FieldErrors<OnboardingFormFields>;
+  register: UseFormRegister<OnboardingFormFields>;
+  watch: UseFormWatch<OnboardingFormFields>;
+  setValue: UseFormSetValue<OnboardingFormFields>;
+  getValues?: UseFormGetValues<OnboardingFormFields>;
   onNextStep: () => void;
   onPreviousStep: () => void;
 }

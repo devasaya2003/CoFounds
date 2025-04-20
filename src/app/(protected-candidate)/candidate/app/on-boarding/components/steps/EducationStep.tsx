@@ -174,7 +174,7 @@ export default function EducationStep({
                   }
                 });
               }}
-              degrees={allDegrees}
+              degrees={allDegrees} // Pass all degrees here
               isLoadingDegrees={isLoading}
               onUpdateDegrees={handleUpdateDegrees}
             />
