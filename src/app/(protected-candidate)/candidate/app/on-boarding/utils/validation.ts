@@ -88,7 +88,35 @@ export function validateStep(
         });
       }
       break;
-    // Additional step validations will be added here...
+    case 5:
+      // Proof of Work validation
+      const proofsOfWork = formData.proofsOfWork || [];
+      
+      // At least one proof of work is required
+      if (proofsOfWork.length === 0) {
+        errors.push("At least one proof of work entry is required");
+      } else {
+        // Validate each entry
+        proofsOfWork.forEach((pow, index) => {
+          if (!pow.title) errors.push(`Title is required for entry #${index + 1}`);
+          if (!pow.description) errors.push(`Description is required for entry #${index + 1}`);
+          
+          // Only validate company name if it's not community work
+          if (!pow.isCommunityWork && !pow.company_name) {
+            errors.push(`Company name is required for entry #${index + 1}`);
+          }
+          
+          // Validate dates
+          if (!pow.startDate || !pow.startDate.year || !pow.startDate.month) {
+            errors.push(`Start date is required for entry #${index + 1}`);
+          }
+          
+          if (!pow.currentlyWorking && (!pow.endDate || !pow.endDate.year || !pow.endDate.month)) {
+            errors.push(`End date is required for entry #${index + 1}`);
+          }
+        });
+      }
+      break;
   }
   
   return {

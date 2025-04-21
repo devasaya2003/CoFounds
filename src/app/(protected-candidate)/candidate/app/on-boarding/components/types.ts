@@ -1,5 +1,5 @@
 import { FieldErrors, UseFormRegister, UseFormWatch, UseFormSetValue, UseFormGetValues, FieldError } from "react-hook-form";
-import { SkillWithId, Certificate as ReduxCertificate, ProofOfWork, Project, DateField } from "@/redux/slices/candidateOnboardingSlice";
+import { SkillWithId, Certificate as ReduxCertificate, ProofOfWork as ReduxProofOfWork, Project, DateField } from "@/redux/slices/candidateOnboardingSlice";
 
 // Add export keyword to the Education interface
 export interface Education {
@@ -72,6 +72,43 @@ export interface CertificateFieldErrors {
   };
   fileUrl?: { message: string };
   externalUrl?: { message: string };
+}
+
+// Update the ProofOfWork interface to include all required properties
+export interface ProofOfWork {
+  id: string;
+  title: string;
+  company_name: string; // Using consistent naming company_name
+  description: string;
+  startDate: {
+    year: string;
+    month: string;
+    day: string;
+  };
+  endDate: {
+    year: string;
+    month: string;
+    day: string;
+  } | null;
+  isCommunityWork: boolean; // Consistent naming
+  currentlyWorking: boolean;
+}
+
+// Add ProofOfWorkFieldErrors interface
+export interface ProofOfWorkFieldErrors {
+  title?: { message: string };
+  company_name?: { message: string };
+  description?: { message: string };
+  startDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
+  endDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
 }
 
 // Form fields interface
@@ -221,6 +258,9 @@ export interface ProofOfWorkStepProps extends StepComponentProps {
   formState: {
     proofsOfWork: ProofOfWork[];
   };
+  register: UseFormRegister<OnboardingFormFields>;
+  watch: UseFormWatch<OnboardingFormFields>;
+  setValue: UseFormSetValue<OnboardingFormFields>;
   onNextStep: () => void;
   onPreviousStep: () => void;
   onAddProofOfWork: () => void;

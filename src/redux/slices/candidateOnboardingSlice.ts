@@ -48,7 +48,7 @@ export interface Certificate {
 export interface ProofOfWork {
   id: string;
   title: string;
-  companyName: string; // Will be "COF_PROOF_COMMUNITY" for community proofs
+  company_name: string; // Changed from companyName to match component expectations
   description: string;
   startDate: {
     year: string;
@@ -61,7 +61,7 @@ export interface ProofOfWork {
     day: string;
   } | null;
   currentlyWorking: boolean;
-  isCommunityProof: boolean;
+  isCommunityWork: boolean; // Changed from isCommunityProof to match component expectations
 }
 
 // Project interface
@@ -141,7 +141,7 @@ const initialState: CandidateOnboardingState = {
   
   certificates: [],
   
-  proofsOfWork: [],
+  proofsOfWork: [] as ProofOfWork[], // Explicitly typed
   
   projects: []
 };
@@ -242,6 +242,9 @@ export const candidateOnboardingSlice = createSlice({
     
     // Step 5 actions
     addProofOfWork: (state, action: PayloadAction<ProofOfWork>) => {
+      if (!state.proofsOfWork) {
+        state.proofsOfWork = [];
+      }
       state.proofsOfWork.push(action.payload);
       state.isDirty = true;
     },
@@ -251,9 +254,9 @@ export const candidateOnboardingSlice = createSlice({
       if (index !== -1) {
         state.proofsOfWork[index] = { ...state.proofsOfWork[index], ...updates };
         
-        // Update company name if isCommunityProof changed
-        if (updates.isCommunityProof !== undefined) {
-          state.proofsOfWork[index].companyName = updates.isCommunityProof ? 'COF_PROOF_COMMUNITY' : state.proofsOfWork[index].companyName;
+        // Update company name if isCommunityWork changed (updated field name)
+        if (updates.isCommunityWork !== undefined) {
+          state.proofsOfWork[index].company_name = updates.isCommunityWork ? 'COF_PROOF_COMMUNITY' : state.proofsOfWork[index].company_name;
         }
         
         state.isDirty = true;

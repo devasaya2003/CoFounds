@@ -2,55 +2,30 @@
 
 import { ReactNode } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { OnboardingFormFields } from './types';
+import { 
+  OnboardingFormFields, 
+  ProofOfWork,
+  Education,
+  Certificate,
+} from './types'; // Import all the types you need
+
 import UsernameStep from './steps/UsernameStep';
 import PersonalInfoStep from './steps/PersonalInfoStep';
 import EducationStep from './steps/EducationStep';
-import CertificateStep from './steps/CertificateStep'; // Add this import
+import CertificateStep from './steps/CertificateStep';
+import ProofOfWorkStep from './steps/ProofOfWorkStep';
+import { SkillWithId } from '@/redux/slices/candidateOnboardingSlice';
 
+// Use the imported types in your state interface
 interface CandidateOnboardingState {
   userName: string;
   firstName: string;
   lastName: string;
   description: string;
-  skills: Array<{
-    id: string;
-    name: string;
-    skill_level: 'beginner' | 'intermediate' | 'advanced';
-  }>;
-  education: Array<{
-    id: string;
-    institution: string;
-    degree: string;
-    startDate: {
-      year: string;
-      month: string;
-      day: string;
-    };
-    endDate: {
-      year: string;
-      month: string;
-      day: string;
-    } | null;
-    currentlyStudying: boolean;
-  }>;
-  certificates: Array<{
-    id: string;
-    title: string;
-    description: string;
-    startDate: {
-      year: string;
-      month: string;
-      day: string;
-    };
-    endDate: {
-      year: string;
-      month: string;
-      day: string;
-    } | null;
-    fileUrl?: string;
-    externalUrl?: string;
-  }>;
+  skills: SkillWithId[];
+  education: Education[];
+  certificates: Certificate[];
+  proofsOfWork: ProofOfWork[];
   currentStep: number;
   steps: string[];
   status: 'idle' | 'loading' | 'submitting' | 'success' | 'error';
@@ -139,6 +114,23 @@ export default function StepContainer({
             onRemoveCertificate={() => {}}
             onUpdateCertificate={() => {}}
             maxCertificateEntries={10}
+          />
+        );
+      case 5:
+        return (
+          <ProofOfWorkStep
+            formState={{
+              proofsOfWork: onboarding.proofsOfWork || [], // No need to transform if types are consistent
+            }}
+            errors={errors}
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            onNextStep={onValidateAndProceed}
+            onPreviousStep={onPreviousStep}
+            onAddProofOfWork={() => {}}
+            onRemoveProofOfWork={() => {}}
+            onUpdateProofOfWork={() => {}}
           />
         );
       default:
