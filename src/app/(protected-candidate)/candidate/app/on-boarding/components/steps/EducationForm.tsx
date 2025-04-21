@@ -63,23 +63,16 @@ export default function EducationForm({
     setValue(`education.${index}.degree`, '');
   };
 
-  const isHighSchool = () => {
-    if (!education.degree) return false;
-    const degree = degrees.find(d => d.id === education.degree);
-    return degree && degree.name.toLowerCase().includes('high school');
-  };
-
   return (
     <div className="p-5 border border-gray-200 rounded-lg relative">
-      {!isHighSchool() && (
-        <button
-          type="button"
-          onClick={onRemove}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      )}
+      {/* Allow removal of any education entry including high school */}
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+      >
+        <X className="h-5 w-5" />
+      </button>
 
       <div className="mb-4">
         <Label htmlFor={`education.${index}.institution`} className="mb-1 block py-3">

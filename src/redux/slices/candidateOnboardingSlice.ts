@@ -40,7 +40,8 @@ export interface Certificate {
     month: string;
     day: string;
   } | null;
-  fileUrl: string; // Can be an uploaded file URL or external URL
+  fileUrl?: string; // Making this optional with ? to match the component interface
+  externalUrl?: string; // Making this optional with ?
 }
 
 // Proof of Work interface
@@ -220,6 +221,9 @@ export const candidateOnboardingSlice = createSlice({
     
     // Step 4 actions
     addCertificate: (state, action: PayloadAction<Certificate>) => {
+      if (!state.certificates) {
+        state.certificates = [];
+      }
       state.certificates.push(action.payload);
       state.isDirty = true;
     },
@@ -228,8 +232,8 @@ export const candidateOnboardingSlice = createSlice({
       const index = state.certificates.findIndex(cert => cert.id === id);
       if (index !== -1) {
         state.certificates[index] = { ...state.certificates[index], ...updates };
-        state.isDirty = true;
       }
+      state.isDirty = true;
     },
     removeCertificate: (state, action: PayloadAction<string>) => {
       state.certificates = state.certificates.filter(cert => cert.id !== action.payload);

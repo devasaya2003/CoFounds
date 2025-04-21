@@ -6,6 +6,7 @@ import { OnboardingFormFields } from './types';
 import UsernameStep from './steps/UsernameStep';
 import PersonalInfoStep from './steps/PersonalInfoStep';
 import EducationStep from './steps/EducationStep';
+import CertificateStep from './steps/CertificateStep'; // Add this import
 
 interface CandidateOnboardingState {
   userName: string;
@@ -33,9 +34,23 @@ interface CandidateOnboardingState {
     } | null;
     currentlyStudying: boolean;
   }>;
-  // certificates: any[];
-  // proofsOfWork: any[];
-  // projects: any[];
+  certificates: Array<{
+    id: string;
+    title: string;
+    description: string;
+    startDate: {
+      year: string;
+      month: string;
+      day: string;
+    };
+    endDate: {
+      year: string;
+      month: string;
+      day: string;
+    } | null;
+    fileUrl?: string;
+    externalUrl?: string;
+  }>;
   currentStep: number;
   steps: string[];
   status: 'idle' | 'loading' | 'submitting' | 'success' | 'error';
@@ -106,6 +121,24 @@ export default function StepContainer({
             onRemoveEducation={() => {}}
             onUpdateEducation={() => {}}
             maxEducationEntries={5}
+          />
+        );
+      case 4:
+        return (
+          <CertificateStep
+            formState={{
+              certificates: onboarding.certificates || [],
+            }}
+            errors={errors}
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            onNextStep={onValidateAndProceed}
+            onPreviousStep={onPreviousStep}
+            onAddCertificate={() => {}}
+            onRemoveCertificate={() => {}}
+            onUpdateCertificate={() => {}}
+            maxCertificateEntries={10}
           />
         );
       default:

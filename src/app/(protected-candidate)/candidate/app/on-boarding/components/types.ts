@@ -1,5 +1,5 @@
 import { FieldErrors, UseFormRegister, UseFormWatch, UseFormSetValue, UseFormGetValues, FieldError } from "react-hook-form";
-import { SkillWithId, Certificate, ProofOfWork, Project, DateField } from "@/redux/slices/candidateOnboardingSlice";
+import { SkillWithId, Certificate as ReduxCertificate, ProofOfWork, Project, DateField } from "@/redux/slices/candidateOnboardingSlice";
 
 // Add export keyword to the Education interface
 export interface Education {
@@ -36,6 +36,43 @@ export type EducationFieldErrors = {
   currentlyStudying?: FieldError;
   [key: string]: FieldError | Record<string, FieldError> | undefined;
 };
+
+// Keep your locally defined Certificate interface
+export interface Certificate {
+  id: string;
+  title: string;
+  description: string;
+  startDate: {
+    year: string;
+    month: string;
+    day: string;
+  };
+  endDate: {
+    year: string;
+    month: string;
+    day: string;
+  } | null;
+  fileUrl?: string;
+  externalUrl?: string;
+}
+
+// Add CertificateFieldErrors interface
+export interface CertificateFieldErrors {
+  title?: { message: string };
+  description?: { message: string };
+  startDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
+  endDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
+  fileUrl?: { message: string };
+  externalUrl?: { message: string };
+}
 
 // Form fields interface
 export interface OnboardingFormFields {

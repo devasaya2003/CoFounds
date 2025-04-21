@@ -59,25 +59,14 @@ export function validateStep(
       if (educations.length === 0) {
         errors.push("At least one education entry is required");
       } else {
-        // Check if at least one entry is high school (10+2)
-        // Only perform this check if degrees are available
-        if (degreesData && degreesData.length > 0) {
-          const hasHighSchool = educations.some(edu => {
-            const degree = degreesData.find((d: Degree) => d.id === edu.degree);
-            return degree && degree.name.toLowerCase().includes('high school');
-          });
-          
-          if (!hasHighSchool) {
-            errors.push("10+2 or 12th Standard education is required");
-          }
-        }
-
-        // Check for required fields in each entry
+        // Keep validation for required fields in each entry
         educations.forEach((edu, index) => {
           if (!edu.institution) errors.push(`Institution is required for education #${index + 1}`);
           if (!edu.degree) errors.push(`Degree is required for education #${index + 1}`);
-          if (!edu.startDate) errors.push(`Start date is required for education #${index + 1}`);
-          if (!edu.currentlyStudying && !edu.endDate) errors.push(`End date is required for education #${index + 1}`);
+          if (!edu.startDate || !edu.startDate.year || !edu.startDate.month) 
+            errors.push(`Start date is required for education #${index + 1}`);
+          if (!edu.currentlyStudying && (!edu.endDate || !edu.endDate.year || !edu.endDate.month))
+            errors.push(`End date is required for education #${index + 1}`);
         });
       }
       break;
@@ -85,12 +74,17 @@ export function validateStep(
       // Certificate validation
       const certificates = formData.certificates || [];
       
-      // If there are certificates, validate each one
+      // Certificates are optional, but if added they should have required fields
       if (certificates.length > 0) {
         certificates.forEach((cert, index) => {
           if (!cert.title) errors.push(`Title is required for certificate #${index + 1}`);
+          if (!cert.description) errors.push(`Description is required for certificate #${index + 1}`);
           if (!cert.startDate) errors.push(`Issue date is required for certificate #${index + 1}`);
-          // We don't require fileUrl/externalUrl as both are optional
+          
+          // Require either a file upload or external URL
+          if (!cert.fileUrl && !cert.externalUrl) {
+            errors.push(`Either upload a file or provide a URL for certificate #${index + 1}`);
+          }
         });
       }
       break;

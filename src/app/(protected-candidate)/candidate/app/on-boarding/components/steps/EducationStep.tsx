@@ -29,14 +29,7 @@ export default function EducationStep({
   const [error, setError] = useState<string | null>(null);
 
   const educations = watch('education') || [];
-  
-  // Updated validation to use the actual degree name instead of ID
-  const hasHighSchool = educations.some(edu => {
-    const degree = allDegrees.find(d => d.id === edu.degree);
-    return degree && degree.name.toLowerCase().includes('high school');
-  });
 
-  // Generate date options
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => (currentYear - i).toString());
   const months = [
@@ -49,7 +42,6 @@ export default function EducationStep({
   ];
   const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
 
-  // Fetch degrees and add default education if needed
   useEffect(() => {
     async function loadDegrees() {
       try {
@@ -58,37 +50,7 @@ export default function EducationStep({
         setDegrees(result.degrees);
         setAllDegrees(result.degrees);
         setError(null);
-        
-        // After degrees are loaded, check if we need to add default high school education
-        if (educations.length === 0) {
-          // Find the High School degree ID
-          const highSchoolDegree = result.degrees.find(d => 
-            d.name.toLowerCase().includes('high school')
-          );
-          
-          if (highSchoolDegree) {
-            const defaultEducation: Education = {
-              id: generateTempId(),
-              institution: '',
-              degree: highSchoolDegree.id, // Use the actual ID from database
-              startDate: {
-                year: (currentYear - 2).toString(), // Default to 2 years ago
-                month: '06', // June
-                day: '01',
-              },
-              endDate: {
-                year: currentYear.toString(),
-                month: '03', // March (typical graduation month)
-                day: '31',
-              },
-              currentlyStudying: false,
-            };
-            
-            setValue('education', [defaultEducation]);
-            dispatch(addEducation(defaultEducation));
-            onAddEducation();
-          }
-        }
+        // Removed automatic education form creation
       } catch (err) {
         setError("Failed to load degrees. Please try again.");
         console.error("Error fetching degrees:", err);
@@ -98,7 +60,7 @@ export default function EducationStep({
     }
 
     loadDegrees();
-  }, [dispatch, educations.length, currentYear, setValue, onAddEducation]);
+  }, [dispatch]);  // Removed dependencies related to education creation
 
   const generateTempId = () => {
     return `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -149,7 +111,6 @@ export default function EducationStep({
     setAllDegrees(newDegrees);
   };
 
-  // Get all selected degree IDs (filtering out empty strings)
   const selectedDegreeIds = educations
     .map(edu => edu.degree)
     .filter(id => id !== '');
@@ -158,20 +119,13 @@ export default function EducationStep({
     <div className="space-y-6">
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Education</h2>
-        <p className="text-gray-600">Add your educational background. 10+2 or 12th Standard is required.</p>
+        <p className="text-gray-600">Add your educational background.</p>
       </div>
 
       {error && (
         <Alert key="error-alert" variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4 mr-2" />
           {error}
-        </Alert>
-      )}
-
-      {!hasHighSchool && educations.length > 0 && (
-        <Alert key="highschool-alert" variant="destructive" className="mb-4 flex items-center">
-          <AlertCircle className="w-5 mr-4" />
-          <span>10+2 or 12th Standard education is required.</span>
         </Alert>
       )}
 
@@ -190,9 +144,8 @@ export default function EducationStep({
       ) : (
         <div className="space-y-6">
           {educations.map((education, index) => {
-            // Create array of degree IDs to exclude (all selected IDs except current one)
             const excludeIds = selectedDegreeIds.filter(id => id !== education.degree);
-            
+
             return (
               <EducationForm
                 key={education.id}
@@ -221,7 +174,7 @@ export default function EducationStep({
                 degrees={allDegrees}
                 isLoadingDegrees={isLoading}
                 onUpdateDegrees={handleUpdateDegrees}
-                excludeDegreeIds={excludeIds} // Pass the filtered IDs to exclude
+                excludeDegreeIds={excludeIds}
               />
             );
           })}
