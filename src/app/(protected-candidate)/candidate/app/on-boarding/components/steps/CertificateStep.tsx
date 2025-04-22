@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { Alert } from '@/components/ui/alert';
-import { CertificatesStepProps, Certificate, CertificateFieldErrors } from '../types';
+import { Certificate } from "@/types/candidate_onboarding";
+import { CertificatesStepProps, CertificateFieldErrors } from '../types';
 import CertificateForm from './CertificateForm';
 import { addCertificate, removeCertificate, updateCertificate } from '@/redux/slices/candidateOnboardingSlice';
 

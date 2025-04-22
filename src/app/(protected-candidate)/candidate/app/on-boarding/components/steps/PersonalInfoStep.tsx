@@ -8,8 +8,8 @@ import PaginatedSkillsSelector from '@/components/SkillsSelector/PaginatedSkills
 import DateSelector from '@/components/DateSelector/DateSelector';
 import { Label } from '@/components/ui/label';
 import { PersonalInfoStepProps } from '../types';
+import { SkillWithLevel } from '@/types/shared';
 import { 
-  SkillWithId,
   setFirstName,
   setLastName,
   setDescription,
@@ -134,7 +134,7 @@ export default function PersonalInfoStep({
         </label>
         <PaginatedSkillsSelector
           selectedSkills={selectedSkills}
-          onSkillSelect={(skill: SkillWithId) => {
+          onSkillSelect={(skill: SkillWithLevel) => {
             const updatedSkills = [...selectedSkills, skill];
             setValue('skills', updatedSkills);
             dispatch(addSkill(skill));
@@ -146,10 +146,10 @@ export default function PersonalInfoStep({
           }}
           onSkillLevelChange={(skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => {
             const updatedSkills = selectedSkills.map(skill => 
-              skill.id === skillId ? { ...skill, skill_level: level } : skill
+              skill.id === skillId ? { ...skill, level } : skill
             );
             setValue('skills', updatedSkills);
-            dispatch(updateSkillLevel({ skillId, skill_level: level }));
+            dispatch(updateSkillLevel({ skillId, level }));
           }}
           error={errors.skills?.message}
         />

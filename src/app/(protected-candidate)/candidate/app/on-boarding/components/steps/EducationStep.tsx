@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { Alert } from '@/components/ui/alert';
-import { EducationStepProps, Education, EducationFieldErrors } from '../types';
+import { Education } from "@/types/candidate_onboarding";
+import { EducationStepProps, EducationFieldErrors } from '../types';
 import EducationForm from './EducationForm';
 import { addEducation, removeEducation, updateEducation } from '@/redux/slices/candidateOnboardingSlice';
 import { fetchDegreesPaginated } from '@/redux/masters/degreeMaster';
@@ -20,7 +21,7 @@ export default function EducationStep({
   onAddEducation,
   onRemoveEducation,
   onUpdateEducation,
-  maxEducationEntries,
+  maxEducationEntries = 5,
 }: EducationStepProps) {
   const dispatch = useAppDispatch();
   const [degrees, setDegrees] = useState<{ id: string, name: string }[]>([]);
@@ -60,7 +61,7 @@ export default function EducationStep({
     }
 
     loadDegrees();
-  }, [dispatch]);  // Removed dependencies related to education creation
+  }, [dispatch]);
 
   const generateTempId = () => {
     return `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;

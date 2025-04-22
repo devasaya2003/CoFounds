@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { Alert } from '@/components/ui/alert';
-import { ProofOfWork } from '@/types/candidate_onboarding';
-import { ProofOfWorkStepProps, ProofOfWorkFieldErrors } from '../types';
-import ProofOfWorkForm from './ProofOfWorkForm';
-import { addProofOfWork, removeProofOfWork, updateProofOfWork } from '@/redux/slices/candidateOnboardingSlice';
+import { Project } from "@/types/candidate_onboarding";
+import { ProjectStepProps } from '../types';
+import ProjectForm from './ProjectForm';
+import { addProject, removeProject, updateProject } from '@/redux/slices/candidateOnboardingSlice';
 
-export default function ProofOfWorkStep({
+export default function ProjectStep({
   formState,
   errors,
   register,
@@ -17,14 +17,14 @@ export default function ProofOfWorkStep({
   setValue,
   onNextStep,
   onPreviousStep,
-  onAddProofOfWork,
-  onRemoveProofOfWork,
-  onUpdateProofOfWork,
-}: ProofOfWorkStepProps) {
+  onAddProject,
+  onRemoveProject,
+  onUpdateProject,
+}: ProjectStepProps) {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
 
-  const proofsOfWork = watch('proofsOfWork') || [];
+  const projects = watch('projects') || [];
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => (currentYear - i).toString());
@@ -42,11 +42,11 @@ export default function ProofOfWorkStep({
     return `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   };
 
-  const handleAddProofOfWork = () => {
-    const newProofOfWork: ProofOfWork = {
+  const handleAddProject = () => {
+    const newProject: Project = {
       id: generateTempId(),
       title: '',
-      company_name: '',
+      projectLink: '',
       description: '',
       startDate: {
         year: currentYear.toString(),
@@ -58,46 +58,36 @@ export default function ProofOfWorkStep({
         month: '01',
         day: '01',
       },
-      isCommunityWork: false,
-      currentlyWorking: false,
+      currentlyBuilding: false,
     };
 
-    setValue('proofsOfWork', [...proofsOfWork, newProofOfWork]);
-    dispatch(addProofOfWork(newProofOfWork));
-    onAddProofOfWork();
+    setValue('projects', [...projects, newProject]);
+    dispatch(addProject(newProject));
+    onAddProject();
   };
 
-  const handleRemoveProofOfWork = (id: string) => {
-    const updatedProofs = proofsOfWork.filter(pow => pow.id !== id);
-    setValue('proofsOfWork', updatedProofs);
-    dispatch(removeProofOfWork(id));
-    onRemoveProofOfWork(id);
+  const handleRemoveProject = (id: string) => {
+    const updatedProjects = projects.filter(proj => proj.id !== id);
+    setValue('projects', updatedProjects);
+    dispatch(removeProject(id));
+    onRemoveProject(id);
   };
 
-  const handleUpdateProofOfWork = (id: string, updates: Partial<ProofOfWork>) => {
-    // Handle special case for community work
-    if (updates.isCommunityWork !== undefined) {
-      if (updates.isCommunityWork) {
-        updates.company_name = 'COF_PROOF_COMMUNITY';
-      } else if (updates.company_name === 'COF_PROOF_COMMUNITY') {
-        updates.company_name = '';
-      }
-    }
-
-    const updatedProofs = proofsOfWork.map(pow =>
-      pow.id === id ? { ...pow, ...updates } : pow
+  const handleUpdateProject = (id: string, updates: Partial<Project>) => {
+    const updatedProjects = projects.map(proj =>
+      proj.id === id ? { ...proj, ...updates } : proj
     );
     
-    setValue('proofsOfWork', updatedProofs);
-    dispatch(updateProofOfWork({ id, updates }));
-    onUpdateProofOfWork(id, updates);
+    setValue('projects', updatedProjects);
+    dispatch(updateProject({ id, updates }));
+    onUpdateProject(id, updates);
   };
 
   return (
     <div className="space-y-6">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Proof of Work</h2>
-        <p className="text-gray-600">Add details about your work experience, projects, or community contributions.</p>
+        <h2 className="text-lg font-semibold mb-2">Projects</h2>
+        <p className="text-gray-600">Add details about your personal or professional projects.</p>
       </div>
 
       {error && (
@@ -107,45 +97,45 @@ export default function ProofOfWorkStep({
         </Alert>
       )}
 
-      {proofsOfWork.length === 0 ? (
+      {projects.length === 0 ? (
         <div className="text-center py-8 bg-gray-50 rounded-md border border-dashed border-gray-300">
-          <p className="text-gray-500 mb-4">No proof of work entries yet.</p>
+          <p className="text-gray-500 mb-4">No projects added yet.</p>
           <button
             type="button"
-            onClick={handleAddProofOfWork}
+            onClick={handleAddProject}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto"
           >
             <Plus className="h-4 w-4 mr-1" />
-            Add Work Experience
+            Add Project
           </button>
         </div>
       ) : (
         <div className="space-y-6">
-          {proofsOfWork.map((proofOfWork, index) => (
-            <ProofOfWorkForm
-              key={proofOfWork.id}
-              proofOfWork={proofOfWork}
+          {projects.map((project, index) => (
+            <ProjectForm
+              key={project.id}
+              project={project}
               index={index}
               register={register}
               watch={watch}
               setValue={setValue}
-              onRemove={() => handleRemoveProofOfWork(proofOfWork.id)}
-              onUpdate={(updates) => handleUpdateProofOfWork(proofOfWork.id, updates)}
+              onRemove={() => handleRemoveProject(project.id)}
+              onUpdate={(updates) => handleUpdateProject(project.id, updates)}
               years={years}
               months={months}
               days={days}
-              errors={errors.proofsOfWork?.[index] as ProofOfWorkFieldErrors} // Type assertion with specific type
+              errors={errors.projects?.[index]}
             />
           ))}
 
           <div className="flex justify-center">
             <button
               type="button"
-              onClick={handleAddProofOfWork}
+              onClick={handleAddProject}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
             >
               <Plus className="h-4 w-4 mr-1" />
-              Add Another Entry
+              Add Another Project
             </button>
           </div>
         </div>
@@ -166,7 +156,7 @@ export default function ProofOfWorkStep({
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
           onClick={onNextStep}
         >
-          Next Step
+          Submit
           <ChevronRight className="ml-1 h-4 w-4" />
         </button>
       </div>

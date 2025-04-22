@@ -1,20 +1,23 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { 
-  OnboardingFormFields, 
+import { OnboardingFormFields, } from './types';
+import {
+  SkillWithId,
+  Education, 
+  Certificate, 
   ProofOfWork,
-  Education,
-  Certificate,
-} from './types'; // Import all the types you need
-
+  Project,
+} from "@/types/candidate_onboarding";
 import UsernameStep from './steps/UsernameStep';
 import PersonalInfoStep from './steps/PersonalInfoStep';
 import EducationStep from './steps/EducationStep';
 import CertificateStep from './steps/CertificateStep';
 import ProofOfWorkStep from './steps/ProofOfWorkStep';
-import { SkillWithId } from '@/redux/slices/candidateOnboardingSlice';
+import ProjectStep from './steps/ProjectStep'; // Add this import
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useAppSelector } from '@/redux/hooks';
 
 // Use the imported types in your state interface
 interface CandidateOnboardingState {
@@ -26,6 +29,7 @@ interface CandidateOnboardingState {
   education: Education[];
   certificates: Certificate[];
   proofsOfWork: ProofOfWork[];
+  projects: Project[]; // Add projects to state
   currentStep: number;
   steps: string[];
   status: 'idle' | 'loading' | 'submitting' | 'success' | 'error';
@@ -49,6 +53,15 @@ export default function StepContainer({
   onPreviousStep
 }: StepContainerProps) {
   const { register, watch, setValue, formState: { errors } } = form;
+  const [showSummary, setShowSummary] = useState(false);
+  const candidateState = useAppSelector(state => state.candidateOnboarding);
+  
+  const handleSubmit = () => {
+    // Show summary dialog
+    setShowSummary(true);
+    // Also proceed to next step if needed
+    onValidateAndProceed();
+  };
 
   const renderStep = (): ReactNode => {
     switch (currentStep) {
@@ -133,10 +146,45 @@ export default function StepContainer({
             onUpdateProofOfWork={() => {}}
           />
         );
+      case 6:
+        return (
+          <ProjectStep
+            formState={{
+              projects: onboarding.projects || [],
+            }}
+            errors={errors}
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            onNextStep={handleSubmit}
+            onPreviousStep={onPreviousStep}
+            onAddProject={() => {}}
+            onRemoveProject={() => {}}
+            onUpdateProject={() => {}}
+          />
+        );
       default:
         return <div>Step not found</div>;
     }
   };
 
-  return <>{renderStep()}</>;
+  return (
+    <>
+      {renderStep()}
+      
+      {/* Summary Dialog */}
+      <Dialog open={showSummary} onOpenChange={setShowSummary}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Your Onboarding Data</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <pre className="bg-gray-100 p-4 rounded-md overflow-auto max-h-[400px] text-xs">
+              {JSON.stringify(candidateState, null, 2)}
+            </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }

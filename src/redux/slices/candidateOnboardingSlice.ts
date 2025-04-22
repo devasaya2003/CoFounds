@@ -1,125 +1,30 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  SkillWithId,
+  Education,
+  Certificate,
+  ProofOfWork,
+  Project,
+  DateField
+} from '@/types/candidate_onboarding';
 
-// Skill interface
-export interface SkillWithId {
-  id: string;
-  name: string;
-  skill_level: 'beginner' | 'intermediate' | 'advanced';
-}
-
-// Education interface
-export interface Education {
-  id: string;
-  institution: string;
-  startDate: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  endDate: {
-    year: string;
-    month: string;
-    day: string;
-  } | null;
-  currentlyStudying: boolean;
-  degree: string;
-}
-
-// Certificate interface
-export interface Certificate {
-  id: string;
-  title: string;
-  description: string;
-  startDate: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  endDate: {
-    year: string;
-    month: string;
-    day: string;
-  } | null;
-  fileUrl?: string; // Making this optional with ? to match the component interface
-  externalUrl?: string; // Making this optional with ?
-}
-
-// Proof of Work interface
-export interface ProofOfWork {
-  id: string;
-  title: string;
-  company_name: string; // Changed from companyName to match component expectations
-  description: string;
-  startDate: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  endDate: {
-    year: string;
-    month: string;
-    day: string;
-  } | null;
-  currentlyWorking: boolean;
-  isCommunityWork: boolean; // Changed from isCommunityProof to match component expectations
-}
-
-// Project interface
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  projectUrl: string;
-  startDate: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  endDate: {
-    year: string;
-    month: string;
-    day: string;
-  } | null;
-  currentlyBuilding: boolean;
-}
-
-// Date type for reusability
-export interface DateField {
-  year: string;
-  month: string;
-  day: string;
-}
-
-// Define the state structure
+// State interface
 interface CandidateOnboardingState {
-  // Step management
+  userName: string;
+  firstName: string;
+  lastName: string;
+  description: string;
+  skills: SkillWithId[];
+  education: Education[];
+  certificates: Certificate[];
+  proofsOfWork: ProofOfWork[];
+  projects: Project[];
   currentStep: number;
   steps: string[];
   isDirty: boolean;
   status: 'idle' | 'submitting' | 'success' | 'error';
   error: string | null;
-  
-  // Step 1: Username
-  userName: string;
-  
-  // Step 2: Personal Info
-  firstName: string;
-  lastName: string;
-  dateOfBirth: DateField | null; // Add this line
-  description: string;
-  skills: SkillWithId[];
-  
-  // Step 3: Education
-  education: Education[];
-  
-  // Step 4: Certificates
-  certificates: Certificate[];
-  
-  // Step 5: Proof of Work
-  proofsOfWork: ProofOfWork[];
-  
-  // Step 6: Projects
-  projects: Project[];
+  dateOfBirth: DateField | null;
 }
 
 const initialState: CandidateOnboardingState = {
@@ -133,7 +38,7 @@ const initialState: CandidateOnboardingState = {
   
   firstName: '',
   lastName: '',
-  dateOfBirth: null, // Add this line
+  dateOfBirth: null,
   description: '',
   skills: [],
   
@@ -141,7 +46,7 @@ const initialState: CandidateOnboardingState = {
   
   certificates: [],
   
-  proofsOfWork: [] as ProofOfWork[], // Explicitly typed
+  proofsOfWork: [] as ProofOfWork[],
   
   projects: []
 };
@@ -192,12 +97,12 @@ export const candidateOnboardingSlice = createSlice({
       state.skills = state.skills.filter(skill => skill.id !== action.payload);
       state.isDirty = true;
     },
-    updateSkillLevel: (state, action: PayloadAction<{ skillId: string, skill_level: 'beginner' | 'intermediate' | 'advanced' }>) => {
-      const { skillId, skill_level } = action.payload;
-      const skillToUpdate = state.skills.find(skill => skill.id === skillId);
-      if (skillToUpdate) {
-        skillToUpdate.skill_level = skill_level;
-        state.isDirty = true;
+    updateSkillLevel: (state, action: PayloadAction<{ skillId: string, level: string }>) => {
+      const { skillId, level } = action.payload;
+      const skillIndex = state.skills.findIndex(s => s.id === skillId);
+      
+      if (skillIndex !== -1) {
+        state.skills[skillIndex].level = level as 'beginner' | 'intermediate' | 'advanced';
       }
     },
     
@@ -269,6 +174,9 @@ export const candidateOnboardingSlice = createSlice({
     
     // Step 6 actions
     addProject: (state, action: PayloadAction<Project>) => {
+      if (!state.projects) {
+        state.projects = [];
+      }
       state.projects.push(action.payload);
       state.isDirty = true;
     },
@@ -298,7 +206,7 @@ export const {
   setUserName,
   setFirstName,
   setLastName,
-  setDateOfBirth, // Export the new action
+  setDateOfBirth,
   setDescription,
   addSkill,
   removeSkill,

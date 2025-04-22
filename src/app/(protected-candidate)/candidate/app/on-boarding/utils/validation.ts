@@ -117,6 +117,28 @@ export function validateStep(
         });
       }
       break;
+    case 6:
+      // Project validation
+      const projects = formData.projects || [];
+      
+      // Projects are optional
+      if (projects.length > 0) {
+        // Validate each project
+        projects.forEach((project, index) => {
+          if (!project.title) errors.push(`Title is required for project #${index + 1}`);
+          if (!project.description) errors.push(`Description is required for project #${index + 1}`);
+          
+          // Validate dates
+          if (!project.startDate || !project.startDate.year || !project.startDate.month) {
+            errors.push(`Start date is required for project #${index + 1}`);
+          }
+          
+          if (!project.currentlyBuilding && (!project.endDate || !project.endDate.year || !project.endDate.month)) {
+            errors.push(`End date is required for project #${index + 1}`);
+          }
+        });
+      }
+      break;
   }
   
   return {

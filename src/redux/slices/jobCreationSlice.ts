@@ -1,11 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-// Define interface for skills with ID
-export interface SkillWithId {
-  id: string;
-  name: string;
-  skill_level: 'beginner' | 'intermediate' | 'advanced';
-}
+import { Skill, SkillWithLevel } from '@/types/shared';
+export interface SkillWithId extends SkillWithLevel {}
 
 export interface JobCreationState {
   title: string;
@@ -122,7 +117,7 @@ const jobCreationSlice = createSlice({
       const { skillId, skill_level } = action.payload;
       const skillIndex = state.required_skills.findIndex(skill => skill.id === skillId);
       if (skillIndex !== -1) {
-        state.required_skills[skillIndex].skill_level = skill_level;
+        state.required_skills[skillIndex].level = skill_level;
         state.isDirty = true;
       }
     },

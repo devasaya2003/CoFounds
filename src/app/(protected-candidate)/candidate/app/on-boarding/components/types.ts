@@ -1,115 +1,12 @@
 import { FieldErrors, UseFormRegister, UseFormWatch, UseFormSetValue, UseFormGetValues, FieldError } from "react-hook-form";
-import { SkillWithId, Certificate as ReduxCertificate, ProofOfWork as ReduxProofOfWork, Project, DateField } from "@/redux/slices/candidateOnboardingSlice";
-
-// Add export keyword to the Education interface
-export interface Education {
-  id: string;
-  institution: string;
-  startDate: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  endDate: {
-    year: string;
-    month: string;
-    day: string;
-  } | null;
-  currentlyStudying: boolean;
-  degree: string;
-}
-
-// Add this type for education field errors
-export type EducationFieldErrors = {
-  institution?: FieldError;
-  degree?: FieldError;
-  startDate?: {
-    year?: FieldError;
-    month?: FieldError;
-    day?: FieldError;
-  };
-  endDate?: {
-    year?: FieldError;
-    month?: FieldError;
-    day?: FieldError;
-  };
-  currentlyStudying?: FieldError;
-  [key: string]: FieldError | Record<string, FieldError> | undefined;
-};
-
-// Keep your locally defined Certificate interface
-export interface Certificate {
-  id: string;
-  title: string;
-  description: string;
-  startDate: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  endDate: {
-    year: string;
-    month: string;
-    day: string;
-  } | null;
-  fileUrl?: string;
-  externalUrl?: string;
-}
-
-// Add CertificateFieldErrors interface
-export interface CertificateFieldErrors {
-  title?: { message: string };
-  description?: { message: string };
-  startDate?: { 
-    year?: { message: string };
-    month?: { message: string };
-    day?: { message: string };
-  };
-  endDate?: { 
-    year?: { message: string };
-    month?: { message: string };
-    day?: { message: string };
-  };
-  fileUrl?: { message: string };
-  externalUrl?: { message: string };
-}
-
-// Update the ProofOfWork interface to include all required properties
-export interface ProofOfWork {
-  id: string;
-  title: string;
-  company_name: string; // Using consistent naming company_name
-  description: string;
-  startDate: {
-    year: string;
-    month: string;
-    day: string;
-  };
-  endDate: {
-    year: string;
-    month: string;
-    day: string;
-  } | null;
-  isCommunityWork: boolean; // Consistent naming
-  currentlyWorking: boolean;
-}
-
-// Add ProofOfWorkFieldErrors interface
-export interface ProofOfWorkFieldErrors {
-  title?: { message: string };
-  company_name?: { message: string };
-  description?: { message: string };
-  startDate?: { 
-    year?: { message: string };
-    month?: { message: string };
-    day?: { message: string };
-  };
-  endDate?: { 
-    year?: { message: string };
-    month?: { message: string };
-    day?: { message: string };
-  };
-}
+import {
+  SkillWithId,
+  Education, 
+  Certificate, 
+  ProofOfWork,
+  Project,
+  DateField
+} from "@/types/candidate_onboarding";
 
 // Form fields interface
 export interface OnboardingFormFields {
@@ -136,109 +33,77 @@ export interface OnboardingFormFields {
   projects: Project[];
 }
 
-// Base props for all step components
-export interface StepComponentProps {
+// Base props interface for all step components
+export interface BaseStepProps {
   errors: FieldErrors<OnboardingFormFields>;
   register: UseFormRegister<OnboardingFormFields>;
   watch: UseFormWatch<OnboardingFormFields>;
   setValue: UseFormSetValue<OnboardingFormFields>;
-  getValues?: UseFormGetValues<OnboardingFormFields>;
-}
-
-// Step 1: Username props
-export interface UsernameStepProps extends StepComponentProps {
-  formState: { userName: string };
   onNextStep: () => void;
+  onPreviousStep?: () => void;
 }
 
-// Step 2: Personal Info props
-export interface PersonalInfoStepProps {
+// Username step props (Step 1)
+export interface UsernameStepProps extends BaseStepProps {
+  formState: {
+    userName: string;
+  };
+}
+
+// Personal info step props (Step 2)
+export interface PersonalInfoStepProps extends BaseStepProps {
   formState: {
     firstName: string;
     lastName: string;
-    dateOfBirth?: DateField;
     description: string;
     skills: SkillWithId[];
+    dateOfBirth?: DateField; // Add dateOfBirth property
   };
-  errors: FieldErrors<OnboardingFormFields>;
-  register: UseFormRegister<OnboardingFormFields>;
-  watch: UseFormWatch<OnboardingFormFields>;
-  setValue: UseFormSetValue<OnboardingFormFields>;
-  getValues?: UseFormGetValues<OnboardingFormFields>;
-  onNextStep: () => void;
-  onPreviousStep: () => void;
 }
 
-// Step 3: Education props
-export interface EducationStepProps extends StepComponentProps {
+// Education step props (Step 3)
+export interface EducationStepProps extends BaseStepProps {
   formState: {
     education: Education[];
   };
-  onNextStep: () => void;
-  onPreviousStep: () => void;
   onAddEducation: () => void;
   onRemoveEducation: (id: string) => void;
   onUpdateEducation: (id: string, updates: Partial<Education>) => void;
-  maxEducationEntries: number;
+  maxEducationEntries?: number;
 }
 
-// Education form field for individual education entry
-export interface EducationFormProps {
-  education: Education;
-  index: number;
-  register: UseFormRegister<OnboardingFormFields>;
-  watch: UseFormWatch<OnboardingFormFields>;
-  setValue: UseFormSetValue<OnboardingFormFields>;
-  onRemove: () => void;
-  onUpdate: (updates: Partial<Education>) => void;
-  years: string[];
-  months: { value: string; label: string }[];
-  days: string[];
-  errors?: Record<string, string>;
-  currentlyStudying: boolean;
-  onCurrentlyStudyingChange: (checked: boolean) => void;
-}
-
-// Degree options
-export type DegreeOption = {
-  value: string;
-  label: string;
-};
-
-export const DegreeOptions: DegreeOption[] = [
-  { value: 'high_school', label: 'High School (10+2)' },
-  { value: 'associate', label: 'Associate Degree' },
-  { value: 'bachelor', label: 'Bachelor\'s Degree' },
-  { value: 'master', label: 'Master\'s Degree' },
-  { value: 'doctorate', label: 'Doctorate or PhD' },
-  { value: 'diploma', label: 'Diploma' },
-  { value: 'certification', label: 'Professional Certification' },
-  { value: 'other', label: 'Other' }
-];
-
-// Step 4: Certificates props
-export interface CertificatesStepProps extends StepComponentProps {
+// Certificate step props (Step 4)
+export interface CertificatesStepProps extends BaseStepProps {
   formState: {
     certificates: Certificate[];
   };
-  onNextStep: () => void;
-  onPreviousStep: () => void;
   onAddCertificate: () => void;
   onRemoveCertificate: (id: string) => void;
   onUpdateCertificate: (id: string, updates: Partial<Certificate>) => void;
-  maxCertificateEntries: number;
+  maxCertificateEntries?: number;
 }
 
-export interface FileUploadProps {
-  onFileChange: (file: File | null) => void;
-  onUrlChange: (url: string) => void;
-  currentFileUrl: string | null;
-  currentExternalUrl: string | null;
-  error?: string;
-  accept: string; // Only .pdf for certificates
+// Proof of work step props (Step 5)
+export interface ProofOfWorkStepProps extends BaseStepProps {
+  formState: {
+    proofsOfWork: ProofOfWork[];
+  };
+  onAddProofOfWork: () => void;
+  onRemoveProofOfWork: (id: string) => void;
+  onUpdateProofOfWork: (id: string, updates: Partial<ProofOfWork>) => void;
 }
 
-// Certificate form field for individual certificate entry
+// Project step props (Step 6)
+export interface ProjectStepProps extends BaseStepProps {
+  formState: {
+    projects: Project[];
+  };
+  onAddProject: () => void;
+  onRemoveProject: (id: string) => void;
+  onUpdateProject: (id: string, updates: Partial<Project>) => void;
+}
+
+// Form component props
 export interface CertificateFormProps {
   certificate: Certificate;
   index: number;
@@ -250,25 +115,23 @@ export interface CertificateFormProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
-  errors?: Record<string, string>;
+  errors?: CertificateFieldErrors;
 }
 
-// Step 5: Proof of Work props
-export interface ProofOfWorkStepProps extends StepComponentProps {
-  formState: {
-    proofsOfWork: ProofOfWork[];
-  };
+export interface EducationFormProps {
+  education: Education;
+  index: number;
   register: UseFormRegister<OnboardingFormFields>;
   watch: UseFormWatch<OnboardingFormFields>;
   setValue: UseFormSetValue<OnboardingFormFields>;
-  onNextStep: () => void;
-  onPreviousStep: () => void;
-  onAddProofOfWork: () => void;
-  onRemoveProofOfWork: (id: string) => void;
-  onUpdateProofOfWork: (id: string, updates: Partial<ProofOfWork>) => void;
+  onRemove: () => void;
+  onUpdate: (updates: Partial<Education>) => void;
+  years: string[];
+  months: { value: string; label: string }[];
+  days: string[];
+  errors?: EducationFieldErrors;
 }
 
-// Proof of Work form field for individual proof entry
 export interface ProofOfWorkFormProps {
   proofOfWork: ProofOfWork;
   index: number;
@@ -280,26 +143,9 @@ export interface ProofOfWorkFormProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
-  errors?: Record<string, string>;
-  isCommunityProof: boolean;
-  onCommunityProofChange: (checked: boolean) => void;
-  currentlyWorking: boolean;
-  onCurrentlyWorkingChange: (checked: boolean) => void;
+  errors?: ProofOfWorkFieldErrors;
 }
 
-// Step 6: Projects props
-export interface ProjectsStepProps extends StepComponentProps {
-  formState: {
-    projects: Project[];
-  };
-  onNextStep: () => void;
-  onPreviousStep: () => void;
-  onAddProject: () => void;
-  onRemoveProject: (id: string) => void;
-  onUpdateProject: (id: string, updates: Partial<Project>) => void;
-}
-
-// Project form field for individual project entry
 export interface ProjectFormProps {
   project: Project;
   index: number;
@@ -311,63 +157,73 @@ export interface ProjectFormProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
-  errors?: Record<string, string>;
-  currentlyBuilding: boolean;
-  onCurrentlyBuildingChange: (checked: boolean) => void;
+  errors?: ProjectFieldErrors;
 }
 
-// Reusable date selection component props
-export interface DateSelectorProps {
-  years: string[];
-  months: { value: string; label: string }[];
-  days: string[];
-  selectedYear: string;
-  selectedMonth: string;
-  selectedDay: string;
-  onYearChange: (year: string) => void;
-  onMonthChange: (month: string) => void;
-  onDayChange: (day: string) => void;
-  label?: string;
-  disabled?: boolean;
-  required?: boolean;
-  error?: string;
-}
-
-// Skill level options
-export type SkillLevelOption = {
-  value: 'beginner' | 'intermediate' | 'advanced';
-  label: string;
+// Field error types remain the same
+export type EducationFieldErrors = {
+  institution?: FieldError;
+  degree?: FieldError;
+  startDate?: {
+    year?: FieldError;
+    month?: FieldError;
+    day?: FieldError;
+  };
+  endDate?: {
+    year?: FieldError;
+    month?: FieldError;
+    day?: FieldError;
+  };
+  currentlyStudying?: FieldError;
+  [key: string]: FieldError | Record<string, FieldError> | undefined;
 };
 
-export const SkillLevelOptions: SkillLevelOption[] = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' }
-];
-
-// Helper types for file handling
-export type FileUploadResult = {
-  fileUrl: string | null;
-  error?: string;
-};
-
-// Helper types for validation
-export interface ValidationErrors {
-  [key: string]: string;
+export interface CertificateFieldErrors {
+  title?: { message: string };
+  description?: { message: string };
+  startDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
+  endDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
+  fileUrl?: { message: string };
+  externalUrl?: { message: string };
 }
 
-export interface ValidationResult {
-  isValid: boolean;
-  errors: ValidationErrors;
+export interface ProofOfWorkFieldErrors {
+  title?: { message: string };
+  company_name?: { message: string };
+  description?: { message: string };
+  startDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
+  endDate?: { 
+    year?: { message: string };
+    month?: { message: string };
+    day?: { message: string };
+  };
 }
 
-// Helper types for step navigation
-export interface StepNavigationProps {
-  onPrevious?: () => void;
-  onNext?: () => void;
-  showPrevious?: boolean;
-  showNext?: boolean;
-  isNextDisabled?: boolean;
-  isSubmitting?: boolean;
-  isLastStep?: boolean;
+export interface ProjectFieldErrors {
+  title?: FieldError;
+  projectLink?: FieldError;
+  description?: FieldError;
+  startDate?: { 
+    year?: FieldError;
+    month?: FieldError;
+    day?: FieldError;
+  };
+  endDate?: { 
+    year?: FieldError;
+    month?: FieldError;
+    day?: FieldError;
+  };
+  currentlyBuilding?: FieldError;
 }

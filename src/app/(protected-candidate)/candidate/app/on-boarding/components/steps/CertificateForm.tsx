@@ -3,7 +3,8 @@
 import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Certificate, CertificateFieldErrors } from '../types';
+import { Certificate } from "@/types/candidate_onboarding";
+import { CertificateFieldErrors } from '../types';
 import { UseFormRegister, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import { OnboardingFormFields } from '../types';
 import DateSelector from '@/components/DateSelector/DateSelector';
