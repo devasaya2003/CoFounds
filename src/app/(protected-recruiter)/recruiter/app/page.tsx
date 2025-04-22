@@ -22,7 +22,6 @@ export default function RecruiterDashboard() {
   
   const [initialized, setInitialized] = useState(false);
   
-  // Load jobs data when component mounts and company ID is available
   useEffect(() => {
     if (!initialized && companyId) {
       dispatch(fetchJobsByCompany());
@@ -30,18 +29,15 @@ export default function RecruiterDashboard() {
     }
   }, [dispatch, initialized, companyId]);
   
-  // Handle pagination
   const handlePageChange = (pageNumber: number) => {
     dispatch(setCurrentPage(pageNumber));
     dispatch(fetchJobsByCompany());
   };
   
-  // Handle search
   const handleSearch = (term: string) => {
     dispatch(setSearchTerm(term));
   };
   
-  // Handle retry on error
   const handleRetry = () => {
     dispatch(fetchJobsByCompany());
   };

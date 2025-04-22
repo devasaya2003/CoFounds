@@ -8,11 +8,11 @@ export interface JobCreationState {
   job_desc: string;
   assignment_link: string;
   required_skills: SkillWithId[];
-  last_date_to_apply: string; // ISO string
+  last_date_to_apply: string; 
   additional_questions: string[];
-  location: string; // Added new field
-  requested_by: string; // Added new field
-  package: number; // Added new field
+  location: string; 
+  requested_by: string; 
+  package: number; 
   status: 'idle' | 'submitting' | 'success' | 'error';
   currentStep: number;
   error: string | null;
@@ -25,12 +25,12 @@ const initialState: JobCreationState = {
   job_desc: '',
   assignment_link: '',
   required_skills: [],
-  // Set date to midnight (00:00:00.000Z)
+  
   last_date_to_apply: new Date().toISOString().split('T')[0] + 'T00:00:00.000Z',
   additional_questions: [],
-  location: '', // Default empty
-  requested_by: '', // Default empty
-  package: 0, // Default value
+  location: '', 
+  requested_by: '', 
+  package: 0, 
   status: 'idle',
   currentStep: 1,
   error: null,
@@ -41,7 +41,7 @@ const jobCreationSlice = createSlice({
   name: 'jobCreation',
   initialState,
   reducers: {
-    // Add new field setters
+    
     setLocation: (state, action: PayloadAction<string>) => {
       state.location = action.payload;
       state.isDirty = true;
@@ -57,7 +57,7 @@ const jobCreationSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Existing field setters
+    
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload;
       state.isDirty = true;
@@ -78,23 +78,22 @@ const jobCreationSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Updated date handling to ensure midnight time
+    
     setLastDateToApply: (state, action: PayloadAction<{
       year: string;
       month: string;
       day: string;
     }>) => {
       const { year, month, day } = action.payload;
-      // Create ISO string date with time set to midnight
+      
       const dateStr = `${year}-${month}-${day}T00:00:00.000Z`;
       state.last_date_to_apply = dateStr;
       state.isDirty = true;
     },
     
-    // Skills management updated for SkillWithId with skill level
     addSkill: (state, action: PayloadAction<SkillWithId>) => {
       const skill = action.payload;
-      // Check if skill already exists by ID
+      
       if (!state.required_skills.some(s => s.id === skill.id)) {
         state.required_skills.push(skill);
         state.isDirty = true;
@@ -102,14 +101,14 @@ const jobCreationSlice = createSlice({
     },
     
     removeSkill: (state, action: PayloadAction<string>) => {
-      // Now removing by ID instead of string value
+      
       state.required_skills = state.required_skills.filter(
         skill => skill.id !== action.payload
       );
       state.isDirty = true;
     },
     
-    // Add a new reducer to update skill level
+    
     updateSkillLevel: (state, action: PayloadAction<{
       skillId: string;
       skill_level: 'beginner' | 'intermediate' | 'advanced';
@@ -122,7 +121,7 @@ const jobCreationSlice = createSlice({
       }
     },
     
-    // Additional questions management remains the same
+    
     addQuestion: (state, action: PayloadAction<string>) => {
       state.additional_questions.push(action.payload);
       state.isDirty = true;
@@ -144,12 +143,12 @@ const jobCreationSlice = createSlice({
       }
     },
     
-    // Form navigation
+    
     setStep: (state, action: PayloadAction<number>) => {
       state.currentStep = action.payload;
     },
     
-    // Form status management
+    
     setStatus: (state, action: PayloadAction<{
       status: 'idle' | 'submitting' | 'success' | 'error';
       error?: string;
@@ -159,7 +158,7 @@ const jobCreationSlice = createSlice({
       state.error = error || null;
     },
     
-    // Reset form
+    
     resetForm: (state) => {
       return {
         ...initialState,

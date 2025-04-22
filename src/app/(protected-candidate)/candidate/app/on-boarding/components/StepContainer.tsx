@@ -15,11 +15,11 @@ import PersonalInfoStep from './steps/PersonalInfoStep';
 import EducationStep from './steps/EducationStep';
 import CertificateStep from './steps/CertificateStep';
 import ProofOfWorkStep from './steps/ProofOfWorkStep';
-import ProjectStep from './steps/ProjectStep'; // Add this import
+import ProjectStep from './steps/ProjectStep'; 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAppSelector } from '@/redux/hooks';
 
-// Use the imported types in your state interface
+
 interface CandidateOnboardingState {
   userName: string;
   firstName: string;
@@ -29,7 +29,7 @@ interface CandidateOnboardingState {
   education: Education[];
   certificates: Certificate[];
   proofsOfWork: ProofOfWork[];
-  projects: Project[]; // Add projects to state
+  projects: Project[]; 
   currentStep: number;
   steps: string[];
   status: 'idle' | 'loading' | 'submitting' | 'success' | 'error';
@@ -57,9 +57,9 @@ export default function StepContainer({
   const candidateState = useAppSelector(state => state.candidateOnboarding);
   
   const handleSubmit = () => {
-    // Show summary dialog
+    
     setShowSummary(true);
-    // Also proceed to next step if needed
+    
     onValidateAndProceed();
   };
 
@@ -133,7 +133,7 @@ export default function StepContainer({
         return (
           <ProofOfWorkStep
             formState={{
-              proofsOfWork: onboarding.proofsOfWork || [], // No need to transform if types are consistent
+              proofsOfWork: onboarding.proofsOfWork || [], 
             }}
             errors={errors}
             register={register}

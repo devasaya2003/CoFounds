@@ -32,10 +32,10 @@ export default function CreateJobPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   
-  // Get form data from Redux
+  
   const jobCreation = useAppSelector(state => state.jobCreation);
   
-  // Initialize date from ISO string with zero time
+  
   const lastDateObj = new Date(jobCreation.last_date_to_apply);
   const formInitialValues: JobFormFields = {
     title: jobCreation.title,
@@ -54,13 +54,13 @@ export default function CreateJobPage() {
     package: jobCreation.package
   };
   
-  // Form handling with React Hook Form
+  
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<JobFormFields>({
     defaultValues: formInitialValues,
     mode: 'onChange'
   });
 
-  // Create our own fields array with IDs for React keys
+  
   const [questionFields, setQuestionFields] = useState<QuestionFieldWithId[]>(
     jobCreation.additional_questions.map(q => ({
       id: crypto.randomUUID(),
@@ -77,7 +77,7 @@ export default function CreateJobPage() {
     );
   }, [jobCreation.additional_questions]);
   
-  // Register custom validation
+  
   useEffect(() => {
     register('required_skills', { 
       validate: value => (value && value.length > 0) || 'At least one skill is required' 
@@ -88,12 +88,12 @@ export default function CreateJobPage() {
     });
   }, [register]);
   
-  // Complete reset function - resets Redux and local state
+  
   const completeFormReset = () => {
-    // Reset Redux state
+    
     dispatch(resetForm());
     
-    // Reset React Hook Form
+    
     const emptyForm: JobFormFields = {
       title: '',
       job_code: '',
@@ -113,16 +113,16 @@ export default function CreateJobPage() {
     
     reset(emptyForm);
     
-    // Reset local state
+    
     setQuestionFields([]);
     setShowAlert(false);
     setShowSuccessAlert(false);
     dispatch(setStep(1));
   };
   
-  // Handle form submission
+  
   const onSubmit: SubmitHandler<JobFormFields> = (data) => {
-    // Update Redux state with form data
+    
     dispatch(setTitle(data.title));
     dispatch(setJobCode(data.job_code));
     dispatch(setJobDesc(data.job_desc));
@@ -132,33 +132,28 @@ export default function CreateJobPage() {
     dispatch(setRequestedBy(data.requested_by));
     dispatch(setPackage(data.package));
 
-    // Log data for debugging
-    console.log('Form data submitted:', data);
     
-    // Call the thunk to handle API requests
+    
+    
     dispatch(createJobWithSkillsAndQuestions())
       .unwrap()
       .then((result) => {
-        console.log('Job creation successful:', result);
-
         setShowSuccessAlert(true);
-
         completeFormReset();
         router.push('/recruiter/app');
       })
       .catch((error) => {
-        console.error('Job creation failed:', error);
         setAlertMessage("Failed to create job. Please try again.");
         setShowAlert(true);
       });
   };
   
-  // Step navigation validation - fixed to correctly validate
+  
   const validateAndGoToNextStep = () => {
     const formData = watch();
     const validationErrors = [];
     
-    // Check all required fields
+    
     if (!formData.title) validationErrors.push("Job title is required");
     if (!formData.job_code) validationErrors.push("Job code is required");
     if (!formData.job_desc) validationErrors.push("Job description is required");
@@ -168,13 +163,13 @@ export default function CreateJobPage() {
     if (!(formData.required_skills || []).length) validationErrors.push("At least one skill is required");
 
     if (validationErrors.length > 0) {
-      // Set appropriate error message
+      
       setAlertMessage(validationErrors.join(", "));
       setShowAlert(true);
       return false;
     }
     
-    // All validation passed, proceed to next step
+    
     dispatch(setStep(2));
     return true;
   };
@@ -217,7 +212,7 @@ export default function CreateJobPage() {
             register={register}
             watch={watch}
             setValue={setValue}
-            onNextStep={validateAndGoToNextStep} // Connect validation function
+            onNextStep={validateAndGoToNextStep} 
           />
         )}
         

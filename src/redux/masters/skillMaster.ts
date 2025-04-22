@@ -4,7 +4,7 @@ import { UpdateSkill } from "@/backend/interfaces/PUT/update_skill";
 import { UpdateBulkSkill } from "@/backend/interfaces/PUT/update_bulk_skill";
 import { CreateSkill } from "@/backend/interfaces/POST/create_skill";
 
-// Skill interfaces
+
 export interface Skill {
   id: string;
   name: string;
@@ -29,7 +29,7 @@ export interface SkillState {
   error: string | null;
 }
 
-// Response interfaces for different API calls
+
 interface GetAllSkillsResponse {
   [index: number]: Skill;
   length: number;
@@ -48,7 +48,7 @@ interface GetSkillsPaginatedResponse {
   };
 }
 
-// Initial state for skill master
+
 export const skillInitialState: SkillState = {
   allSkills: [],
   filteredSkills: [],
@@ -65,12 +65,12 @@ export const skillInitialState: SkillState = {
   error: null,
 };
 
-// Base URL helper
+
 const getBaseUrl = () => process.env.NEXT_PUBLIC_BASE_URL_API || "";
 
-// Async thunks for skill master
 
-// Fetch all skills
+
+
 export const fetchAllSkills = createAsyncThunk(
   "skill/fetchAllSkills",
   async (_, { rejectWithValue }) => {
@@ -84,7 +84,7 @@ export const fetchAllSkills = createAsyncThunk(
   }
 );
 
-// Fetch skill by ID
+
 export const fetchSkillById = createAsyncThunk(
   "skill/fetchSkillById",
   async (skillId: string, { rejectWithValue }) => {
@@ -98,7 +98,7 @@ export const fetchSkillById = createAsyncThunk(
   }
 );
 
-// Fetch skill by name
+
 export const fetchSkillByName = createAsyncThunk(
   "skill/fetchSkillByName",
   async (skillName: string, { rejectWithValue }) => {
@@ -114,7 +114,7 @@ export const fetchSkillByName = createAsyncThunk(
   }
 );
 
-// Fetch skills paginated
+
 export const fetchSkillsPaginated = createAsyncThunk(
   "skill/fetchSkillsPaginated",
   async (pageNo: number, { rejectWithValue }) => {
@@ -130,7 +130,7 @@ export const fetchSkillsPaginated = createAsyncThunk(
   }
 );
 
-// Update a single skill
+
 export const updateSkill = createAsyncThunk(
   "skill/updateSkill",
   async (
@@ -150,7 +150,7 @@ export const updateSkill = createAsyncThunk(
   }
 );
 
-// Bulk update skills
+
 export const bulkUpdateSkills = createAsyncThunk(
   "skill/bulkUpdateSkills",
   async (updates: UpdateBulkSkill[], { rejectWithValue }) => {
@@ -167,7 +167,7 @@ export const bulkUpdateSkills = createAsyncThunk(
   }
 );
 
-// Create a single skill
+
 export const createSkill = createAsyncThunk(
   "skill/createSkill",
   async (data: CreateSkill, { rejectWithValue }) => {
@@ -184,7 +184,7 @@ export const createSkill = createAsyncThunk(
   }
 );
 
-// Bulk create skills
+
 export const bulkCreateSkills = createAsyncThunk(
   "skill/bulkCreateSkills",
   async (skills: CreateSkill[], { rejectWithValue }) => {
@@ -201,7 +201,7 @@ export const bulkCreateSkills = createAsyncThunk(
   }
 );
 
-// Skill master reducers for use in the main slice
+
 export const skillMasterReducers = {
   filterSkillsByName: (state: SkillState, action: { payload: string }) => {
     const searchTerm = action.payload.toLowerCase();

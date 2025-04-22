@@ -22,13 +22,13 @@ interface EducationFormProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
-  errors?: EducationFieldErrors; // Use specific type instead of any
+  errors?: EducationFieldErrors; 
   currentlyStudying: boolean;
   onCurrentlyStudyingChange: (checked: boolean) => void;
   degrees: { id: string; name: string }[];
   isLoadingDegrees: boolean;
   onUpdateDegrees: (updatedDegrees: { id: string; name: string }[]) => void;
-  excludeDegreeIds?: string[]; // Add this new prop
+  excludeDegreeIds?: string[]; 
 }
 
 export default function EducationForm({
@@ -48,7 +48,7 @@ export default function EducationForm({
   degrees,
   isLoadingDegrees,
   onUpdateDegrees,
-  excludeDegreeIds = [], // Default to empty array
+  excludeDegreeIds = [], 
 }: EducationFormProps) {
   const handleInstitutionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onUpdate({ institution: e.target.value });
@@ -105,7 +105,7 @@ export default function EducationForm({
           error={errors?.degree?.message}
           isLoading={isLoadingDegrees}
           initialDegrees={degrees}
-          excludeDegreeIds={excludeDegreeIds} // Pass the excluded IDs
+          excludeDegreeIds={excludeDegreeIds} 
         />
       </div>
 

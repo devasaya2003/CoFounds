@@ -24,7 +24,7 @@ const skillSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // fetchAllSkills
+      
       .addCase(fetchAllSkills.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -40,7 +40,7 @@ const skillSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchSkillById
+      
       .addCase(fetchSkillById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -54,7 +54,7 @@ const skillSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchSkillByName
+      
       .addCase(fetchSkillByName.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -68,7 +68,7 @@ const skillSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchSkillsPaginated
+      
       .addCase(fetchSkillsPaginated.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -87,7 +87,7 @@ const skillSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // updateSkill
+      
       .addCase(updateSkill.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -95,7 +95,7 @@ const skillSlice = createSlice({
       .addCase(updateSkill.fulfilled, (state, action) => {
         state.isLoading = false;
 
-        // Update the skill in the allSkills list
+        
         const skillIndex = state.allSkills.findIndex(
           (skill) => skill.id === action.payload.id
         );
@@ -103,7 +103,7 @@ const skillSlice = createSlice({
           state.allSkills[skillIndex] = action.payload;
         }
 
-        // Update the skill in the filteredSkills list
+        
         const filteredIndex = state.filteredSkills.findIndex(
           (skill) => skill.id === action.payload.id
         );
@@ -111,7 +111,7 @@ const skillSlice = createSlice({
           state.filteredSkills[filteredIndex] = action.payload;
         }
 
-        // Update the selectedSkill if it's the one being updated
+        
         if (state.selectedSkill?.id === action.payload.id) {
           state.selectedSkill = action.payload;
         }
@@ -121,7 +121,7 @@ const skillSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // bulkUpdateSkills
+      
       .addCase(bulkUpdateSkills.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -129,15 +129,15 @@ const skillSlice = createSlice({
       .addCase(bulkUpdateSkills.fulfilled, (state, action) => {
         state.isLoading = false;
 
-        // After a bulk update, we should refresh the skills list
-        // This can be handled by dispatching fetchAllSkills after the bulk update
+        
+        
       })
       .addCase(bulkUpdateSkills.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })
 
-      // createSkill
+      
       .addCase(createSkill.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -145,7 +145,7 @@ const skillSlice = createSlice({
       .addCase(createSkill.fulfilled, (state, action) => {
         state.isLoading = false;
 
-        // Add the new skill to the allSkills and filteredSkills lists
+        
         state.allSkills.push(action.payload);
         state.filteredSkills.push(action.payload);
       })
@@ -154,7 +154,7 @@ const skillSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // bulkCreateSkills
+      
       .addCase(bulkCreateSkills.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -162,8 +162,8 @@ const skillSlice = createSlice({
       .addCase(bulkCreateSkills.fulfilled, (state, action) => {
         state.isLoading = false;
 
-        // After a bulk creation, we should refresh the skills list
-        // This can be handled by dispatching fetchAllSkills after the bulk creation
+        
+        
       })
       .addCase(bulkCreateSkills.rejected, (state, action) => {
         state.isLoading = false;
@@ -172,10 +172,10 @@ const skillSlice = createSlice({
   },
 });
 
-// Export actions
+
 export const { filterSkillsByName, resetSkillState } = skillSlice.actions;
 
-// Export thunks
+
 export {
   fetchAllSkills,
   fetchSkillById,
@@ -187,5 +187,5 @@ export {
   bulkCreateSkills,
 };
 
-// Export reducer
+
 export default skillSlice.reducer;

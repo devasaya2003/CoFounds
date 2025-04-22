@@ -7,11 +7,11 @@ interface UserProfile {
   role: string;
   verified: boolean;
   userName?: string | null;
-  firstName?: string | null; // Add firstName field
-  lastName?: string | null;  // Add lastName field
+  firstName?: string | null; 
+  lastName?: string | null;  
   phone?: string | null;
   description?: string | null;
-  dob?: string | null;       // Add dob field
+  dob?: string | null;       
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -45,7 +45,7 @@ const initialState: AuthState = {
   user: null,
 };
 
-// Thunk to restore user session
+
 export const restoreUserSession = createAsyncThunk(
   "auth/restoreUserSession",
   async (_, { rejectWithValue }) => {
@@ -167,11 +167,11 @@ export const signUp = createAsyncThunk(
   }
 );
 
-// Add selector to get full name
+
 export const getFullName = (user: UserProfile | null): string => {
   if (!user) return "";
   
-  // Use firstName and lastName if available, fallback to userName
+  
   if (user.firstName || user.lastName) {
     return `${user.firstName || ""} ${user.lastName || ""}`.trim();
   }

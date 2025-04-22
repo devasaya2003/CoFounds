@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { jobs } from "@/data/jobs";
 import { testimonials } from "@/data/testimonials";
-import { stories } from "@/data/stories";
+// import { stories } from "@/data/stories";
 import Footer from './Footer';
 
 const AnimationProvider = dynamic(() => import('@/components/AnimationProvider'), { 
@@ -13,32 +13,32 @@ const AnimationProvider = dynamic(() => import('@/components/AnimationProvider')
 });
 
 const HeroSection = dynamic(() => import('@/components/sections/HeroSection'), { 
-  ssr: false,
+  ssr: true,
   loading: () => <div></div>
 });
 
 const JobsSection = dynamic(() => import('@/components/sections/JobsSection'), { 
-  ssr: false,
+  ssr: true,
   loading: () => <div></div>
 });
 
 const TestimonialsSection = dynamic(() => import('@/components/sections/TestimonialsSection'), { 
-  ssr: false,
+  ssr: true,
   loading: () => <div></div>
 });
 
 // const StoriesSection = dynamic(() => import('@/components/sections/StoriesSection'), { 
-//   ssr: false,
+//   ssr: true,
 //   loading: () => <div></div>
 // });
 
 const CTASection = dynamic(() => import('@/components/sections/CTASection'), { 
-  ssr: false,
+  ssr: true,
   loading: () => <div></div>
 });
 
 const ScrollAnimationHook = dynamic(() => import('@/hooks/use-scroll-animation-provider'), { 
-  ssr: false,
+  ssr: true,
   loading: () => <div></div>
 });
 

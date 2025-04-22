@@ -25,7 +25,7 @@ export default function RecruiterJobs() {
   
   const [initialized, setInitialized] = useState(false);
   
-  // Load jobs when component mounts and user ID is available
+  
   useEffect(() => {
     if (!initialized && userId) {
       dispatch(fetchJobsByRecruiter(userId));
@@ -33,18 +33,18 @@ export default function RecruiterJobs() {
     }
   }, [dispatch, initialized, userId]);
   
-  // Handle pagination
+  
   const handlePageChange = (pageNumber: number) => {
     dispatch(setCurrentPage(pageNumber));
     dispatch(fetchJobsByRecruiter(userId));
   };
   
-  // Handle search
+  
   const handleSearch = (term: string) => {
     dispatch(setSearchTerm(term));
   };
   
-  // Handle retry on error
+  
   const handleRetry = () => {
     dispatch(fetchJobsByRecruiter(userId));
   };

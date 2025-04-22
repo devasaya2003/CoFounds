@@ -25,7 +25,7 @@ export default function SignUpPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "candidate", // Default role is candidate
+    role: "candidate",
   });
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -36,7 +36,6 @@ export default function SignUpPage() {
     terms?: string;
   }>({});
 
-  // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated) {
       router.push("/candidate/app");
@@ -48,7 +47,7 @@ export default function SignUpPage() {
       ...prev,
       email: e.target.value,
     }));
-    // Clear error when user starts typing
+  
     if (formErrors.email) {
       setFormErrors((prev) => ({ ...prev, email: undefined }));
     }
@@ -91,9 +90,9 @@ export default function SignUpPage() {
     
     try {
       await dispatch(signUp({ email, password, role })).unwrap();
-      // Success - redirect will happen via the useEffect above
+    
     } catch (err) {
-      // Error is already handled in the Redux slice
+    
       console.error("Signup error:", err);
     }
   };

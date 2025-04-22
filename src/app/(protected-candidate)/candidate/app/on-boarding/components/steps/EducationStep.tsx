@@ -51,10 +51,8 @@ export default function EducationStep({
         setDegrees(result.degrees);
         setAllDegrees(result.degrees);
         setError(null);
-        // Removed automatic education form creation
       } catch (err) {
         setError("Failed to load degrees. Please try again.");
-        console.error("Error fetching degrees:", err);
       } finally {
         setIsLoading(false);
       }

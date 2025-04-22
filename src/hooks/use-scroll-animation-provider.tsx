@@ -3,7 +3,6 @@
 import React, { useRef } from 'react';
 import { scrollToSection as scrollTo } from '@/utils/scrollUtils';
 
-// Create a type that matches what useRef actually returns
 type ScrollRefs = {
   heroRef: React.MutableRefObject<HTMLDivElement | null>;
   jobsRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -17,13 +16,13 @@ interface ScrollAnimationProviderProps {
 }
 
 export default function ScrollAnimationProvider({ children }: ScrollAnimationProviderProps) {
-  // Create refs with correct types
+  
   const heroRef = useRef<HTMLDivElement | null>(null);
   const jobsRef = useRef<HTMLDivElement | null>(null);
   const reviewsRef = useRef<HTMLDivElement | null>(null);
   const storiesRef = useRef<HTMLDivElement | null>(null);
 
-  // Create an object to pass to children
+  
   const renderProps: ScrollRefs = {
     heroRef,
     jobsRef,

@@ -42,7 +42,7 @@ export default function useProtectedRoute(requiredRole: string = "any") {
                 
         router.push("/auth/recruiter-sign-in");
       } catch (err) {
-        console.error("Auth check failed:", err);
+        
         router.push("/auth/recruiter-sign-in");
       }
     };

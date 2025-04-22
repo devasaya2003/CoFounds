@@ -3,7 +3,7 @@ import { fetchWithAuth_GET, fetchWithAuth_PUT, fetchWithAuth_POST } from "@/util
 import { UpdateCompany } from "@/backend/interfaces/PUT/update_company";
 import { UpdateBulkCompany } from "@/backend/interfaces/PUT/update_bulk_company";
 
-// Add interfaces for POST operations
+
 export interface CreateCompany {
   name: string;
   size: number;
@@ -17,7 +17,7 @@ export interface BulkCreateResponse {
   createdCount: number;
 }
 
-// Company interfaces
+
 export interface Company {
   id: string;
   name: string;
@@ -29,7 +29,7 @@ export interface Company {
   updatedAt: string;
 }
 
-// For update operations
+
 export interface CompanyUpdatePayload {
   companyId: string;
   data: Partial<UpdateCompany>;
@@ -66,7 +66,7 @@ export interface CompanyState {
   };
 }
 
-// Response interfaces for different API calls
+
 interface GetAllCompaniesResponse {
   [index: number]: Company;
   length: number;
@@ -97,7 +97,7 @@ interface GetCompaniesBySizePaginatedResponse {
   companies: Company[];
 }
 
-// Initial state for company master
+
 export const companyInitialState: CompanyState = {
   allCompanies: [],
   filteredCompanies: [],
@@ -123,10 +123,10 @@ export const companyInitialState: CompanyState = {
   },
 };
 
-// Base URL helper
+
 const getBaseUrl = () => process.env.NEXT_PUBLIC_BASE_URL_API || "";
 
-// Async thunks for company master
+
 export const fetchAllCompanies = createAsyncThunk(
   "master/fetchAllCompanies",
   async (_, { rejectWithValue }) => {
@@ -231,7 +231,7 @@ export const fetchCompaniesBySizePaginated = createAsyncThunk(
   }
 );
 
-// Update a single company
+
 export const updateCompany = createAsyncThunk(
   "master/updateCompany",
   async (
@@ -251,7 +251,7 @@ export const updateCompany = createAsyncThunk(
   }
 );
 
-// Bulk update companies
+
 export const bulkUpdateCompanies = createAsyncThunk(
   "master/bulkUpdateCompanies",
   async (updates: UpdateBulkCompany[], { rejectWithValue }) => {
@@ -268,9 +268,9 @@ export const bulkUpdateCompanies = createAsyncThunk(
   }
 );
 
-// Add POST thunks
 
-// Create a single company
+
+
 export const createCompany = createAsyncThunk(
   "master/createCompany",
   async (data: CreateCompany, { rejectWithValue }) => {
@@ -287,7 +287,7 @@ export const createCompany = createAsyncThunk(
   }
 );
 
-// Bulk create companies
+
 export const bulkCreateCompanies = createAsyncThunk(
   "master/bulkCreateCompanies",
   async (companies: CreateCompany[], { rejectWithValue }) => {
@@ -304,9 +304,9 @@ export const bulkCreateCompanies = createAsyncThunk(
   }
 );
 
-// Company master reducers for use in the main slice
+
 export const companyMasterReducers = {
-  // Add company-specific reducers here
+  
   filterCompaniesByName: (state: CompanyState, action: { payload: string }) => {
     const searchTerm = action.payload.toLowerCase();
     state.filters.searchTerm = searchTerm;

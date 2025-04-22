@@ -32,9 +32,9 @@ export default function PersonalInfoStep({
   const dispatch = useAppDispatch();
   const selectedSkills = watch('skills') || [];
   
-  // Generate date options for DOB
+  
   const currentYear = new Date().getFullYear();
-  // Allow selection from 100 years ago to current year
+  
   const years = Array.from({ length: 100 }, (_, i) => (currentYear - 100 + i).toString());
   const months = [
     { value: '01', label: 'January' }, { value: '02', label: 'February' },
@@ -45,7 +45,7 @@ export default function PersonalInfoStep({
     { value: '11', label: 'November' }, { value: '12', label: 'December' }
   ];
   
-  // Watch DOB values
+  
   const dobYear = watch('dateOfBirth.year') || '';
   const dobMonth = watch('dateOfBirth.month') || '';
   const dobDay = watch('dateOfBirth.day') || '';
@@ -55,7 +55,7 @@ export default function PersonalInfoStep({
     dispatch(setDescription(html));
   };
   
-  // Initialize DOB fields if they exist in formState
+  
   useEffect(() => {
     if (formState.dateOfBirth) {
       setValue('dateOfBirth.year', formState.dateOfBirth.year || '');
@@ -64,7 +64,7 @@ export default function PersonalInfoStep({
     }
   }, [formState.dateOfBirth, setValue]);
   
-  // Handle DOB changes
+  
   const handleDOBChange = (field: 'year' | 'month' | 'day', value: string) => {
     const updatedDOB = {
       year: field === 'year' ? value : dobYear,

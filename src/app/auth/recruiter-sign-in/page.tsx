@@ -27,17 +27,16 @@ export default function RecruiterSignIn() {
     (state) => state.auth
   );
   const router = useRouter();
-  
-  // Local state for form errors
+
   const [formErrors, setFormErrors] = useState<{
     email?: string;
     password?: string;
   }>({});
-  
+
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
     console.log("Page loaded, token in localStorage:", storedToken ? "exists" : "none");
-    
+
     if (storedToken) {
       dispatch(setToken(storedToken));
     }
@@ -47,7 +46,7 @@ export default function RecruiterSignIn() {
     dispatch(clearError());
   }, [dispatch]);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (isAuthenticated && userRole === "recruiter") {
       router.push("/recruiter/app");
     }
@@ -61,18 +60,18 @@ export default function RecruiterSignIn() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form before submission
+
+
     if (!validateForm()) {
       return;
     }
-    
+
     dispatch(signIn());
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setEmail(e.target.value));
-    // Clear error when user starts typing
+
     if (formErrors.email) {
       setFormErrors((prev) => ({ ...prev, email: undefined }));
     }
@@ -105,23 +104,23 @@ export default function RecruiterSignIn() {
           )}
 
           <form onSubmit={handleSignIn} className="space-y-4">
-            <EmailInput 
-              value={email} 
-              onChange={handleEmailChange} 
-              disabled={isLoading} 
+            <EmailInput
+              value={email}
+              onChange={handleEmailChange}
+              disabled={isLoading}
               error={formErrors.email}
             />
 
-            <PasswordInput 
-              value={password} 
-              onChange={handlePasswordChange} 
+            <PasswordInput
+              value={password}
+              onChange={handlePasswordChange}
               disabled={isLoading}
               forgotPasswordLink={true}
               error={formErrors.password}
             />
 
-            <AuthButton 
-              isLoading={isLoading} 
+            <AuthButton
+              isLoading={isLoading}
               loadingText="Signing in..."
             >
               Sign In

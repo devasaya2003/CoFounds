@@ -4,7 +4,7 @@ import { RootState } from "../store";
 import { COMPANY, RECRUITER } from "@/backend/constants/constants";
 import { Job } from "@/types/job";
 
-// Define request payload interfaces
+
 interface JobsRequestPayload {
   type: string;
   id: string;
@@ -30,7 +30,7 @@ interface JobsState {
   jobsPerPage: number;
   totalJobs: number;
   totalPages: number;
-  activeView: string; // Added this property
+  activeView: string;
 }
 
 const initialState: JobsState = {
@@ -43,10 +43,10 @@ const initialState: JobsState = {
   jobsPerPage: 10,
   totalJobs: 0,
   totalPages: 1,
-  activeView: "all-jobs", // Default view
+  activeView: "all-jobs",
 };
 
-// Async thunk for fetching all jobs by company
+
 export const fetchJobsByCompany = createAsyncThunk(
   "jobs/fetchJobsByCompany",
   async (_, { getState, rejectWithValue }) => {
@@ -77,7 +77,7 @@ export const fetchJobsByCompany = createAsyncThunk(
   }
 );
 
-// Async thunk for fetching jobs created by a specific recruiter
+
 export const fetchJobsByRecruiter = createAsyncThunk(
   "jobs/fetchJobsByRecruiter",
   async (recruiterId: string, { getState, rejectWithValue }) => {
@@ -110,7 +110,7 @@ export const jobsSlice = createSlice({
     setSearchTerm: (state, action: PayloadAction<string>) => {
       state.searchTerm = action.payload;
 
-      // Filter jobs based on search term
+
       if (action.payload) {
         const term = action.payload.toLowerCase();
         state.filteredJobs = state.jobs.filter(
@@ -135,12 +135,12 @@ export const jobsSlice = createSlice({
     },
     setActiveView: (state, action: PayloadAction<string>) => {
       state.activeView = action.payload;
-      state.currentPage = 1; // Reset to page 1 when changing views
+      state.currentPage = 1;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Handle fetchJobsByCompany
+
       .addCase(fetchJobsByCompany.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -158,7 +158,7 @@ export const jobsSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // Handle fetchJobsByRecruiter
+
       .addCase(fetchJobsByRecruiter.pending, (state) => {
         state.isLoading = true;
         state.error = null;

@@ -62,11 +62,8 @@ export default function CertificateForm({
         setUploading(true);
 
         try {
-            // Here you would typically upload to your storage service
-            // For this example, we'll simulate a successful upload
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Simulate successful upload with generated URL
             const fakeUploadUrl = `https://storage.example.com/${Date.now()}-${file.name}`;
 
             onUpdate({ fileUrl: fakeUploadUrl });

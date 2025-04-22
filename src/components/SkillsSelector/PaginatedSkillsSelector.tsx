@@ -44,7 +44,7 @@ export default function PaginatedSkillsSelector({
         }
         setTotalPages(result.totalPages);
       } catch (error) {
-        console.error('Failed to load skills:', error);
+  
       } finally {
         setIsLoading(false);
       }
@@ -99,7 +99,6 @@ export default function PaginatedSkillsSelector({
   };
 
   const handleSkillLevelChange = (skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => {
-    console.log('Changing skill level:', skillId, level);
     if (onSkillLevelChange) {
       onSkillLevelChange(skillId, level);
     }

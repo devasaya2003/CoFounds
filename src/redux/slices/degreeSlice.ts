@@ -33,7 +33,7 @@ const degreeSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // fetchAllDegrees
+      
       .addCase(fetchAllDegrees.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -49,7 +49,7 @@ const degreeSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchDegreeById
+      
       .addCase(fetchDegreeById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -63,7 +63,7 @@ const degreeSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchDegreeByName
+      
       .addCase(fetchDegreeByName.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -77,7 +77,7 @@ const degreeSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchDegreesPaginated
+      
       .addCase(fetchDegreesPaginated.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -96,7 +96,7 @@ const degreeSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchDegreesByType
+      
       .addCase(fetchDegreesByType.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -110,7 +110,7 @@ const degreeSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchDegreesByTypePaginated
+      
       .addCase(fetchDegreesByTypePaginated.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -129,7 +129,7 @@ const degreeSlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // createDegree
+      
       .addCase(createDegree.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -140,11 +140,11 @@ const degreeSlice = createSlice({
         state.updateStatus.success = true;
         state.updateStatus.message = "Degree created successfully";
 
-        // Add the new degree to the allDegrees and filteredDegrees lists
+        
         state.allDegrees.push(action.payload);
         state.filteredDegrees.push(action.payload);
         
-        // Update pagination count
+        
         state.pagination.totalDegrees += 1;
       })
       .addCase(createDegree.rejected, (state, action) => {
@@ -154,7 +154,7 @@ const degreeSlice = createSlice({
         state.updateStatus.message = `Creation failed: ${action.payload}`;
       })
 
-      // bulkCreateDegrees
+      
       .addCase(bulkCreateDegrees.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -172,7 +172,7 @@ const degreeSlice = createSlice({
         state.updateStatus.message = `Bulk creation failed: ${action.payload}`;
       })
 
-      // updateDegree
+      
       .addCase(updateDegree.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -183,7 +183,7 @@ const degreeSlice = createSlice({
         state.updateStatus.success = true;
         state.updateStatus.message = "Degree updated successfully";
         
-        // Update the degree in the allDegrees list
+        
         const degreeIndex = state.allDegrees.findIndex(
           (degree) => degree.id === action.payload.id
         );
@@ -191,7 +191,7 @@ const degreeSlice = createSlice({
           state.allDegrees[degreeIndex] = action.payload;
         }
         
-        // Update the degree in the filteredDegrees list
+        
         const filteredIndex = state.filteredDegrees.findIndex(
           (degree) => degree.id === action.payload.id
         );
@@ -199,7 +199,7 @@ const degreeSlice = createSlice({
           state.filteredDegrees[filteredIndex] = action.payload;
         }
         
-        // Update the selectedDegree if it's the one being updated
+        
         if (state.selectedDegree?.id === action.payload.id) {
           state.selectedDegree = action.payload;
         }
@@ -211,7 +211,7 @@ const degreeSlice = createSlice({
         state.updateStatus.message = `Update failed: ${action.payload}`;
       })
       
-      // bulkUpdateDegrees
+      
       .addCase(bulkUpdateDegrees.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -231,10 +231,10 @@ const degreeSlice = createSlice({
   },
 });
 
-// Export actions
+
 export const { filterDegreesByName, resetDegreeState, resetUpdateStatus } = degreeSlice.actions;
 
-// Export thunks
+
 export {
   fetchAllDegrees,
   fetchDegreeById,
@@ -248,5 +248,5 @@ export {
   bulkUpdateDegrees,
 };
 
-// Export reducer
+
 export default degreeSlice.reducer;

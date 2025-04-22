@@ -75,7 +75,7 @@ export default function ProofOfWorkStep({
   };
 
   const handleUpdateProofOfWork = (id: string, updates: Partial<ProofOfWork>) => {
-    // Handle special case for community work
+    
     if (updates.isCommunityWork !== undefined) {
       if (updates.isCommunityWork) {
         updates.company_name = 'COF_PROOF_COMMUNITY';
@@ -134,7 +134,7 @@ export default function ProofOfWorkStep({
               years={years}
               months={months}
               days={days}
-              errors={errors.proofsOfWork?.[index] as ProofOfWorkFieldErrors} // Type assertion with specific type
+              errors={errors.proofsOfWork?.[index] as ProofOfWorkFieldErrors} 
             />
           ))}
 

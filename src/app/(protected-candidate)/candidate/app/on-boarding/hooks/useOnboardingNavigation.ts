@@ -7,7 +7,7 @@ export function useOnboardingNavigation(currentStep: number, steps: string[]) {
   const isHashChangeFromWithin = useRef(false);
   const isInitialMount = useRef(true);
   
-  // Handle hash-based navigation
+  
   useEffect(() => {
     const handleHashChange = () => {
       if (isHashChangeFromWithin.current) {
@@ -25,7 +25,7 @@ export function useOnboardingNavigation(currentStep: number, steps: string[]) {
       }
     };
     
-    // Initial setup - only runs once
+    
     if (isInitialMount.current) {
       isInitialMount.current = false;
       if (!window.location.hash && steps[currentStep - 1]) {
@@ -38,11 +38,11 @@ export function useOnboardingNavigation(currentStep: number, steps: string[]) {
     
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [dispatch, steps, currentStep]); // Now we can safely include currentStep
+  }, [dispatch, steps, currentStep]); 
   
-  // Update hash when step changes
+  
   useEffect(() => {
-    // Skip the first render to avoid double-execution
+    
     if (isInitialMount.current) {
       return;
     }

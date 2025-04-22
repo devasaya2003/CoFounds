@@ -4,7 +4,7 @@ import { CreateDegree } from "@/backend/interfaces/POST/create_degree";
 import { UpdateDegree } from "@/backend/interfaces/PUT/update_degree";
 import { UpdateBulkDegree } from "@/backend/interfaces/PUT/update_bulk_degree";
 
-// Degree interfaces
+
 export interface Degree {
   id: string;
   name: string;
@@ -29,7 +29,7 @@ export interface DegreeState {
   };
   isLoading: boolean;
   error: string | null;
-  // Add update status
+  
   updateStatus: {
     isUpdating: boolean;
     success: boolean;
@@ -37,7 +37,7 @@ export interface DegreeState {
   };
 }
 
-// Response interfaces for different API calls
+
 interface GetAllDegreesResponse {
   [index: number]: Degree;
   length: number;
@@ -74,7 +74,7 @@ export interface BulkCreateDegreeResponse {
   createdCount: number;
 }
 
-// Add PUT response interfaces
+
 export interface UpdateDegreeResponse extends Degree {}
 
 export interface BulkUpdateDegreeResponse {
@@ -83,7 +83,7 @@ export interface BulkUpdateDegreeResponse {
   updatedCount: number;
 }
 
-// Initial state for degree master
+
 export const degreeInitialState: DegreeState = {
   allDegrees: [],
   filteredDegrees: [],
@@ -106,12 +106,12 @@ export const degreeInitialState: DegreeState = {
   },
 };
 
-// Base URL helper
+
 const getBaseUrl = () => process.env.NEXT_PUBLIC_BASE_URL_API || "";
 
-// Async thunks for degree master
 
-// Fetch all degrees
+
+
 export const fetchAllDegrees = createAsyncThunk(
   "degree/fetchAllDegrees",
   async (_, { rejectWithValue }) => {
@@ -125,7 +125,7 @@ export const fetchAllDegrees = createAsyncThunk(
   }
 );
 
-// Fetch degree by ID
+
 export const fetchDegreeById = createAsyncThunk(
   "degree/fetchDegreeById",
   async (degreeId: string, { rejectWithValue }) => {
@@ -139,7 +139,7 @@ export const fetchDegreeById = createAsyncThunk(
   }
 );
 
-// Fetch degree by name
+
 export const fetchDegreeByName = createAsyncThunk(
   "degree/fetchDegreeByName",
   async (degreeName: string, { rejectWithValue }) => {
@@ -155,7 +155,7 @@ export const fetchDegreeByName = createAsyncThunk(
   }
 );
 
-// Fetch degrees paginated
+
 export const fetchDegreesPaginated = createAsyncThunk(
   "degree/fetchDegreesPaginated",
   async (pageNo: number, { rejectWithValue }) => {
@@ -171,7 +171,7 @@ export const fetchDegreesPaginated = createAsyncThunk(
   }
 );
 
-// Fetch degrees by type
+
 export const fetchDegreesByType = createAsyncThunk(
   "degree/fetchDegreesByType",
   async (degreeType: string, { rejectWithValue }) => {
@@ -187,7 +187,7 @@ export const fetchDegreesByType = createAsyncThunk(
   }
 );
 
-// Fetch degrees by type paginated
+
 export const fetchDegreesByTypePaginated = createAsyncThunk(
   "degree/fetchDegreesByTypePaginated",
   async (
@@ -208,9 +208,9 @@ export const fetchDegreesByTypePaginated = createAsyncThunk(
   }
 );
 
-// Add POST thunks
 
-// Create a single degree
+
+
 export const createDegree = createAsyncThunk(
   "degree/createDegree",
   async (data: CreateDegree, { rejectWithValue }) => {
@@ -227,7 +227,7 @@ export const createDegree = createAsyncThunk(
   }
 );
 
-// Bulk create degrees
+
 export const bulkCreateDegrees = createAsyncThunk(
   "degree/bulkCreateDegrees",
   async (degrees: CreateDegree[], { rejectWithValue }) => {
@@ -244,9 +244,9 @@ export const bulkCreateDegrees = createAsyncThunk(
   }
 );
 
-// Add PUT thunks
 
-// Update a single degree
+
+
 export const updateDegree = createAsyncThunk(
   "degree/updateDegree",
   async (
@@ -266,7 +266,7 @@ export const updateDegree = createAsyncThunk(
   }
 );
 
-// Bulk update degrees
+
 export const bulkUpdateDegrees = createAsyncThunk(
   "degree/bulkUpdateDegrees",
   async (updates: UpdateBulkDegree[], { rejectWithValue }) => {
@@ -283,7 +283,7 @@ export const bulkUpdateDegrees = createAsyncThunk(
   }
 );
 
-// Degree master reducers for use in the main slice
+
 export const degreeMasterReducers = {
   filterDegreesByName: (state: DegreeState, action: { payload: string }) => {
     const searchTerm = action.payload.toLowerCase();

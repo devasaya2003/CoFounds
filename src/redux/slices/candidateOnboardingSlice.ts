@@ -8,7 +8,7 @@ import {
   DateField
 } from '@/types/candidate_onboarding';
 
-// State interface
+
 interface CandidateOnboardingState {
   userName: string;
   firstName: string;
@@ -55,7 +55,7 @@ export const candidateOnboardingSlice = createSlice({
   name: 'candidateOnboarding',
   initialState,
   reducers: {
-    // Navigation actions
+    
     setStep: (state, action: PayloadAction<number>) => {
       if (action.payload >= 1 && action.payload <= state.steps.length) {
         state.currentStep = action.payload;
@@ -66,13 +66,13 @@ export const candidateOnboardingSlice = createSlice({
       state.error = action.payload.error || null;
     },
     
-    // Step 1 actions
+    
     setUserName: (state, action: PayloadAction<string>) => {
       state.userName = action.payload;
       state.isDirty = true;
     },
     
-    // Step 2 actions
+    
     setFirstName: (state, action: PayloadAction<string>) => {
       state.firstName = action.payload;
       state.isDirty = true;
@@ -106,7 +106,7 @@ export const candidateOnboardingSlice = createSlice({
       }
     },
     
-    // Step 3 actions
+    
     addEducation: (state, action: PayloadAction<Education>) => {
       state.education.push(action.payload);
       state.isDirty = true;
@@ -124,7 +124,7 @@ export const candidateOnboardingSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Step 4 actions
+    
     addCertificate: (state, action: PayloadAction<Certificate>) => {
       if (!state.certificates) {
         state.certificates = [];
@@ -145,7 +145,7 @@ export const candidateOnboardingSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Step 5 actions
+    
     addProofOfWork: (state, action: PayloadAction<ProofOfWork>) => {
       if (!state.proofsOfWork) {
         state.proofsOfWork = [];
@@ -159,7 +159,7 @@ export const candidateOnboardingSlice = createSlice({
       if (index !== -1) {
         state.proofsOfWork[index] = { ...state.proofsOfWork[index], ...updates };
         
-        // Update company name if isCommunityWork changed (updated field name)
+        
         if (updates.isCommunityWork !== undefined) {
           state.proofsOfWork[index].company_name = updates.isCommunityWork ? 'COF_PROOF_COMMUNITY' : state.proofsOfWork[index].company_name;
         }
@@ -172,7 +172,7 @@ export const candidateOnboardingSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Step 6 actions
+    
     addProject: (state, action: PayloadAction<Project>) => {
       if (!state.projects) {
         state.projects = [];
@@ -193,7 +193,7 @@ export const candidateOnboardingSlice = createSlice({
       state.isDirty = true;
     },
     
-    // Form reset
+    
     resetForm: (state) => {
       return { ...initialState, currentStep: state.currentStep };
     }

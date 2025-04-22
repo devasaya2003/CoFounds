@@ -38,7 +38,7 @@ const companySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // fetchAllCompanies
+      
       .addCase(fetchAllCompanies.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -54,7 +54,7 @@ const companySlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchCompanyById
+      
       .addCase(fetchCompanyById.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -68,7 +68,7 @@ const companySlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchCompanyByName
+      
       .addCase(fetchCompanyByName.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -82,7 +82,7 @@ const companySlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchCompaniesPaginated
+      
       .addCase(fetchCompaniesPaginated.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -101,7 +101,7 @@ const companySlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchCompaniesBySize
+      
       .addCase(fetchCompaniesBySize.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -116,7 +116,7 @@ const companySlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // fetchCompaniesBySizePaginated
+      
       .addCase(fetchCompaniesBySizePaginated.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -135,7 +135,7 @@ const companySlice = createSlice({
         state.error = action.payload as string;
       })
 
-      // updateCompany
+      
       .addCase(updateCompany.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -146,12 +146,12 @@ const companySlice = createSlice({
         state.updateStatus.success = true;
         state.updateStatus.message = "Company updated successfully";
 
-        // Update the selected company if it's the one being updated
+        
         if (state.selectedCompany?.id === action.payload.id) {
           state.selectedCompany = action.payload;
         }
 
-        // Update in allCompanies list
+        
         const companyIndex = state.allCompanies.findIndex(
           (company) => company.id === action.payload.id
         );
@@ -160,7 +160,7 @@ const companySlice = createSlice({
           state.allCompanies[companyIndex] = action.payload;
         }
 
-        // Update in filteredCompanies list if present
+        
         const filteredIndex = state.filteredCompanies.findIndex(
           (company) => company.id === action.payload.id
         );
@@ -176,7 +176,7 @@ const companySlice = createSlice({
         state.updateStatus.message = `Update failed: ${action.payload}`;
       })
 
-      // bulkUpdateCompanies
+      
       .addCase(bulkUpdateCompanies.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -194,7 +194,7 @@ const companySlice = createSlice({
         state.updateStatus.message = `Bulk update failed: ${action.payload}`;
       })
 
-      // createCompany
+      
       .addCase(createCompany.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -205,7 +205,7 @@ const companySlice = createSlice({
         state.updateStatus.success = true;
         state.updateStatus.message = "Company created successfully";
 
-        // Add the new company to the allCompanies and filteredCompanies lists
+        
         state.allCompanies.push(action.payload);
         state.filteredCompanies.push(action.payload);
       })
@@ -216,7 +216,7 @@ const companySlice = createSlice({
         state.updateStatus.message = `Creation failed: ${action.payload}`;
       })
 
-      // bulkCreateCompanies
+      
       .addCase(bulkCreateCompanies.pending, (state) => {
         state.updateStatus.isUpdating = true;
         state.updateStatus.message = null;
@@ -236,7 +236,7 @@ const companySlice = createSlice({
   },
 });
 
-// Export actions
+
 export const {
   filterCompaniesByName,
   setCompanySizeFilter,
@@ -244,7 +244,7 @@ export const {
   resetCompanyState,
 } = companySlice.actions;
 
-// Export thunks
+
 export {
   fetchAllCompanies,
   fetchCompanyById,
@@ -258,5 +258,5 @@ export {
   bulkCreateCompanies,
 };
 
-// Export reducer
+
 export default companySlice.reducer;

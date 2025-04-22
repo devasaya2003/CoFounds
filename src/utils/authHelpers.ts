@@ -1,6 +1,6 @@
 import { jwtVerify, JWTPayload } from "jose";
 
-// Define a more specific interface for JWT payload
+
 interface UserJwtPayload extends JWTPayload {
   user?: {
     id?: string;
@@ -23,7 +23,7 @@ interface UserJwtPayload extends JWTPayload {
   userName?: string | null;
 }
 
-// Update AuthUser to match UserProfile in your auth slice
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -44,13 +44,13 @@ export async function getUserFromToken(token: string): Promise<AuthUser | null> 
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "");
     const { payload } = await jwtVerify(token, secret);
     
-    // Cast to our expected type
+    
     const jwtPayload = payload as UserJwtPayload;
     
-    // Handle different token formats and ensure required fields
+    
     const userData = jwtPayload.user || jwtPayload;
     
-    // Check for required fields
+    
     const userId = userData.id;
     const userEmail = userData.email;
     
@@ -59,12 +59,12 @@ export async function getUserFromToken(token: string): Promise<AuthUser | null> 
       return null;
     }
     
-    // Helper function to safely convert unknown to string or null
+    
     function safeString(value: unknown): string | null {
       return typeof value === 'string' ? value : null;
     }
     
-    // Ensure we have mandatory fields with good defaults
+    
     return {
       id: userId,
       email: userEmail,
@@ -87,7 +87,7 @@ export async function getUserFromApiStatus(): Promise<{isAuthenticated: boolean,
   try {
     const response = await fetch('/api/auth/status', {
       method: 'GET',
-      credentials: 'include', // Include cookies in request
+      credentials: 'include', 
     });
     
     if (!response.ok) {
@@ -102,18 +102,18 @@ export async function getUserFromApiStatus(): Promise<{isAuthenticated: boolean,
     
     const userData = data.user;
     
-    // Check for required fields
+    
     if (!userData.id || !userData.email) {
       console.error("Missing required user data in API response");
       return { isAuthenticated: false, user: null };
     }
     
-    // Helper function to safely convert unknown to string or null
+    
     function safeString(value: unknown): string | null {
       return typeof value === 'string' ? value : null;
     }
     
-    // Ensure user data matches expected interface
+    
     const user: AuthUser = {
       id: userData.id,
       email: userData.email,
@@ -137,7 +137,7 @@ export async function getUserFromApiStatus(): Promise<{isAuthenticated: boolean,
 export function getAuthTokenFromCookie(): string | null {
   if (typeof window === 'undefined') return null;
   
-  // Try to get token from cookies
+  
   const cookies = document.cookie.split(';');
   for (const cookie of cookies) {
     const [name, value] = cookie.trim().split('=');

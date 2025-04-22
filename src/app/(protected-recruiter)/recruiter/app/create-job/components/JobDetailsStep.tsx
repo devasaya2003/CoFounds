@@ -28,7 +28,7 @@ export default function JobDetailsStep({
   register, 
   watch,
   setValue,
-  onNextStep // Add this prop to receive the validation function
+  onNextStep 
 }: JobDetailsStepProps) {
   const dispatch = useAppDispatch();
   const selectedSkills = watch('required_skills') || [];
@@ -213,7 +213,7 @@ export default function JobDetailsStep({
   );
 }
 
-// Generate year, month, and day options
+
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 5 }, (_, i) => (currentYear + i).toString());
 const months = [

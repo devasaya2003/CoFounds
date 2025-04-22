@@ -117,7 +117,6 @@ export default function KanbanBoard() {
         setHasMore(false);
       }
     } catch (error) {
-      console.error('Error loading more applications:', error);
     } finally {
       setIsLoading(false);
     }

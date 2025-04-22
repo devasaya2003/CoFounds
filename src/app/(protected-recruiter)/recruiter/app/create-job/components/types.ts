@@ -1,7 +1,7 @@
 import { FieldErrors, UseFormRegister, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { SkillWithId } from "@/redux/slices/jobCreationSlice";
 
-// Form fields interface
+
 export interface JobFormFields {
   title: string;
   job_code: string;
@@ -19,23 +19,23 @@ export interface JobFormFields {
   package: number;
 }
 
-// Custom question field with ID
+
 export interface QuestionFieldWithId {
   id: string;
   value: string;
 }
 
-// Updated JobDetailsStep props with onNextStep
+
 export interface JobDetailsStepProps {
   formState: JobFormFields;
   errors: FieldErrors<JobFormFields>;
   register: UseFormRegister<JobFormFields>;
   watch: UseFormWatch<JobFormFields>;
   setValue: UseFormSetValue<JobFormFields>;
-  onNextStep: () => void; // Add the validation function
+  onNextStep: () => void; 
 }
 
-// Simplified AdditionalQuestionsStep props
+
 export interface AdditionalQuestionsStepProps {
   fields: QuestionFieldWithId[];
   errors: FieldErrors<JobFormFields>;

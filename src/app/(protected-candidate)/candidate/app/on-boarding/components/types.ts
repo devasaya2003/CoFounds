@@ -8,7 +8,6 @@ import {
   DateField
 } from "@/types/candidate_onboarding";
 
-// Form fields interface
 export interface OnboardingFormFields {
   // Step 1
   userName: string;
@@ -33,7 +32,7 @@ export interface OnboardingFormFields {
   projects: Project[];
 }
 
-// Base props interface for all step components
+// 
 export interface BaseStepProps {
   errors: FieldErrors<OnboardingFormFields>;
   register: UseFormRegister<OnboardingFormFields>;
@@ -43,25 +42,25 @@ export interface BaseStepProps {
   onPreviousStep?: () => void;
 }
 
-// Username step props (Step 1)
+
 export interface UsernameStepProps extends BaseStepProps {
   formState: {
     userName: string;
   };
 }
 
-// Personal info step props (Step 2)
+
 export interface PersonalInfoStepProps extends BaseStepProps {
   formState: {
     firstName: string;
     lastName: string;
     description: string;
     skills: SkillWithId[];
-    dateOfBirth?: DateField; // Add dateOfBirth property
+    dateOfBirth?: DateField; 
   };
 }
 
-// Education step props (Step 3)
+
 export interface EducationStepProps extends BaseStepProps {
   formState: {
     education: Education[];
@@ -72,7 +71,7 @@ export interface EducationStepProps extends BaseStepProps {
   maxEducationEntries?: number;
 }
 
-// Certificate step props (Step 4)
+
 export interface CertificatesStepProps extends BaseStepProps {
   formState: {
     certificates: Certificate[];
@@ -83,7 +82,7 @@ export interface CertificatesStepProps extends BaseStepProps {
   maxCertificateEntries?: number;
 }
 
-// Proof of work step props (Step 5)
+
 export interface ProofOfWorkStepProps extends BaseStepProps {
   formState: {
     proofsOfWork: ProofOfWork[];
@@ -93,7 +92,7 @@ export interface ProofOfWorkStepProps extends BaseStepProps {
   onUpdateProofOfWork: (id: string, updates: Partial<ProofOfWork>) => void;
 }
 
-// Project step props (Step 6)
+
 export interface ProjectStepProps extends BaseStepProps {
   formState: {
     projects: Project[];
@@ -103,7 +102,7 @@ export interface ProjectStepProps extends BaseStepProps {
   onUpdateProject: (id: string, updates: Partial<Project>) => void;
 }
 
-// Form component props
+
 export interface CertificateFormProps {
   certificate: Certificate;
   index: number;
@@ -160,7 +159,7 @@ export interface ProjectFormProps {
   errors?: ProjectFieldErrors;
 }
 
-// Field error types remain the same
+
 export type EducationFieldErrors = {
   institution?: FieldError;
   degree?: FieldError;

@@ -91,7 +91,7 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
         end_at: jobCreation.last_date_to_apply
       };
       
-      console.log('Creating job with payload:', jobPayload);
+      
       
       const jobResponse = await fetchWithAuth_POST<JobCreationResponse, typeof jobPayload>(
         `${baseUrl}/jobs`,
@@ -99,7 +99,7 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
       );
       
       const jobId = jobResponse.createdRecruiter.id;
-      console.log('Job created with ID:', jobId);
+      
       
       // Step 2: Associate skills with job - now using skill_level from each skill
       if (jobCreation.required_skills.length > 0) {
@@ -107,20 +107,20 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
           job_id: jobId,
           skills: jobCreation.required_skills.map(skill => ({
             skill_id: skill.id,
-            skill_level: skill.skill_level // Use the stored skill level
+            skill_level: skill.level
           })),
           is_active: true,
           created_by
         };
         
-        console.log('Adding skills with payload:', skillsPayload);
+        
         
         await fetchWithAuth_POST<JobSkillResponse, JobSkillPayload>(
           `${baseUrl}/jobs/skills`,
           skillsPayload
         );
         
-        console.log('Skills added successfully');
+        
       }
       
       // Step 3: Add additional questions
@@ -132,14 +132,14 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
           questions: jobCreation.additional_questions
         };
         
-        console.log('Adding questions with payload:', questionsPayload);
+        
         
         await fetchWithAuth_POST<JobQuestionsResponse, JobQuestionsPayload>(
           `${baseUrl}/jobs/extra-questions`,
           questionsPayload
         );
         
-        console.log('Questions added successfully');
+        
       }
       
       // All steps completed successfully
@@ -152,7 +152,7 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
         message: 'Job created successfully with skills and questions'
       };
     } catch (error: unknown) {
-      console.error('Error creating job:', error);
+      
       
       let errorMessage = 'Failed to create job';
       if (error instanceof Error) {

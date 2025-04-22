@@ -30,20 +30,7 @@ export default function ForgotPassword() {
     setIsLoading(true);
 
     try {
-      // Replace this with your actual API call
-      // const response = await fetch('/api/auth/forgot-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
-      
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // if (!response.ok) {
-      //   throw new Error('Failed to send password reset email');
-      // }
-      
       setSuccess(true);
     } catch (error) {
       setError("Something went wrong. Please try again.");

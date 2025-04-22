@@ -27,16 +27,15 @@ export default function CandidateSignIn() {
     (state) => state.auth
   );
   const router = useRouter();
-  
-  // Local state for form errors
+
   const [formErrors, setFormErrors] = useState<{
     email?: string;
     password?: string;
   }>({});
-  
+
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
-    
+
     if (storedToken) {
       dispatch(setToken(storedToken));
     }
@@ -46,7 +45,7 @@ export default function CandidateSignIn() {
     dispatch(clearError());
   }, [dispatch]);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (isAuthenticated && userRole === "candidate") {
       router.push("/candidate/app");
     }
@@ -60,18 +59,18 @@ export default function CandidateSignIn() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form before submission
+
+
     if (!validateForm()) {
       return;
     }
-    
+
     dispatch(signIn());
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setEmail(e.target.value));
-    // Clear error when user starts typing
+
     if (formErrors.email) {
       setFormErrors((prev) => ({ ...prev, email: undefined }));
     }
@@ -104,29 +103,29 @@ export default function CandidateSignIn() {
           )}
 
           <form onSubmit={handleSignIn} className="space-y-4">
-            <EmailInput 
-              value={email} 
-              onChange={handleEmailChange} 
-              disabled={isLoading} 
+            <EmailInput
+              value={email}
+              onChange={handleEmailChange}
+              disabled={isLoading}
               error={formErrors.email}
             />
 
-            <PasswordInput 
-              value={password} 
-              onChange={handlePasswordChange} 
+            <PasswordInput
+              value={password}
+              onChange={handlePasswordChange}
               disabled={isLoading}
               forgotPasswordLink={true}
               error={formErrors.password}
             />
 
-            <AuthButton 
-              isLoading={isLoading} 
+            <AuthButton
+              isLoading={isLoading}
               loadingText="Signing in..."
             >
               Sign In
             </AuthButton>
           </form>
-          
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <Separator className="w-full" />
@@ -135,7 +134,7 @@ export default function CandidateSignIn() {
               <span className="bg-white px-2 text-gray-500">Or continue with</span>
             </div>
           </div>
-          
+
           <Button
             type="button"
             variant="outline"

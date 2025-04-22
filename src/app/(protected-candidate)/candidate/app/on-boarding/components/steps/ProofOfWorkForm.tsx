@@ -21,7 +21,7 @@ interface ProofOfWorkFormProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
-  errors?: ProofOfWorkFieldErrors; // More specific type instead of any
+  errors?: ProofOfWorkFieldErrors; 
 }
 
 export default function ProofOfWorkForm({
@@ -53,7 +53,7 @@ export default function ProofOfWorkForm({
   const handleCommunityWorkChange = (checked: boolean) => {
     onUpdate({ 
       isCommunityWork: checked,
-      // Set the company name automatically when toggling community work
+      
       company_name: checked ? 'COF_PROOF_COMMUNITY' : ''
     });
     setValue(`proofsOfWork.${index}.isCommunityWork`, checked);
