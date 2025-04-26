@@ -5,8 +5,8 @@ import { UseFormReturn } from 'react-hook-form';
 import { OnboardingFormFields, } from './types';
 import {
   SkillWithId,
-  Education, 
-  Certificate, 
+  Education,
+  Certificate,
   ProofOfWork,
   Project,
 } from "@/types/candidate_onboarding";
@@ -15,7 +15,7 @@ import PersonalInfoStep from './steps/PersonalInfoStep';
 import EducationStep from './steps/EducationStep';
 import CertificateStep from './steps/CertificateStep';
 import ProofOfWorkStep from './steps/ProofOfWorkStep';
-import ProjectStep from './steps/ProjectStep'; 
+import ProjectStep from './steps/ProjectStep';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAppSelector } from '@/redux/hooks';
 
@@ -29,7 +29,7 @@ interface CandidateOnboardingState {
   education: Education[];
   certificates: Certificate[];
   proofsOfWork: ProofOfWork[];
-  projects: Project[]; 
+  projects: Project[];
   currentStep: number;
   steps: string[];
   status: 'idle' | 'loading' | 'submitting' | 'success' | 'error';
@@ -55,11 +55,11 @@ export default function StepContainer({
   const { register, watch, setValue, formState: { errors } } = form;
   const [showSummary, setShowSummary] = useState(false);
   const candidateState = useAppSelector(state => state.candidateOnboarding);
-  
+
   const handleSubmit = () => {
-    
+
     setShowSummary(true);
-    
+
     onValidateAndProceed();
   };
 
@@ -105,9 +105,9 @@ export default function StepContainer({
             setValue={setValue}
             onNextStep={onValidateAndProceed}
             onPreviousStep={onPreviousStep}
-            onAddEducation={() => {}}
-            onRemoveEducation={() => {}}
-            onUpdateEducation={() => {}}
+            onAddEducation={() => { }}
+            onRemoveEducation={() => { }}
+            onUpdateEducation={() => { }}
             maxEducationEntries={5}
           />
         );
@@ -123,9 +123,9 @@ export default function StepContainer({
             setValue={setValue}
             onNextStep={onValidateAndProceed}
             onPreviousStep={onPreviousStep}
-            onAddCertificate={() => {}}
-            onRemoveCertificate={() => {}}
-            onUpdateCertificate={() => {}}
+            onAddCertificate={() => { }}
+            onRemoveCertificate={() => { }}
+            onUpdateCertificate={() => { }}
             maxCertificateEntries={10}
           />
         );
@@ -133,7 +133,7 @@ export default function StepContainer({
         return (
           <ProofOfWorkStep
             formState={{
-              proofsOfWork: onboarding.proofsOfWork || [], 
+              proofsOfWork: onboarding.proofsOfWork || [],
             }}
             errors={errors}
             register={register}
@@ -141,9 +141,9 @@ export default function StepContainer({
             setValue={setValue}
             onNextStep={onValidateAndProceed}
             onPreviousStep={onPreviousStep}
-            onAddProofOfWork={() => {}}
-            onRemoveProofOfWork={() => {}}
-            onUpdateProofOfWork={() => {}}
+            onAddProofOfWork={() => { }}
+            onRemoveProofOfWork={() => { }}
+            onUpdateProofOfWork={() => { }}
           />
         );
       case 6:
@@ -158,9 +158,9 @@ export default function StepContainer({
             setValue={setValue}
             onNextStep={handleSubmit}
             onPreviousStep={onPreviousStep}
-            onAddProject={() => {}}
-            onRemoveProject={() => {}}
-            onUpdateProject={() => {}}
+            onAddProject={() => { }}
+            onRemoveProject={() => { }}
+            onUpdateProject={() => { }}
           />
         );
       default:
@@ -171,17 +171,21 @@ export default function StepContainer({
   return (
     <>
       {renderStep()}
-      
+
       {/* Summary Dialog */}
       <Dialog open={showSummary} onOpenChange={setShowSummary}>
-        <DialogContent className="sm:max-w-[700px]">
+        <DialogContent
+          className="sm:max-w-[700px] max-h-[80vh] overflow-hidden"
+        >
           <DialogHeader>
             <DialogTitle>Your Onboarding Data</DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
-            <pre className="bg-gray-100 p-4 rounded-md overflow-auto max-h-[400px] text-xs">
-              {JSON.stringify(candidateState, null, 2)}
-            </pre>
+
+          {/* scroll only this inner area */}
+          <div
+            className="mt-4 overflow-auto max-h-[400] bg-gray-100 p-4 rounded-md text-xs w-full box-border"
+          >
+            <pre className="w-full">{JSON.stringify(candidateState, null, 2)}</pre>
           </div>
         </DialogContent>
       </Dialog>

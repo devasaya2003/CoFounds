@@ -25,6 +25,7 @@
     "@react-three/drei": "^9.121.4",
     "@react-three/fiber": "^8.17.14",
     "@reduxjs/toolkit": "^2.6.1",
+    "@supabase/supabase-js": "^2.49.4",
     "@tabler/icons-react": "^3.30.0",
     "@tanstack/react-virtual": "^3.13.6",
     "@tiptap/extension-heading": "^2.11.7",

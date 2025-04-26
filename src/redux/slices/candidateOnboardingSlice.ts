@@ -25,6 +25,12 @@ interface CandidateOnboardingState {
   status: 'idle' | 'submitting' | 'success' | 'error';
   error: string | null;
   dateOfBirth: DateField | null;
+  submissionStatus: {
+    [key: string]: 'idle' | 'loading' | 'success' | 'error';
+  };
+  submissionErrors: {
+    [key: string]: string | null;
+  };
 }
 
 const initialState: CandidateOnboardingState = {
@@ -48,7 +54,26 @@ const initialState: CandidateOnboardingState = {
   
   proofsOfWork: [] as ProofOfWork[],
   
-  projects: []
+  projects: [],
+  
+  submissionStatus: {
+    profile: 'idle',
+    skills: 'idle',
+    education: 'idle',
+    certificates: 'idle',
+    experience: 'idle',
+    projects: 'idle',
+    complete: 'idle'
+  },
+  submissionErrors: {
+    profile: null,
+    skills: null,
+    education: null,
+    certificates: null,
+    experience: null,
+    projects: null,
+    complete: null
+  }
 };
 
 export const candidateOnboardingSlice = createSlice({
@@ -196,6 +221,16 @@ export const candidateOnboardingSlice = createSlice({
     
     resetForm: (state) => {
       return { ...initialState, currentStep: state.currentStep };
+    },
+    
+    setSubmissionStatus: (state, action: PayloadAction<{ 
+      step: string;
+      status: 'idle' | 'loading' | 'success' | 'error';
+      error?: string;
+    }>) => {
+      const { step, status, error } = action.payload;
+      state.submissionStatus[step] = status;
+      state.submissionErrors[step] = error || null;
     }
   }
 });
@@ -223,7 +258,8 @@ export const {
   addProject,
   updateProject,
   removeProject,
-  resetForm
+  resetForm,
+  setSubmissionStatus
 } = candidateOnboardingSlice.actions;
 
 export default candidateOnboardingSlice.reducer;

@@ -5,7 +5,6 @@ export interface UserProfile {
     user_name: string;
     first_name: string;
     last_name: string;
-    phone: string;
     dob: Date;
     description: string;
 }
@@ -17,7 +16,6 @@ export const createUserProfile = async (data: UserProfile) => {
             userName: data.user_name,
             firstName: data.first_name,
             lastName: data.last_name,
-            phone: data.phone,
             dob: data.dob,
             description: data.description,
             isActive: true,
@@ -30,7 +28,6 @@ export const createUserProfile = async (data: UserProfile) => {
             userName: true,
             firstName: true,
             lastName: true,
-            phone: true,
             dob: true,
             description: true
         }
