@@ -17,8 +17,15 @@ import CertificateStep from './steps/CertificateStep';
 import ProofOfWorkStep from './steps/ProofOfWorkStep';
 import ProjectStep from './steps/ProjectStep';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useAppSelector } from '@/redux/hooks';
-
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
+import { 
+  submitUserNameStep, 
+  submitPersonalInfoStep,
+  submitEducationStep,
+  submitCertificatesStep,
+  submitExperienceStep,
+  submitProjectsStep
+} from '@/redux/thunks/stepThunks';
 
 interface CandidateOnboardingState {
   userName: string;
@@ -55,12 +62,46 @@ export default function StepContainer({
   const { register, watch, setValue, formState: { errors } } = form;
   const [showSummary, setShowSummary] = useState(false);
   const candidateState = useAppSelector(state => state.candidateOnboarding);
-
-  const handleSubmit = () => {
-
-    setShowSummary(true);
-
+  const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const handleStepSubmit = async () => {
     onValidateAndProceed();
+    setIsSubmitting(true);
+    try {
+      let response;
+      switch (currentStep) {
+        case 1:
+          response = await dispatch(submitUserNameStep()).unwrap();
+          break;
+        case 2:
+          response = await dispatch(submitPersonalInfoStep()).unwrap();
+          break;
+        case 3:
+          response = await dispatch(submitEducationStep()).unwrap();
+          break;
+        case 4:
+          response = await dispatch(submitCertificatesStep()).unwrap();
+          break;
+        case 5:
+          response = await dispatch(submitExperienceStep()).unwrap();
+          break;
+        case 6:
+          response = await dispatch(submitProjectsStep()).unwrap();          
+          setShowSummary(true);
+          break;
+        default:
+          break;
+      }
+            
+      if (response) {        
+        onValidateAndProceed();
+      }
+    } catch (error) {      
+      console.error("Error submitting step:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStep = (): ReactNode => {
@@ -73,7 +114,8 @@ export default function StepContainer({
             register={register}
             watch={watch}
             setValue={setValue}
-            onNextStep={onValidateAndProceed}
+            onNextStep={handleStepSubmit}
+            isSubmitting={isSubmitting}
           />
         );
       case 2:
@@ -89,8 +131,9 @@ export default function StepContainer({
             register={register}
             watch={watch}
             setValue={setValue}
-            onNextStep={onValidateAndProceed}
+            onNextStep={handleStepSubmit}
             onPreviousStep={onPreviousStep}
+            isSubmitting={isSubmitting}
           />
         );
       case 3:
@@ -103,12 +146,13 @@ export default function StepContainer({
             register={register}
             watch={watch}
             setValue={setValue}
-            onNextStep={onValidateAndProceed}
+            onNextStep={handleStepSubmit}
             onPreviousStep={onPreviousStep}
             onAddEducation={() => { }}
             onRemoveEducation={() => { }}
             onUpdateEducation={() => { }}
             maxEducationEntries={5}
+            isSubmitting={isSubmitting}
           />
         );
       case 4:
@@ -121,12 +165,13 @@ export default function StepContainer({
             register={register}
             watch={watch}
             setValue={setValue}
-            onNextStep={onValidateAndProceed}
+            onNextStep={handleStepSubmit}
             onPreviousStep={onPreviousStep}
             onAddCertificate={() => { }}
             onRemoveCertificate={() => { }}
             onUpdateCertificate={() => { }}
             maxCertificateEntries={10}
+            isSubmitting={isSubmitting}
           />
         );
       case 5:
@@ -139,11 +184,12 @@ export default function StepContainer({
             register={register}
             watch={watch}
             setValue={setValue}
-            onNextStep={onValidateAndProceed}
+            onNextStep={handleStepSubmit}
             onPreviousStep={onPreviousStep}
             onAddProofOfWork={() => { }}
             onRemoveProofOfWork={() => { }}
             onUpdateProofOfWork={() => { }}
+            isSubmitting={isSubmitting}
           />
         );
       case 6:
@@ -156,11 +202,12 @@ export default function StepContainer({
             register={register}
             watch={watch}
             setValue={setValue}
-            onNextStep={handleSubmit}
+            onNextStep={handleStepSubmit}
             onPreviousStep={onPreviousStep}
             onAddProject={() => { }}
             onRemoveProject={() => { }}
             onUpdateProject={() => { }}
+            isSubmitting={isSubmitting}
           />
         );
       default:
@@ -183,7 +230,7 @@ export default function StepContainer({
 
           {/* scroll only this inner area */}
           <div
-            className="mt-4 overflow-auto max-h-[400] bg-gray-100 p-4 rounded-md text-xs w-full box-border"
+            className="mt-4 overflow-auto max-h-[70vh] bg-gray-100 p-4 pb-8 rounded-md text-xs w-full box-border"
           >
             <pre className="w-full">{JSON.stringify(candidateState, null, 2)}</pre>
           </div>

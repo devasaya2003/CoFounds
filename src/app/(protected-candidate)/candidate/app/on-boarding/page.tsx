@@ -19,9 +19,7 @@ export default function CandidateOnboarding() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-
   const onboarding = useAppSelector(state => state.candidateOnboarding);
-
 
   const form = useForm<OnboardingFormFields>({
     defaultValues: {
@@ -40,12 +38,10 @@ export default function CandidateOnboarding() {
 
   const { watch, reset, register, handleSubmit } = form;
 
-
   const { goToPreviousStep, goToNextStep, goToStep } = useOnboardingNavigation(
     onboarding.currentStep,
     onboarding.steps
   );
-
 
   useEffect(() => {
     register('description', { required: 'Description is required' });
@@ -53,7 +49,6 @@ export default function CandidateOnboarding() {
       validate: value => (value && value.length > 0) || 'At least one skill is required'
     });
   }, [register]);
-
 
   const validateAndGoToNextStep = () => {
     const formData = watch();
@@ -64,13 +59,12 @@ export default function CandidateOnboarding() {
       setShowAlert(true);
       return false;
     }
-
-
-    goToNextStep();
+    
+    // No need to call goToNextStep here as it will be called after API submission
     return true;
   };
 
-
+  // This now only validates the form data, API calls happen in StepContainer
   const completeFormReset = () => {
     dispatch(resetForm());
     reset({
@@ -86,21 +80,18 @@ export default function CandidateOnboarding() {
     });
     setShowAlert(false);
 
-
     if (onboarding.currentStep !== 1) {
-
       if (typeof goToStep === 'function') {
         goToStep(1);
       } else {
-
         window.location.hash = onboarding.steps[0];
       }
     }
   };
 
-
   const onSubmit: SubmitHandler<OnboardingFormFields> = (data) => {
-    // console.log('Form data to submit:', data);
+    // This is now handled in StepContainer with individual API calls
+    console.log('Form validated:', data);
   };
 
   return (
@@ -144,6 +135,7 @@ export default function CandidateOnboarding() {
             type="button"
             onClick={completeFormReset}
             className="text-sm text-gray-500 hover:text-gray-700"
+            disabled={onboarding.status === 'submitting'}
           >
             Reset Form
           </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertCircle, Loader2 } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import FormInput from '@/components/FormElements/FormInput';
 import RichTextEditor from '@/components/RichTextEditor/RichTextEditor';
@@ -27,11 +27,11 @@ export default function PersonalInfoStep({
   watch,
   setValue,
   onNextStep,
-  onPreviousStep
+  onPreviousStep,
+  isSubmitting 
 }: PersonalInfoStepProps) {
   const dispatch = useAppDispatch();
   const selectedSkills = watch('skills') || [];
-  
   
   const currentYear = new Date().getFullYear();
   
@@ -45,16 +45,17 @@ export default function PersonalInfoStep({
     { value: '11', label: 'November' }, { value: '12', label: 'December' }
   ];
   
-  
   const dobYear = watch('dateOfBirth.year') || '';
   const dobMonth = watch('dateOfBirth.month') || '';
   const dobDay = watch('dateOfBirth.day') || '';
   
   const handleEditorChange = (html: string) => {
+    
+    if (isSubmitting) return;
+    
     setValue('description', html);
     dispatch(setDescription(html));
   };
-  
   
   useEffect(() => {
     if (formState.dateOfBirth) {
@@ -64,8 +65,10 @@ export default function PersonalInfoStep({
     }
   }, [formState.dateOfBirth, setValue]);
   
-  
   const handleDOBChange = (field: 'year' | 'month' | 'day', value: string) => {
+    
+    if (isSubmitting) return;
+    
     const updatedDOB = {
       year: field === 'year' ? value : dobYear,
       month: field === 'month' ? value : dobMonth,
@@ -91,6 +94,7 @@ export default function PersonalInfoStep({
           error={errors.firstName?.message}
           {...register('firstName', { required: 'First name is required' })}
           onChange={(e) => dispatch(setFirstName(e.target.value))}
+          disabled={isSubmitting} 
         />
         
         <FormInput
@@ -101,6 +105,7 @@ export default function PersonalInfoStep({
           error={errors.lastName?.message}
           {...register('lastName', { required: 'Last name is required' })}
           onChange={(e) => dispatch(setLastName(e.target.value))}
+          disabled={isSubmitting} 
         />
       </div>
 
@@ -119,6 +124,7 @@ export default function PersonalInfoStep({
           onMonthChange={(month) => handleDOBChange('month', month)}
           onDayChange={(day) => handleDOBChange('day', day)}
           error={errors.dateOfBirth?.message}
+          disabled={isSubmitting} 
         />
         {errors.dateOfBirth && (
           <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -135,16 +141,23 @@ export default function PersonalInfoStep({
         <PaginatedSkillsSelector
           selectedSkills={selectedSkills}
           onSkillSelect={(skill: SkillWithLevel) => {
+            
+            if (isSubmitting) return;
+            
             const updatedSkills = [...selectedSkills, skill];
             setValue('skills', updatedSkills);
             dispatch(addSkill(skill));
           }}
           onSkillRemove={(skillId: string) => {
+            if (isSubmitting) return;
+            
             const updatedSkills = selectedSkills.filter(s => s.id !== skillId);
             setValue('skills', updatedSkills);
             dispatch(removeSkill(skillId));
           }}
           onSkillLevelChange={(skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => {
+            if (isSubmitting) return;
+            
             const updatedSkills = selectedSkills.map(skill => 
               skill.id === skillId ? { ...skill, level } : skill
             );
@@ -152,6 +165,7 @@ export default function PersonalInfoStep({
             dispatch(updateSkillLevel({ skillId, level }));
           }}
           error={errors.skills?.message}
+          disabled={isSubmitting} 
         />
       </div>
       
@@ -164,6 +178,7 @@ export default function PersonalInfoStep({
         <RichTextEditor 
           initialValue={formState.description}
           onChange={handleEditorChange}
+          disabled={isSubmitting} 
         />
         {errors.description && (
           <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -176,8 +191,9 @@ export default function PersonalInfoStep({
       <div className="flex justify-between pt-4">
         <button
           type="button"
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={onPreviousStep}
+          disabled={isSubmitting} 
         >
           <ChevronLeft className="mr-1 h-4 w-4" />
           Previous Step
@@ -185,11 +201,21 @@ export default function PersonalInfoStep({
         
         <button
           type="button"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={onNextStep}
+          disabled={isSubmitting} 
         >
-          Next Step
-          <ChevronRight className="ml-1 h-4 w-4" />
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              Saving...
+            </>
+          ) : (
+            <>
+              Next Step
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </>
+          )}
         </button>
       </div>
     </div>

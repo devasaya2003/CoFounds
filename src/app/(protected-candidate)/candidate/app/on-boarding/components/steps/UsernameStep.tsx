@@ -5,7 +5,7 @@ import { useAppDispatch } from '@/redux/hooks';
 import FormInput from '@/components/FormElements/FormInput';
 import { UsernameStepProps } from '../types';
 import { setUserName } from '@/redux/slices/candidateOnboardingSlice';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { VALIDATE_USERNAME } from '@/utils/regex_utils/regex_validations';
 import { debounce } from 'lodash';
 import { fetchWithAuth_GET } from '@/utils/api';
@@ -21,15 +21,16 @@ export default function UsernameStep({
   errors,
   register,
   setValue,
-  onNextStep
+  onNextStep,
+  isSubmitting
 }: UsernameStepProps) {
   const dispatch = useAppDispatch();
   const [isChecking, setIsChecking] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [validationMessage, setValidationMessage] = useState('');
 
-  const checkUsername = debounce(async (username: string) => {
-
+  // First, define the actual username check function with proper dependencies
+  const checkUsernameImmediate = useCallback(async (username: string) => {
     if (!username || username.length < 3) {
       setIsAvailable(null);
       setValidationMessage('');
@@ -59,7 +60,13 @@ export default function UsernameStep({
     } finally {
       setIsChecking(false);
     }
-  }, 500);
+  }, [setIsAvailable, setIsChecking, setValidationMessage]);
+  
+  // Then create a debounced version that will be stable across renders
+  const checkUsername = useMemo(
+    () => debounce(checkUsernameImmediate, 500),
+    [checkUsernameImmediate]
+  );
   
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -76,12 +83,12 @@ export default function UsernameStep({
     }
   };
   
-  // // Clear validation when component unmounts
-  // useEffect(() => {
-  //   return () => {
-  //     checkUsername.cancel();
-  //   };
-  // }, [checkUsername]);
+  // Don't forget to cancel the debounce when unmounting
+  useEffect(() => {
+    return () => {
+      checkUsername.cancel();
+    };
+  }, [checkUsername]);
   
   return (
     <div className="space-y-6">
@@ -107,6 +114,7 @@ export default function UsernameStep({
           })}
           onChange={handleUsernameChange}
           placeholder="e.g., john_doe"
+          disabled={isSubmitting} // Disable input during submission
         />
         
         {/* Validation status */}
@@ -133,10 +141,19 @@ export default function UsernameStep({
           type="button"
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={onNextStep}
-          disabled={!isAvailable || isChecking || !!errors.userName}
+          disabled={!isAvailable || isChecking || !!errors.userName || isSubmitting}
         >
-          Next Step
-          <ChevronRight className="ml-1 h-4 w-4" />
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              Saving...
+            </>
+          ) : (
+            <>
+              Next Step
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </>
+          )}
         </button>
       </div>
     </div>

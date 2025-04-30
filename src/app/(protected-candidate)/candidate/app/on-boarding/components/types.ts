@@ -32,7 +32,6 @@ export interface OnboardingFormFields {
   projects: Project[];
 }
 
-// 
 export interface BaseStepProps {
   errors: FieldErrors<OnboardingFormFields>;
   register: UseFormRegister<OnboardingFormFields>;
@@ -40,6 +39,7 @@ export interface BaseStepProps {
   setValue: UseFormSetValue<OnboardingFormFields>;
   onNextStep: () => void;
   onPreviousStep?: () => void;
+  isSubmitting?: boolean; // Add this line
 }
 
 

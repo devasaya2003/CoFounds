@@ -7,12 +7,14 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Highlight from '@tiptap/extension-highlight';
 import { EditorToolbar } from './EditorToolbar';
+import { useEffect } from 'react';
 
 interface RichTextEditorProps {
   initialValue?: string;
   onChange?: (html: string) => void;
   placeholder?: string;
   minHeight?: string;
+  disabled?: boolean; // Add this prop
 }
 
 export default function RichTextEditor({
@@ -20,6 +22,7 @@ export default function RichTextEditor({
   onChange,
   placeholder = 'Start writing...',
   minHeight = '200px',
+  disabled = false // Add default value
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -50,20 +53,30 @@ export default function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: `prose prose-lg max-w-none focus:outline-none px-4 py-2`,
+        class: `prose prose-lg max-w-none focus:outline-none px-4 py-2 ${disabled ? 'cursor-not-allowed opacity-75' : ''}`,
         style: `min-height: ${minHeight}`,
       },
     },
+    editable: !disabled, // Set editor to readonly when disabled
     immediatelyRender: false,
   });
+
+  // Update editable state when disabled prop changes
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(!disabled);
+    }
+  }, [disabled, editor]);
 
   if (!editor) {
     return null;
   }
 
   return (
-    <div className="bg-white rounded-md border border-gray-300 overflow-hidden">
-      <EditorToolbar editor={editor} />
+    <div className={`bg-white rounded-md border border-gray-300 overflow-hidden ${
+      disabled ? 'bg-gray-50' : ''
+    }`}>
+      <EditorToolbar editor={editor} disabled={disabled} />
       <EditorContent editor={editor} />
     </div>
   );
