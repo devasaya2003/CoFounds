@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { X, UploadCloud } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Certificate } from "@/types/candidate_onboarding";
@@ -11,7 +11,6 @@ import DateSelector from '@/components/DateSelector/DateSelector';
 import MarkdownEditor from '@/components/RichTextEditor/RichTextEditor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useState } from 'react';
-import { UploadCloud } from 'lucide-react';
 
 interface CertificateFormProps {
     certificate: Certificate;
@@ -25,6 +24,7 @@ interface CertificateFormProps {
     months: { value: string; label: string }[];
     days: string[];
     errors?: CertificateFieldErrors;
+    disabled?: boolean; // Add disabled prop
 }
 
 export default function CertificateForm({
@@ -39,23 +39,28 @@ export default function CertificateForm({
     months,
     days,
     errors,
+    disabled = false, // Add disabled prop with default value
 }: CertificateFormProps) {
     const [uploading, setUploading] = useState(false);
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (disabled) return; // Skip if disabled
         onUpdate({ title: e.target.value });
     };
 
     const handleDescriptionChange = (value: string) => {
+        if (disabled) return; // Skip if disabled
         onUpdate({ description: value });
         setValue(`certificates.${index}.description`, value);
     };
 
     const handleExternalUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (disabled) return; // Skip if disabled
         onUpdate({ externalUrl: e.target.value });
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (disabled) return; // Skip if disabled
         if (!e.target.files || e.target.files.length === 0) return;
 
         const file = e.target.files[0];
@@ -80,7 +85,10 @@ export default function CertificateForm({
             <button
                 type="button"
                 onClick={onRemove}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                disabled={disabled} // Disable when form is submitting
+                className={`absolute top-4 right-4 text-gray-400 hover:text-gray-600 ${
+                    disabled ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
             >
                 <X className="h-5 w-5" />
             </button>
@@ -96,6 +104,7 @@ export default function CertificateForm({
                     value={certificate.title}
                     onChange={handleTitleChange}
                     className={errors?.title ? "border-red-500" : ""}
+                    disabled={disabled} // Disable when form is submitting
                 />
                 {errors?.title && (
                     <p className="mt-1 text-sm text-red-600">
@@ -111,6 +120,7 @@ export default function CertificateForm({
                 <MarkdownEditor
                     initialValue={certificate.description}
                     onChange={handleDescriptionChange}
+                    disabled={disabled} // Disable when form is submitting
                 />
                 {errors?.description && (
                     <p className="mt-1 text-sm text-red-600">
@@ -131,23 +141,27 @@ export default function CertificateForm({
                         selectedMonth={certificate.startDate.month}
                         selectedDay={certificate.startDate.day}
                         onYearChange={(year) => {
+                            if (disabled) return; // Skip if disabled
                             onUpdate({
                                 startDate: { ...certificate.startDate, year }
                             });
                             setValue(`certificates.${index}.startDate.year`, year);
                         }}
                         onMonthChange={(month) => {
+                            if (disabled) return; // Skip if disabled
                             onUpdate({
                                 startDate: { ...certificate.startDate, month }
                             });
                             setValue(`certificates.${index}.startDate.month`, month);
                         }}
                         onDayChange={(day) => {
+                            if (disabled) return; // Skip if disabled
                             onUpdate({
                                 startDate: { ...certificate.startDate, day }
                             });
                             setValue(`certificates.${index}.startDate.day`, day);
                         }}
+                        disabled={disabled} // Disable when form is submitting
                     />
                 </div>
 
@@ -162,23 +176,27 @@ export default function CertificateForm({
                         selectedMonth={certificate.endDate?.month || ""}
                         selectedDay={certificate.endDate?.day || ""}
                         onYearChange={(year) => {
+                            if (disabled) return; // Skip if disabled
                             onUpdate({
                                 endDate: { ...(certificate.endDate || { year: "", month: "", day: "" }), year }
                             });
                             setValue(`certificates.${index}.endDate.year`, year);
                         }}
                         onMonthChange={(month) => {
+                            if (disabled) return; // Skip if disabled
                             onUpdate({
                                 endDate: { ...(certificate.endDate || { year: "", month: "", day: "" }), month }
                             });
                             setValue(`certificates.${index}.endDate.month`, month);
                         }}
                         onDayChange={(day) => {
+                            if (disabled) return; // Skip if disabled
                             onUpdate({
                                 endDate: { ...(certificate.endDate || { year: "", month: "", day: "" }), day }
                             });
                             setValue(`certificates.${index}.endDate.day`, day);
                         }}
+                        disabled={disabled} // Disable when form is submitting
                     />
                 </div>
             </div>
@@ -189,8 +207,8 @@ export default function CertificateForm({
                 </Label>
                 <Tabs defaultValue="url">
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="url">External URL</TabsTrigger>
-                        <TabsTrigger value="upload">Upload File</TabsTrigger>
+                        <TabsTrigger value="url" disabled={disabled}>External URL</TabsTrigger>
+                        <TabsTrigger value="upload" disabled={disabled}>Upload File</TabsTrigger>
                     </TabsList>
                     <TabsContent value="url" className="pt-4">
                         <Input
@@ -199,20 +217,27 @@ export default function CertificateForm({
                             placeholder="https://example.com/certificate"
                             value={certificate.externalUrl || ""}
                             onChange={handleExternalUrlChange}
+                            disabled={disabled} // Disable when form is submitting
                         />
                     </TabsContent>
                     <TabsContent value="upload" className="pt-4">
-                        <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                        <div className={`border-2 border-dashed border-gray-300 rounded-md p-6 text-center ${
+                            disabled ? 'opacity-70 bg-gray-50' : ''
+                        }`}>
                             {certificate.fileUrl ? (
                                 <div className="flex flex-col items-center">
                                     <p className="mb-2 font-medium text-green-600">File uploaded successfully</p>
                                     <button
                                         type="button"
-                                        className="text-red-500 hover:text-red-600 mt-2 text-sm"
+                                        className={`text-red-500 hover:text-red-600 mt-2 text-sm ${
+                                            disabled ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
                                         onClick={() => {
+                                            if (disabled) return; // Skip if disabled
                                             onUpdate({ fileUrl: "" });
                                             setValue(`certificates.${index}.fileUrl`, "");
                                         }}
+                                        disabled={disabled} // Disable when form is submitting
                                     >
                                         Remove file
                                     </button>
@@ -225,10 +250,13 @@ export default function CertificateForm({
                                         className="hidden"
                                         onChange={handleFileUpload}
                                         accept="application/pdf,image/*"
+                                        disabled={disabled} // Disable when form is submitting
                                     />
                                     <label
                                         htmlFor={`file-upload-${certificate.id}`}
-                                        className="cursor-pointer flex flex-col items-center justify-center"
+                                        className={`cursor-pointer flex flex-col items-center justify-center ${
+                                            disabled ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
                                     >
                                         <UploadCloud className="h-12 w-12 text-gray-400 mb-3" />
                                         <p className="text-sm font-medium mb-1">

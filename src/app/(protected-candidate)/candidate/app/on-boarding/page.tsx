@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import StepIndicator from '@/components/StepIndicator/StepIndicator';
 import Alert from '@/components/Alert/Alert';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { setStatus, resetForm } from '@/redux/slices/candidateOnboardingSlice';
+import { setStatus, resetForm, setStep } from '@/redux/slices/candidateOnboardingSlice';
 import { OnboardingFormFields } from './components/types';
 import { validateStep } from './utils/validation';
 import { useOnboardingNavigation } from './hooks/useOnboardingNavigation';
@@ -53,18 +53,17 @@ export default function CandidateOnboarding() {
   const validateAndGoToNextStep = () => {
     const formData = watch();
     const { isValid, errors: validationErrors } = validateStep(onboarding.currentStep, formData);
-
+  
     if (!isValid) {
       setAlertMessage(validationErrors.join(", "));
       setShowAlert(true);
       return false;
     }
-    
-    // No need to call goToNextStep here as it will be called after API submission
+        
+    dispatch(setStep(onboarding.currentStep + 1));
     return true;
   };
-
-  // This now only validates the form data, API calls happen in StepContainer
+  
   const completeFormReset = () => {
     dispatch(resetForm());
     reset({
@@ -89,8 +88,7 @@ export default function CandidateOnboarding() {
     }
   };
 
-  const onSubmit: SubmitHandler<OnboardingFormFields> = (data) => {
-    // This is now handled in StepContainer with individual API calls
+  const onSubmit: SubmitHandler<OnboardingFormFields> = (data) => {    
     console.log('Form validated:', data);
   };
 

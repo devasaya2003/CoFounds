@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, AlertCircle, Loader2 } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { Alert } from '@/components/ui/alert';
 import { ProofOfWork } from '@/types/candidate_onboarding';
@@ -20,6 +20,7 @@ export default function ProofOfWorkStep({
   onAddProofOfWork,
   onRemoveProofOfWork,
   onUpdateProofOfWork,
+  isSubmitting = false 
 }: ProofOfWorkStepProps) {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +44,9 @@ export default function ProofOfWorkStep({
   };
 
   const handleAddProofOfWork = () => {
+    
+    if (isSubmitting) return;
+    
     const newProofOfWork: ProofOfWork = {
       id: generateTempId(),
       title: '',
@@ -68,6 +72,9 @@ export default function ProofOfWorkStep({
   };
 
   const handleRemoveProofOfWork = (id: string) => {
+    
+    if (isSubmitting) return;
+    
     const updatedProofs = proofsOfWork.filter(pow => pow.id !== id);
     setValue('proofsOfWork', updatedProofs);
     dispatch(removeProofOfWork(id));
@@ -75,6 +82,8 @@ export default function ProofOfWorkStep({
   };
 
   const handleUpdateProofOfWork = (id: string, updates: Partial<ProofOfWork>) => {
+    
+    if (isSubmitting) return;
     
     if (updates.isCommunityWork !== undefined) {
       if (updates.isCommunityWork) {
@@ -113,7 +122,10 @@ export default function ProofOfWorkStep({
           <button
             type="button"
             onClick={handleAddProofOfWork}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto"
+            disabled={isSubmitting}
+            className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <Plus className="h-4 w-4 mr-1" />
             Add Work Experience
@@ -134,7 +146,8 @@ export default function ProofOfWorkStep({
               years={years}
               months={months}
               days={days}
-              errors={errors.proofsOfWork?.[index] as ProofOfWorkFieldErrors} 
+              errors={errors.proofsOfWork?.[index] as ProofOfWorkFieldErrors}
+              disabled={isSubmitting} 
             />
           ))}
 
@@ -142,7 +155,10 @@ export default function ProofOfWorkStep({
             <button
               type="button"
               onClick={handleAddProofOfWork}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+              disabled={isSubmitting}
+              className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <Plus className="h-4 w-4 mr-1" />
               Add Another Entry
@@ -154,8 +170,11 @@ export default function ProofOfWorkStep({
       <div className="flex justify-between pt-4 mt-6">
         <button
           type="button"
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+          className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           onClick={onPreviousStep}
+          disabled={isSubmitting}
         >
           <ChevronLeft className="mr-1 h-4 w-4" />
           Previous Step
@@ -163,11 +182,23 @@ export default function ProofOfWorkStep({
 
         <button
           type="button"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+          className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           onClick={onNextStep}
+          disabled={isSubmitting}
         >
-          Next Step
-          <ChevronRight className="ml-1 h-4 w-4" />
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              Saving...
+            </>
+          ) : (
+            <>
+              Next Step
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </>
+          )}
         </button>
       </div>
     </div>

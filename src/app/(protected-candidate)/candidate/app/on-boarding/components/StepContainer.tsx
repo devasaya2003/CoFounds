@@ -66,7 +66,36 @@ export default function StepContainer({
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleStepSubmit = async () => {
-    onValidateAndProceed();
+    let isValid = false;
+
+    switch (currentStep) {
+      case 1: 
+        isValid = await form.trigger('userName');
+        break;
+      case 2: 
+        isValid = await form.trigger(['firstName', 'lastName', 'description', 'skills']);
+        break;
+      case 3: 
+        isValid = await form.trigger('education');
+        break;
+      case 4: 
+        isValid = await form.trigger('certificates');
+        break;
+      case 5: 
+        isValid = await form.trigger('proofsOfWork');
+        break;
+      case 6: 
+        isValid = await form.trigger('projects');
+        break;
+      default:
+        isValid = false;
+    }
+    
+    console.log(`Step ${currentStep} validation result:`, isValid);
+    console.log("Current errors:", form.formState.errors);
+    
+    if (!isValid) return;
+
     setIsSubmitting(true);
     try {
       let response;
@@ -94,10 +123,11 @@ export default function StepContainer({
           break;
       }
             
-      if (response) {        
+      if (response) {
+        console.log("API response successful, moving to next step");
         onValidateAndProceed();
       }
-    } catch (error) {      
+    } catch (error) {
       console.error("Error submitting step:", error);
     } finally {
       setIsSubmitting(false);

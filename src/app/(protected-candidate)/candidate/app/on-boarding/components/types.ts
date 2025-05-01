@@ -39,7 +39,7 @@ export interface BaseStepProps {
   setValue: UseFormSetValue<OnboardingFormFields>;
   onNextStep: () => void;
   onPreviousStep?: () => void;
-  isSubmitting?: boolean; // Add this line
+  isSubmitting?: boolean;
 }
 
 

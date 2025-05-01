@@ -21,7 +21,8 @@ interface ProofOfWorkFormProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
-  errors?: ProofOfWorkFieldErrors; 
+  errors?: ProofOfWorkFieldErrors;
+  disabled?: boolean; 
 }
 
 export default function ProofOfWorkForm({
@@ -36,24 +37,28 @@ export default function ProofOfWorkForm({
   months,
   days,
   errors,
+  disabled = false, 
 }: ProofOfWorkFormProps) {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return; 
     onUpdate({ title: e.target.value });
   };
 
   const handleCompanyNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return; 
     onUpdate({ company_name: e.target.value });
   };
 
   const handleDescriptionChange = (value: string) => {
+    if (disabled) return; 
     onUpdate({ description: value });
     setValue(`proofsOfWork.${index}.description`, value);
   };
 
   const handleCommunityWorkChange = (checked: boolean) => {
+    if (disabled) return; 
     onUpdate({ 
       isCommunityWork: checked,
-      
       company_name: checked ? 'COF_PROOF_COMMUNITY' : ''
     });
     setValue(`proofsOfWork.${index}.isCommunityWork`, checked);
@@ -61,6 +66,7 @@ export default function ProofOfWorkForm({
   };
 
   const handleCurrentlyWorkingChange = (checked: boolean) => {
+    if (disabled) return; 
     onUpdate({
       currentlyWorking: checked,
       endDate: checked ? null : {
@@ -86,7 +92,10 @@ export default function ProofOfWorkForm({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        disabled={disabled} 
+        className={`absolute top-4 right-4 text-gray-400 hover:text-gray-600 ${
+          disabled ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       >
         <X className="h-5 w-5" />
       </button>
@@ -96,10 +105,11 @@ export default function ProofOfWorkForm({
           id={`proofsOfWork.${index}.isCommunityWork`}
           checked={proofOfWork.isCommunityWork}
           onCheckedChange={handleCommunityWorkChange}
+          disabled={disabled} 
         />
         <Label
           htmlFor={`proofsOfWork.${index}.isCommunityWork`}
-          className="ml-2 text-sm font-medium"
+          className={`ml-2 text-sm font-medium ${disabled ? 'opacity-70' : ''}`}
         >
           This is community work (public speaking, workshops, etc.)
         </Label>
@@ -116,6 +126,7 @@ export default function ProofOfWorkForm({
           value={proofOfWork.title}
           onChange={handleTitleChange}
           className={errors?.title ? "border-red-500" : ""}
+          disabled={disabled} 
         />
         {errors?.title && (
           <p className="mt-1 text-sm text-red-600">
@@ -137,6 +148,7 @@ export default function ProofOfWorkForm({
             value={proofOfWork.company_name}
             onChange={handleCompanyNameChange}
             className={errors?.company_name ? "border-red-500" : ""}
+            disabled={disabled} 
           />
           {errors?.company_name && (
             <p className="mt-1 text-sm text-red-600">
@@ -153,6 +165,7 @@ export default function ProofOfWorkForm({
         <RichTextEditor
           initialValue={proofOfWork.description}
           onChange={handleDescriptionChange}
+          disabled={disabled} 
         />
         {errors?.description && (
           <p className="mt-1 text-sm text-red-600">
@@ -173,23 +186,27 @@ export default function ProofOfWorkForm({
             selectedMonth={proofOfWork.startDate.month}
             selectedDay={proofOfWork.startDate.day}
             onYearChange={(year) => {
+              if (disabled) return; 
               onUpdate({
                 startDate: { ...proofOfWork.startDate, year }
               });
               setValue(`proofsOfWork.${index}.startDate.year`, year);
             }}
             onMonthChange={(month) => {
+              if (disabled) return; 
               onUpdate({
                 startDate: { ...proofOfWork.startDate, month }
               });
               setValue(`proofsOfWork.${index}.startDate.month`, month);
             }}
             onDayChange={(day) => {
+              if (disabled) return; 
               onUpdate({
                 startDate: { ...proofOfWork.startDate, day }
               });
               setValue(`proofsOfWork.${index}.startDate.day`, day);
             }}
+            disabled={disabled} 
           />
         </div>
 
@@ -209,23 +226,27 @@ export default function ProofOfWorkForm({
               selectedMonth={proofOfWork.endDate?.month || ""}
               selectedDay={proofOfWork.endDate?.day || ""}
               onYearChange={(year) => {
+                if (disabled) return; 
                 onUpdate({
                   endDate: { ...(proofOfWork.endDate || { year: "", month: "", day: "" }), year }
                 });
                 setValue(`proofsOfWork.${index}.endDate.year`, year);
               }}
               onMonthChange={(month) => {
+                if (disabled) return; 
                 onUpdate({
                   endDate: { ...(proofOfWork.endDate || { year: "", month: "", day: "" }), month }
                 });
                 setValue(`proofsOfWork.${index}.endDate.month`, month);
               }}
               onDayChange={(day) => {
+                if (disabled) return; 
                 onUpdate({
                   endDate: { ...(proofOfWork.endDate || { year: "", month: "", day: "" }), day }
                 });
                 setValue(`proofsOfWork.${index}.endDate.day`, day);
               }}
+              disabled={disabled} 
             />
           )}
         </div>
@@ -236,10 +257,11 @@ export default function ProofOfWorkForm({
           id={`proofsOfWork.${index}.currentlyWorking`}
           checked={proofOfWork.currentlyWorking}
           onCheckedChange={handleCurrentlyWorkingChange}
+          disabled={disabled} 
         />
         <Label
           htmlFor={`proofsOfWork.${index}.currentlyWorking`}
-          className="ml-2 text-sm font-medium"
+          className={`ml-2 text-sm font-medium ${disabled ? 'opacity-70' : ''}`}
         >
           I am currently working on this
         </Label>

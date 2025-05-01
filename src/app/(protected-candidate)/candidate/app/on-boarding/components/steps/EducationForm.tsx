@@ -22,13 +22,14 @@ interface EducationFormProps {
   years: string[];
   months: { value: string; label: string }[];
   days: string[];
-  errors?: EducationFieldErrors; 
+  errors?: EducationFieldErrors;
   currentlyStudying: boolean;
   onCurrentlyStudyingChange: (checked: boolean) => void;
   degrees: { id: string; name: string }[];
   isLoadingDegrees: boolean;
   onUpdateDegrees: (updatedDegrees: { id: string; name: string }[]) => void;
-  excludeDegreeIds?: string[]; 
+  excludeDegreeIds?: string[];
+  disabled?: boolean;
 }
 
 export default function EducationForm({
@@ -48,18 +49,22 @@ export default function EducationForm({
   degrees,
   isLoadingDegrees,
   onUpdateDegrees,
-  excludeDegreeIds = [], 
+  excludeDegreeIds = [],
+  disabled = false,
 }: EducationFormProps) {
   const handleInstitutionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     onUpdate({ institution: e.target.value });
   };
 
   const handleDegreeChange = (degreeId: string, degreeName: string) => {
+    if (disabled) return;
     onUpdate({ degree: degreeId });
     setValue(`education.${index}.degree`, degreeId);
   };
 
   const handleClearDegree = () => {
+    if (disabled) return;
     onUpdate({ degree: '' });
     setValue(`education.${index}.degree`, '');
   };
@@ -70,7 +75,9 @@ export default function EducationForm({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        disabled={disabled}
+        className={`absolute top-4 right-4 text-gray-400 hover:text-gray-600 ${disabled ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
       >
         <X className="h-5 w-5" />
       </button>
@@ -86,6 +93,7 @@ export default function EducationForm({
           value={education.institution}
           onChange={handleInstitutionChange}
           className={errors?.institution ? "border-red-500" : ""}
+          disabled={disabled}
         />
         {errors?.institution && (
           <p className="mt-1 text-sm text-red-600">
@@ -105,7 +113,8 @@ export default function EducationForm({
           error={errors?.degree?.message}
           isLoading={isLoadingDegrees}
           initialDegrees={degrees}
-          excludeDegreeIds={excludeDegreeIds} 
+          excludeDegreeIds={excludeDegreeIds}
+          disabled={disabled}
         />
       </div>
 
@@ -121,23 +130,27 @@ export default function EducationForm({
             selectedMonth={education.startDate.month}
             selectedDay={education.startDate.day}
             onYearChange={(year) => {
+              if (disabled) return;
               onUpdate({
                 startDate: { ...education.startDate, year }
               });
               setValue(`education.${index}.startDate.year`, year);
             }}
             onMonthChange={(month) => {
+              if (disabled) return;
               onUpdate({
                 startDate: { ...education.startDate, month }
               });
               setValue(`education.${index}.startDate.month`, month);
             }}
             onDayChange={(day) => {
+              if (disabled) return;
               onUpdate({
                 startDate: { ...education.startDate, day }
               });
               setValue(`education.${index}.startDate.day`, day);
             }}
+            disabled={disabled}
           />
         </div>
 
@@ -157,23 +170,27 @@ export default function EducationForm({
               selectedMonth={education.endDate?.month || ""}
               selectedDay={education.endDate?.day || ""}
               onYearChange={(year) => {
+                if (disabled) return;
                 onUpdate({
                   endDate: { ...(education.endDate || { year: "", month: "", day: "" }), year }
                 });
                 setValue(`education.${index}.endDate.year`, year);
               }}
               onMonthChange={(month) => {
+                if (disabled) return;
                 onUpdate({
                   endDate: { ...(education.endDate || { year: "", month: "", day: "" }), month }
                 });
                 setValue(`education.${index}.endDate.month`, month);
               }}
               onDayChange={(day) => {
+                if (disabled) return;
                 onUpdate({
                   endDate: { ...(education.endDate || { year: "", month: "", day: "" }), day }
                 });
                 setValue(`education.${index}.endDate.day`, day);
               }}
+              disabled={disabled}
             />
           )}
         </div>
@@ -183,11 +200,15 @@ export default function EducationForm({
         <Checkbox
           id={`education.${index}.currentlyStudying`}
           checked={currentlyStudying}
-          onCheckedChange={onCurrentlyStudyingChange}
+          onCheckedChange={(checked) => {
+            if (disabled) return;
+            onCurrentlyStudyingChange(checked as boolean);
+          }}
+          disabled={disabled}
         />
         <Label
           htmlFor={`education.${index}.currentlyStudying`}
-          className="ml-2 text-sm font-medium"
+          className={`ml-2 text-sm font-medium ${disabled ? 'opacity-70' : ''}`}
         >
           Currently studying here
         </Label>

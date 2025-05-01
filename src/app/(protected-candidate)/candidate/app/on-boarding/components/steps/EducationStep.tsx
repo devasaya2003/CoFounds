@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, AlertCircle, Loader2 } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { Alert } from '@/components/ui/alert';
 import { Education } from "@/types/candidate_onboarding";
@@ -22,6 +22,7 @@ export default function EducationStep({
   onRemoveEducation,
   onUpdateEducation,
   maxEducationEntries = 5,
+  isSubmitting = false // Add isSubmitting prop with default value
 }: EducationStepProps) {
   const dispatch = useAppDispatch();
   const [degrees, setDegrees] = useState<{ id: string, name: string }[]>([]);
@@ -66,6 +67,9 @@ export default function EducationStep({
   };
 
   const handleAddEducation = () => {
+    // Don't allow adding when submitting
+    if (isSubmitting) return;
+
     if (educations.length < maxEducationEntries) {
       const newEducation: Education = {
         id: generateTempId(),
@@ -91,6 +95,9 @@ export default function EducationStep({
   };
 
   const handleRemoveEducation = (id: string) => {
+    // Don't allow removing when submitting
+    if (isSubmitting) return;
+
     const updatedEducations = educations.filter(edu => edu.id !== id);
     setValue('education', updatedEducations);
     dispatch(removeEducation(id));
@@ -98,6 +105,9 @@ export default function EducationStep({
   };
 
   const handleUpdateEducation = (id: string, updates: Partial<Education>) => {
+    // Don't allow updates when submitting
+    if (isSubmitting) return;
+
     const updatedEducations = educations.map(edu =>
       edu.id === id ? { ...edu, ...updates } : edu
     );
@@ -107,6 +117,9 @@ export default function EducationStep({
   };
 
   const handleUpdateDegrees = (newDegrees: { id: string, name: string }[]) => {
+    // Don't update degrees when submitting
+    if (isSubmitting) return;
+
     setAllDegrees(newDegrees);
   };
 
@@ -134,7 +147,9 @@ export default function EducationStep({
           <button
             type="button"
             onClick={handleAddEducation}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto"
+            className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            disabled={isSubmitting}
           >
             <Plus className="h-4 w-4 mr-1" />
             Add Education
@@ -174,6 +189,7 @@ export default function EducationStep({
                 isLoadingDegrees={isLoading}
                 onUpdateDegrees={handleUpdateDegrees}
                 excludeDegreeIds={excludeIds}
+                disabled={isSubmitting} // Pass disabled state to the form
               />
             );
           })}
@@ -183,7 +199,9 @@ export default function EducationStep({
               <button
                 type="button"
                 onClick={handleAddEducation}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+                className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                disabled={isSubmitting}
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Another Education ({educations.length}/{maxEducationEntries})
@@ -196,8 +214,10 @@ export default function EducationStep({
       <div className="flex justify-between pt-4 mt-6">
         <button
           type="button"
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+          className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           onClick={onPreviousStep}
+          disabled={isSubmitting}
         >
           <ChevronLeft className="mr-1 h-4 w-4" />
           Previous Step
@@ -205,11 +225,22 @@ export default function EducationStep({
 
         <button
           type="button"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+          className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           onClick={onNextStep}
+          disabled={isSubmitting}
         >
-          Next Step
-          <ChevronRight className="ml-1 h-4 w-4" />
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              Saving...
+            </>
+          ) : (
+            <>
+              Next Step
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </>
+          )}
         </button>
       </div>
     </div>

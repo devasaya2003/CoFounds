@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, AlertCircle, Loader2 } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { Alert } from '@/components/ui/alert';
 import { Certificate } from "@/types/candidate_onboarding";
@@ -21,6 +21,7 @@ export default function CertificateStep({
   onRemoveCertificate,
   onUpdateCertificate,
   maxCertificateEntries = 10,
+  isSubmitting = false 
 }: CertificatesStepProps) {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +45,9 @@ export default function CertificateStep({
   };
 
   const handleAddCertificate = () => {
+    
+    if (isSubmitting) return;
+    
     if (certificates.length < maxCertificateEntries) {
       const newCertificate: Certificate = {
         id: generateTempId(),
@@ -70,6 +74,9 @@ export default function CertificateStep({
   };
 
   const handleRemoveCertificate = (id: string) => {
+    
+    if (isSubmitting) return;
+    
     const updatedCertificates = certificates.filter(cert => cert.id !== id);
     setValue('certificates', updatedCertificates);
     dispatch(removeCertificate(id));
@@ -77,6 +84,9 @@ export default function CertificateStep({
   };
 
   const handleUpdateCertificate = (id: string, updates: Partial<Certificate>) => {
+    
+    if (isSubmitting) return;
+    
     const updatedCertificates = certificates.map(cert =>
       cert.id === id ? { ...cert, ...updates } : cert
     );
@@ -105,7 +115,10 @@ export default function CertificateStep({
           <button
             type="button"
             onClick={handleAddCertificate}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto"
+            disabled={isSubmitting}
+            className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <Plus className="h-4 w-4 mr-1" />
             Add Certificate
@@ -127,6 +140,7 @@ export default function CertificateStep({
               months={months}
               days={days}
               errors={errors.certificates?.[index] as CertificateFieldErrors}
+              disabled={isSubmitting} 
             />
           ))}
 
@@ -135,7 +149,10 @@ export default function CertificateStep({
               <button
                 type="button"
                 onClick={handleAddCertificate}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+                disabled={isSubmitting}
+                className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add Another Certificate ({certificates.length}/{maxCertificateEntries})
@@ -148,8 +165,11 @@ export default function CertificateStep({
       <div className="flex justify-between pt-4 mt-6">
         <button
           type="button"
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+          className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           onClick={onPreviousStep}
+          disabled={isSubmitting}
         >
           <ChevronLeft className="mr-1 h-4 w-4" />
           Previous Step
@@ -157,11 +177,23 @@ export default function CertificateStep({
 
         <button
           type="button"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+          className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           onClick={onNextStep}
+          disabled={isSubmitting}
         >
-          Next Step
-          <ChevronRight className="ml-1 h-4 w-4" />
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              Saving...
+            </>
+          ) : (
+            <>
+              Next Step
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </>
+          )}
         </button>
       </div>
     </div>

@@ -17,7 +17,8 @@ interface PaginatedDegreeSelectorProps {
   error?: string;
   isLoading?: boolean;
   initialDegrees?: Degree[];
-  excludeDegreeIds?: string[]; // Add this new prop
+  excludeDegreeIds?: string[];
+  disabled?: boolean;
 }
 
 export default function PaginatedDegreeSelector({
@@ -27,7 +28,8 @@ export default function PaginatedDegreeSelector({
   error,
   isLoading: externalLoading,
   initialDegrees = [],
-  excludeDegreeIds = [] // Default to empty array
+  excludeDegreeIds = [],
+  disabled = false
 }: PaginatedDegreeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,10 +41,10 @@ export default function PaginatedDegreeSelector({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
 
-  // Look up selected degree name when component loads or selection changes
+
   useEffect(() => {
     if (selectedDegree) {
-      // Find the degree in our loaded degrees
+
       const found = degrees.find(d => d.id === selectedDegree);
       if (found) {
         setSelectedDegreeName(found.name);
@@ -54,20 +56,20 @@ export default function PaginatedDegreeSelector({
     }
   }, [selectedDegree, degrees]);
 
-  // Load degrees when component mounts and when page changes
+
   useEffect(() => {
     const loadDegrees = async () => {
       setIsLoading(true);
       try {
         const result = await dispatch(fetchDegreesPaginated(currentPage)).unwrap();
-        
-        // On first page, replace degrees; on subsequent pages, append
+
+
         if (currentPage === 1) {
           setDegrees(result.degrees);
         } else {
           setDegrees(prev => [...prev, ...result.degrees]);
         }
-        
+
         setTotalPages(result.totalPages);
       } catch (error) {
         console.error('Failed to load degrees:', error);
@@ -79,7 +81,7 @@ export default function PaginatedDegreeSelector({
     loadDegrees();
   }, [dispatch, currentPage]);
 
-  // Handle click outside to close dropdown
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -93,21 +95,34 @@ export default function PaginatedDegreeSelector({
     };
   }, []);
 
-  // Filter degrees based on search term and exclusions
-  const filteredDegrees = searchTerm
-    ? [...degrees].filter(degree => 
-        degree.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        (degree.id === selectedDegree || !excludeDegreeIds.includes(degree.id))
-      )
-    : [...degrees].filter(degree => 
-        degree.id === selectedDegree || !excludeDegreeIds.includes(degree.id)
-      );
 
-  // Load more degrees
+  const filteredDegrees = searchTerm
+    ? [...degrees].filter(degree =>
+      degree.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (degree.id === selectedDegree || !excludeDegreeIds.includes(degree.id))
+    )
+    : [...degrees].filter(degree =>
+      degree.id === selectedDegree || !excludeDegreeIds.includes(degree.id)
+    );
+
+
   const loadMoreDegrees = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
     }
+  };
+
+
+  const handleToggleDropdown = () => {
+    if (disabled) return;
+    setIsOpen(!isOpen);
+  };
+
+
+  const handleClear = (e: React.MouseEvent) => {
+    if (disabled) return;
+    e.stopPropagation();
+    onClear();
   };
 
   return (
@@ -116,10 +131,13 @@ export default function PaginatedDegreeSelector({
       <div className="relative" ref={dropdownRef}>
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between px-4 py-2 text-left border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-            error ? 'border-red-500' : 'border-gray-300'
-          }`}
+          onClick={handleToggleDropdown}
+          disabled={disabled}
+          className={`w-full flex items-center justify-between px-4 py-2 text-left border rounded-md shadow-sm 
+            ${error ? 'border-red-500' : 'border-gray-300'}
+            ${disabled
+              ? 'bg-gray-100 cursor-not-allowed opacity-70'
+              : 'focus:outline-none focus:ring-2 focus:ring-indigo-500'}`}
         >
           <span className={`block truncate ${!selectedDegreeName ? 'text-gray-500' : ''}`}>
             {selectedDegreeName || 'Select a degree'}
@@ -130,17 +148,16 @@ export default function PaginatedDegreeSelector({
         {selectedDegree && (
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClear();
-            }}
-            className="absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={handleClear}
+            disabled={disabled}
+            className={`absolute right-10 top-1/2 transform -translate-y-1/2 text-gray-400 
+              ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:text-gray-600'}`}
           >
             <X className="h-4 w-4" />
           </button>
         )}
 
-        {isOpen && (
+        {isOpen && !disabled && (
           <div className="absolute z-10 w-full mt-1 bg-white shadow-lg rounded-md overflow-hidden border border-gray-200">
             <div className="p-2">
               <input
@@ -152,14 +169,14 @@ export default function PaginatedDegreeSelector({
                 autoFocus
               />
             </div>
-            
+
             <div className="max-h-60 overflow-y-auto">
               {filteredDegrees.length === 0 && !isLoading && searchTerm && (
                 <div className="px-4 py-2 text-gray-500">
                   No degrees found. Try a different search.
                 </div>
               )}
-              
+
               {filteredDegrees.map(degree => (
                 <button
                   key={degree.id}
@@ -169,21 +186,20 @@ export default function PaginatedDegreeSelector({
                     setSearchTerm('');
                     setIsOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none ${
-                    selectedDegree === degree.id ? 'bg-indigo-100' : ''
-                  }`}
+                  className={`w-full text-left px-4 py-2 hover:bg-indigo-50 focus:bg-indigo-50 focus:outline-none ${selectedDegree === degree.id ? 'bg-indigo-100' : ''
+                    }`}
                 >
                   {degree.name}
                 </button>
               ))}
-              
+
               {(isLoading || externalLoading) && (
                 <div className="flex justify-center items-center p-4">
                   <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
                   <span className="ml-2 text-indigo-600">Loading degrees...</span>
                 </div>
               )}
-              
+
               {!isLoading && !externalLoading && currentPage < totalPages && (
                 <button
                   type="button"

@@ -23,6 +23,7 @@ interface ProjectFormProps {
   months: { value: string; label: string }[];
   days: string[];
   errors?: ProjectFieldErrors;
+  disabled?: boolean; 
 }
 
 export default function ProjectForm({
@@ -37,21 +38,26 @@ export default function ProjectForm({
   months,
   days,
   errors,
+  disabled = false, 
 }: ProjectFormProps) {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return; 
     onUpdate({ title: e.target.value });
   };
 
   const handleProjectLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return; 
     onUpdate({ projectLink: e.target.value });
   };
 
   const handleDescriptionChange = (value: string) => {
+    if (disabled) return; 
     onUpdate({ description: value });
     setValue(`projects.${index}.description`, value);
   };
 
   const handleCurrentlyBuildingChange = (checked: boolean) => {
+    if (disabled) return; 
     onUpdate({
       currentlyBuilding: checked,
       endDate: checked ? null : {
@@ -77,7 +83,10 @@ export default function ProjectForm({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        disabled={disabled} 
+        className={`absolute top-4 right-4 text-gray-400 hover:text-gray-600 ${
+          disabled ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       >
         <X className="h-5 w-5" />
       </button>
@@ -93,6 +102,7 @@ export default function ProjectForm({
           value={project.title}
           onChange={handleTitleChange}
           className={errors?.title ? "border-red-500" : ""}
+          disabled={disabled} 
         />
         {errors?.title && (
           <p className="mt-1 text-sm text-red-600">
@@ -112,6 +122,7 @@ export default function ProjectForm({
           value={project.projectLink}
           onChange={handleProjectLinkChange}
           className={errors?.projectLink ? "border-red-500" : ""}
+          disabled={disabled} 
         />
         {errors?.projectLink && (
           <p className="mt-1 text-sm text-red-600">
@@ -127,6 +138,7 @@ export default function ProjectForm({
         <RichTextEditor
           initialValue={project.description}
           onChange={handleDescriptionChange}
+          disabled={disabled} 
         />
         {errors?.description && (
           <p className="mt-1 text-sm text-red-600">
@@ -147,23 +159,27 @@ export default function ProjectForm({
             selectedMonth={project.startDate.month}
             selectedDay={project.startDate.day}
             onYearChange={(year) => {
+              if (disabled) return; 
               onUpdate({
                 startDate: { ...project.startDate, year }
               });
               setValue(`projects.${index}.startDate.year`, year);
             }}
             onMonthChange={(month) => {
+              if (disabled) return; 
               onUpdate({
                 startDate: { ...project.startDate, month }
               });
               setValue(`projects.${index}.startDate.month`, month);
             }}
             onDayChange={(day) => {
+              if (disabled) return; 
               onUpdate({
                 startDate: { ...project.startDate, day }
               });
               setValue(`projects.${index}.startDate.day`, day);
             }}
+            disabled={disabled} 
           />
         </div>
 
@@ -183,23 +199,27 @@ export default function ProjectForm({
               selectedMonth={project.endDate?.month || ""}
               selectedDay={project.endDate?.day || ""}
               onYearChange={(year) => {
+                if (disabled) return; 
                 onUpdate({
                   endDate: { ...(project.endDate || { year: "", month: "", day: "" }), year }
                 });
                 setValue(`projects.${index}.endDate.year`, year);
               }}
               onMonthChange={(month) => {
+                if (disabled) return; 
                 onUpdate({
                   endDate: { ...(project.endDate || { year: "", month: "", day: "" }), month }
                 });
                 setValue(`projects.${index}.endDate.month`, month);
               }}
               onDayChange={(day) => {
+                if (disabled) return; 
                 onUpdate({
                   endDate: { ...(project.endDate || { year: "", month: "", day: "" }), day }
                 });
                 setValue(`projects.${index}.endDate.day`, day);
               }}
+              disabled={disabled} 
             />
           )}
         </div>
@@ -210,10 +230,11 @@ export default function ProjectForm({
           id={`projects.${index}.currentlyBuilding`}
           checked={project.currentlyBuilding}
           onCheckedChange={handleCurrentlyBuildingChange}
+          disabled={disabled} 
         />
         <Label
           htmlFor={`projects.${index}.currentlyBuilding`}
-          className="ml-2 text-sm font-medium"
+          className={`ml-2 text-sm font-medium ${disabled ? 'opacity-70' : ''}`}
         >
           I am currently building this project
         </Label>

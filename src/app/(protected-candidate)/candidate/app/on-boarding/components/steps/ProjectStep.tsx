@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, AlertCircle, Loader2 } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { Alert } from '@/components/ui/alert';
 import { Project } from "@/types/candidate_onboarding";
@@ -20,6 +20,7 @@ export default function ProjectStep({
   onAddProject,
   onRemoveProject,
   onUpdateProject,
+  isSubmitting = false 
 }: ProjectStepProps) {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +44,9 @@ export default function ProjectStep({
   };
 
   const handleAddProject = () => {
+    
+    if (isSubmitting) return;
+    
     const newProject: Project = {
       id: generateTempId(),
       title: '',
@@ -67,6 +71,9 @@ export default function ProjectStep({
   };
 
   const handleRemoveProject = (id: string) => {
+    
+    if (isSubmitting) return;
+    
     const updatedProjects = projects.filter(proj => proj.id !== id);
     setValue('projects', updatedProjects);
     dispatch(removeProject(id));
@@ -74,6 +81,9 @@ export default function ProjectStep({
   };
 
   const handleUpdateProject = (id: string, updates: Partial<Project>) => {
+    
+    if (isSubmitting) return;
+    
     const updatedProjects = projects.map(proj =>
       proj.id === id ? { ...proj, ...updates } : proj
     );
@@ -103,7 +113,10 @@ export default function ProjectStep({
           <button
             type="button"
             onClick={handleAddProject}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto"
+            disabled={isSubmitting}
+            className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center mx-auto ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <Plus className="h-4 w-4 mr-1" />
             Add Project
@@ -125,6 +138,7 @@ export default function ProjectStep({
               months={months}
               days={days}
               errors={errors.projects?.[index]}
+              disabled={isSubmitting} 
             />
           ))}
 
@@ -132,7 +146,10 @@ export default function ProjectStep({
             <button
               type="button"
               onClick={handleAddProject}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+              disabled={isSubmitting}
+              className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <Plus className="h-4 w-4 mr-1" />
               Add Another Project
@@ -144,8 +161,11 @@ export default function ProjectStep({
       <div className="flex justify-between pt-4 mt-6">
         <button
           type="button"
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center"
+          className={`px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           onClick={onPreviousStep}
+          disabled={isSubmitting}
         >
           <ChevronLeft className="mr-1 h-4 w-4" />
           Previous Step
@@ -153,11 +173,23 @@ export default function ProjectStep({
 
         <button
           type="button"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+          className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           onClick={onNextStep}
+          disabled={isSubmitting}
         >
-          Submit
-          <ChevronRight className="ml-1 h-4 w-4" />
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              Submit
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </>
+          )}
         </button>
       </div>
     </div>

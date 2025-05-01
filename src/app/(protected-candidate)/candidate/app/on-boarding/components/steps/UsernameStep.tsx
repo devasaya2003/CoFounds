@@ -29,7 +29,6 @@ export default function UsernameStep({
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [validationMessage, setValidationMessage] = useState('');
 
-  // First, define the actual username check function with proper dependencies
   const checkUsernameImmediate = useCallback(async (username: string) => {
     if (!username || username.length < 3) {
       setIsAvailable(null);
@@ -37,20 +36,19 @@ export default function UsernameStep({
       setIsChecking(false);
       return;
     }
-    
-    // Check username format first
+
     if (!VALIDATE_USERNAME(username)) {
       setIsAvailable(false);
       setValidationMessage('Username format is invalid. Use only letters, numbers, underscores, and dots.');
       setIsChecking(false);
       return;
     }
-    
+
     setIsChecking(true);
-    
+
     try {
       const data = await fetchWithAuth_GET<UsernameCheckResponse>(`/api/v1/candidate/check-user/${username}`);
-      
+
       setIsAvailable(data.available);
       setValidationMessage(data.message);
     } catch (error) {
@@ -61,19 +59,18 @@ export default function UsernameStep({
       setIsChecking(false);
     }
   }, [setIsAvailable, setIsChecking, setValidationMessage]);
-  
-  // Then create a debounced version that will be stable across renders
+
   const checkUsername = useMemo(
     () => debounce(checkUsernameImmediate, 500),
     [checkUsernameImmediate]
   );
-  
+
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
     dispatch(setUserName(value));
     setValue('userName', value);
-    
+
     if (value.length >= 3) {
       setIsChecking(true);
       checkUsername(value);
@@ -82,21 +79,20 @@ export default function UsernameStep({
       setValidationMessage('');
     }
   };
-  
-  // Don't forget to cancel the debounce when unmounting
+
   useEffect(() => {
     return () => {
       checkUsername.cancel();
     };
   }, [checkUsername]);
-  
+
   return (
     <div className="space-y-6">
       <div className="mb-8">
         <h2 className="text-lg font-semibold mb-2">Choose Your Username</h2>
         <p className="text-gray-600">This will be your unique identifier on CoFounds.</p>
       </div>
-      
+
       <div className="relative">
         <FormInput
           id="userName"
@@ -104,19 +100,19 @@ export default function UsernameStep({
           required
           type="text"
           error={errors.userName?.message}
-          {...register('userName', { 
+          {...register('userName', {
             required: 'Username is required',
             minLength: { value: 3, message: 'Username must be at least 3 characters' },
-            pattern: { 
-              value: /^[a-zA-Z0-9_-]+$/, 
-              message: 'Username can only contain letters, numbers, underscores and hyphens' 
+            pattern: {
+              value: /^[a-zA-Z0-9_-]+$/,
+              message: 'Username can only contain letters, numbers, underscores and hyphens'
             }
           })}
           onChange={handleUsernameChange}
           placeholder="e.g., john_doe"
-          disabled={isSubmitting} // Disable input during submission
+          disabled={isSubmitting}
         />
-        
+
         {/* Validation status */}
         {formState.userName && formState.userName.length >= 3 && (
           <div className="mt-2">
@@ -135,7 +131,7 @@ export default function UsernameStep({
           </div>
         )}
       </div>
-      
+
       <div className="flex justify-end pt-4">
         <button
           type="button"
