@@ -3,14 +3,14 @@ import prisma from "../../../../../prisma/client";
 
 export interface CreateBulkUserSkillset {
   user_id: string;
-  data: {
+  skills: {
     skill_id: string;
     skill_level: string;
   }[];
 }
 
 export const createBulkUserSkillset = async (data: CreateBulkUserSkillset) => {
-  const formattedData = data.data.map((skillset) => ({
+  const formattedData = data.skills.map((skillset) => ({
     userId: data.user_id,
     skillId: skillset.skill_id,
     skillLevel: skillset.skill_level as SkillLevel,

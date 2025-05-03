@@ -2,18 +2,17 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { setStatus, setSubmissionStatus } from '../slices/candidateOnboardingSlice';
 import { DateField } from '@/types/candidate_onboarding';
+import { fetchWithAuth_POST } from '@/utils/api';
 
-// Simulate API endpoints for reference
 const API_ENDPOINTS = {
-  PROFILE: '/api/v1/candidate/user-master',
-  SKILLS: '/api/v1/candidate/user-skillset',
-  EDUCATION: '/api/v1/candidate/user-education',
-  CERTIFICATES: '/api/v1/candidate/user-certificates',
-  EXPERIENCE: '/api/v1/candidate/user-experience',
-  PROJECTS: '/api/v1/candidate/user-projects'
+    PROFILE: '/api/v1/candidate/profile',
+    SKILLS: '/api/v1/candidate/skills',
+    EDUCATION: '/api/v1/candidate/user-education',
+    CERTIFICATES: '/api/v1/candidate/user-certificates',
+    EXPERIENCE: '/api/v1/candidate/user-experience',
+    PROJECTS: '/api/v1/candidate/user-projects'
 };
 
-// Helper to format dates properly for API
 const formatDateForAPI = (dateObj: DateField | null): string => {
     if (!dateObj) return '';
 
@@ -36,23 +35,20 @@ const formatDateForAPI = (dateObj: DateField | null): string => {
  * @returns A promise that resolves after the delay with simulated response
  */
 async function simulateApiCall<T>(endpoint: string, data: unknown, delay = 1000): Promise<T> {
-  console.group(`📡 API Call Simulation to ${endpoint}`);
-  console.log('📦 Request Payload:');
-  console.log(JSON.stringify(data, null, 2));
-  console.groupEnd();
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, delay));
-  
-  // Simulate successful response
-  return {
-    success: true,
-    message: `Step completed successfully at ${new Date().toLocaleTimeString()}`,
-    data: data
-  } as unknown as T;
+    console.group(`📡 API Call Simulation to ${endpoint}`);
+    console.log('📦 Request Payload:');
+    console.log(JSON.stringify(data, null, 2));
+    console.groupEnd();
+
+    await new Promise(resolve => setTimeout(resolve, delay));
+
+    return {
+        success: true,
+        message: `Step completed successfully at ${new Date().toLocaleTimeString()}`,
+        data: data
+    } as unknown as T;
 }
 
-// Step 1: Username step submission
 export const submitUserNameStep = createAsyncThunk(
     'candidate/submitUserName',
     async (_, { getState, dispatch, rejectWithValue }) => {
@@ -60,37 +56,46 @@ export const submitUserNameStep = createAsyncThunk(
         const authState = state.auth;
         const onboardingData = state.candidateOnboarding;
 
+        console.log("USER ID: ", authState);
+
         try {
-            dispatch(setStatus({ status: 'submitting', error: 'Submitting username...' }));
+            dispatch(setStatus({ status: 'submitting' }));
             dispatch(setSubmissionStatus({ step: 'set-username', status: 'loading' }));
 
             const profilePayload = {
                 user_id: authState.user?.id,
-                user_name: onboardingData.userName,
-                created_by: authState.user?.id,
-                updated_by: authState.user?.id,
+                user_name: onboardingData.userName
             };
 
-            // Simulate API call instead of actual fetch
-            const response = await simulateApiCall(
+            console.log('Submitting username with payload:', profilePayload);
+
+            const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.PROFILE,
                 profilePayload
             );
 
-            dispatch(setStatus({ status: 'success', error: 'Username submitted successfully.' }));
+            console.log('Username update response:', response);
+
+            dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'set-username', status: 'success' }));
-            
+
             return response;
         } catch (error: unknown) {
             const err = error as Error;
+            console.error('Error updating username:', err);
+
             dispatch(setStatus({ status: 'error', error: err.message || 'Failed to submit username' }));
-            dispatch(setSubmissionStatus({ step: 'set-username', status: 'error', error: err.message }));
+            dispatch(setSubmissionStatus({
+                step: 'set-username',
+                status: 'error',
+                error: err.message
+            }));
+
             return rejectWithValue(err.message || 'Failed to submit username');
         }
     }
 );
 
-// Step 2: Personal info and skills
 export const submitPersonalInfoStep = createAsyncThunk(
     'candidate/submitPersonalInfo',
     async (_, { getState, dispatch, rejectWithValue }) => {
@@ -102,7 +107,6 @@ export const submitPersonalInfoStep = createAsyncThunk(
             dispatch(setStatus({ status: 'submitting', error: 'Submitting personal info...' }));
             dispatch(setSubmissionStatus({ step: 'personal-info', status: 'loading' }));
 
-            // First update the profile with personal details
             const profilePayload = {
                 user_id: authState.user?.id,
                 first_name: onboardingData.firstName,
@@ -112,32 +116,29 @@ export const submitPersonalInfoStep = createAsyncThunk(
                 updated_by: authState.user?.id,
             };
 
-            // Simulate profile update API call
-            const profileResponse = await simulateApiCall(
+            const profileResponse = await fetchWithAuth_POST(
                 API_ENDPOINTS.PROFILE,
                 profilePayload
             );
 
-            // Then submit skills
             const skillsPayload = {
                 user_id: authState.user?.id,
-                created_by: authState.user?.id,
-                updated_by: authState.user?.id,
                 skills: onboardingData.skills.map(skill => ({
-                    skill_id: skill.id,
-                    skill_level: skill.level.toLowerCase()
+                  skill_id: skill.id,
+                  skill_level: skill.level.toLowerCase()
                 }))
-            };
-
-            // Simulate skills submission API call
-            const skillsResponse = await simulateApiCall(
+              };
+              
+              console.log('Submitting skills with payload:', skillsPayload);
+              
+              const skillsResponse = await fetchWithAuth_POST(
                 API_ENDPOINTS.SKILLS,
                 skillsPayload
-            );
+              );
 
             dispatch(setStatus({ status: 'success', error: 'Personal info submitted successfully.' }));
             dispatch(setSubmissionStatus({ step: 'personal-info', status: 'success' }));
-            
+
             return { profile: profileResponse, skills: skillsResponse };
         } catch (error: unknown) {
             const err = error as Error;
@@ -148,7 +149,6 @@ export const submitPersonalInfoStep = createAsyncThunk(
     }
 );
 
-// Step 3: Education
 export const submitEducationStep = createAsyncThunk(
     'candidate/submitEducation',
     async (_, { getState, dispatch, rejectWithValue }) => {
@@ -172,7 +172,6 @@ export const submitEducationStep = createAsyncThunk(
                 }))
             };
 
-            // Simulate education API call
             const response = await simulateApiCall(
                 API_ENDPOINTS.EDUCATION,
                 educationPayload
@@ -180,7 +179,7 @@ export const submitEducationStep = createAsyncThunk(
 
             dispatch(setStatus({ status: 'success', error: 'Education submitted successfully.' }));
             dispatch(setSubmissionStatus({ step: 'education', status: 'success' }));
-            
+
             return response;
         } catch (error: unknown) {
             const err = error as Error;
@@ -191,7 +190,6 @@ export const submitEducationStep = createAsyncThunk(
     }
 );
 
-// Step 4: Certificates
 export const submitCertificatesStep = createAsyncThunk(
     'candidate/submitCertificates',
     async (_, { getState, dispatch, rejectWithValue }) => {
@@ -217,7 +215,6 @@ export const submitCertificatesStep = createAsyncThunk(
                 }))
             };
 
-            // Simulate certificates API call
             const response = await simulateApiCall(
                 API_ENDPOINTS.CERTIFICATES,
                 certificatesPayload
@@ -225,7 +222,7 @@ export const submitCertificatesStep = createAsyncThunk(
 
             dispatch(setStatus({ status: 'success', error: 'Certificates submitted successfully.' }));
             dispatch(setSubmissionStatus({ step: 'certificates', status: 'success' }));
-            
+
             return response;
         } catch (error: unknown) {
             const err = error as Error;
@@ -236,7 +233,6 @@ export const submitCertificatesStep = createAsyncThunk(
     }
 );
 
-// Step 5: Experience
 export const submitExperienceStep = createAsyncThunk(
     'candidate/submitExperience',
     async (_, { getState, dispatch, rejectWithValue }) => {
@@ -261,7 +257,6 @@ export const submitExperienceStep = createAsyncThunk(
                 }))
             };
 
-            // Simulate experience API call
             const response = await simulateApiCall(
                 API_ENDPOINTS.EXPERIENCE,
                 experiencePayload
@@ -269,7 +264,7 @@ export const submitExperienceStep = createAsyncThunk(
 
             dispatch(setStatus({ status: 'success', error: 'Work experience submitted successfully.' }));
             dispatch(setSubmissionStatus({ step: 'proof-of-work', status: 'success' }));
-            
+
             return response;
         } catch (error: unknown) {
             const err = error as Error;
@@ -280,7 +275,6 @@ export const submitExperienceStep = createAsyncThunk(
     }
 );
 
-// Step 6: Projects
 export const submitProjectsStep = createAsyncThunk(
     'candidate/submitProjects',
     async (_, { getState, dispatch, rejectWithValue }) => {
@@ -305,7 +299,6 @@ export const submitProjectsStep = createAsyncThunk(
                 }))
             };
 
-            // Simulate projects API call
             const response = await simulateApiCall(
                 API_ENDPOINTS.PROJECTS,
                 projectsPayload
@@ -313,7 +306,7 @@ export const submitProjectsStep = createAsyncThunk(
 
             dispatch(setStatus({ status: 'success', error: 'Projects submitted successfully.' }));
             dispatch(setSubmissionStatus({ step: 'projects', status: 'success' }));
-            
+
             return response;
         } catch (error: unknown) {
             const err = error as Error;

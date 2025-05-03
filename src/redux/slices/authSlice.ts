@@ -53,7 +53,7 @@ export const restoreUserSession = createAsyncThunk(
       const { isAuthenticated, user } = await getUserFromApiStatus();
 
       if (!isAuthenticated || !user) {
-        return rejectWithValue("Not authenticated");
+        return rejectWithValue("Please sign in again!");
       }
 
       return { user, isAuthenticated };

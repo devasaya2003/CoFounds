@@ -5,22 +5,55 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
 
-    if (!data.user_id || !data.user_name || !data.first_name || !data.last_name || !data.phone || !data.dob || !data.description) {
+    if (!data.user_id) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "User ID is required" },
         { status: 400 }
       );
     }
 
-    const createdProfile = await createUserProfile(data);
+    if (data.user_name !== undefined && typeof data.user_name !== 'string') {
+      return NextResponse.json(
+        { error: "Username must be a string" },
+        { status: 400 }
+      );
+    }
+
+    if (data.first_name !== undefined && typeof data.first_name !== 'string') {
+      return NextResponse.json(
+        { error: "First name must be a string" },
+        { status: 400 }
+      );
+    }
+
+
+    const updatedProfile = await createUserProfile(data);
+
+
+    let message = "Profile updated successfully";
+    if (data.user_name && !data.first_name && !data.last_name) {
+      message = "Username updated successfully";
+    } else if (data.user_name && data.first_name && data.last_name) {
+      message = "Full profile created successfully";
+    }
+
     return NextResponse.json(
-      { message: "User profile created successfully", createdProfile },
-      { status: 201 }
+      {
+        success: true,
+        message,
+        updatedProfile
+      },
+      { status: 200 }
     );
+
   } catch (error) {
-    console.error("Error creating user profile:", error);
+    console.error("Error updating user profile:", error);
     return NextResponse.json(
-      { error: "Failed to create user profile" },
+      {
+        success: false,
+        error: "Failed to update user profile",
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

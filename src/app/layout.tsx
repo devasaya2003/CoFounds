@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/redux/provider';
+import AuthInitializer from '@/components/AuthInitializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
       {/* Add the suppressHydrationWarning attribute to the body */}
       <body className={inter.className} suppressHydrationWarning={true}>
         <Providers>
+        <AuthInitializer />
           {children}
         </Providers>
       </body>
