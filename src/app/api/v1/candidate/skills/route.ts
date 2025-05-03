@@ -5,7 +5,6 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
 
-    // Validate required fields
     if (!data.user_id) {
       return NextResponse.json(
         { error: "User ID is required" },
@@ -20,7 +19,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Create the skillsets in the database
     const result = await createBulkUserSkillset(data);
 
     return NextResponse.json({

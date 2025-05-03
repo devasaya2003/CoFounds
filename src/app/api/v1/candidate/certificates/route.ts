@@ -4,16 +4,14 @@ import { createBulkCertificates } from "@/backend/functions/user_certificates/PO
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-
-    // Validate required fields
+    
     if (!data.user_id) {
       return NextResponse.json(
         { success: false, message: "User ID is required" },
         { status: 400 }
       );
     }
-
-    // Use user_id for both created_by and updated_by if not provided
+    
     const requestData = {
       user_id: data.user_id,
       created_by: data.created_by || data.user_id,
@@ -27,8 +25,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Validate each certificate has a title
+    
     const invalidCertificates = requestData.certificates.filter(cert => !cert.title);
     if (invalidCertificates.length > 0) {
       return NextResponse.json(

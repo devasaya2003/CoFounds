@@ -29,43 +29,33 @@ export default function DateSelector({
   onDayChange,
   disabled = false,
   error,
-}: DateSelectorProps) {
-  // Calculate available days based on month and year
+}: DateSelectorProps) {  
   const [availableDays, setAvailableDays] = useState<string[]>([]);
-  
-  // Function to check if a year is a leap year
+    
   const isLeapYear = (year: number): boolean => {
     if (year % 400 === 0) return true;
     if (year % 100 === 0) return false;
     return year % 4 === 0;
   };
-  
-  // Calculate days in a month
-  const getDaysInMonth = (year: number, month: number): number => {
-    // Month is 1-based in Date constructor (Jan = 1, Feb = 2, etc.)
-    // But we pass 0 as day to get the last day of the previous month
-    // Example: new Date(2024, 3, 0) gives us the last day of March 2024
+    
+  const getDaysInMonth = (year: number, month: number): number => {            
     return new Date(year, month, 0).getDate();
   };
-  
-  // Update available days when month or year changes
+    
   useEffect(() => {
     if (!selectedYear || !selectedMonth) return;
     
     const yearNum = parseInt(selectedYear, 10);
     const monthNum = parseInt(selectedMonth, 10);
-    
-    // Get days in the selected month
+        
     const daysInMonth = getDaysInMonth(yearNum, monthNum);
-    
-    // Create array of days as strings with padding
+        
     const newDays = Array.from({ length: daysInMonth }, (_, i) => 
       (i + 1).toString().padStart(2, '0')
     );
     
     setAvailableDays(newDays);
-    
-    // If the current selected day is invalid for the new month/year, adjust it
+        
     const dayNum = parseInt(selectedDay, 10);
     if (dayNum > daysInMonth) {
       onDayChange(daysInMonth.toString().padStart(2, '0'));

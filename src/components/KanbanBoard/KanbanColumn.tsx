@@ -12,7 +12,6 @@ export default function KanbanColumn({
   onStatusChange,
   onDelete
 }: KanbanColumnProps) {
-  // Create a ref for the column element
   const columnRef = useRef<HTMLDivElement>(null);
   
   const [{ isOver }, connectDrop] = useDrop({
@@ -27,7 +26,6 @@ export default function KanbanColumn({
     }),
   });
 
-  // Connect the drop ref to our element
   connectDrop(columnRef);
 
   const getBadgeColor = () => {

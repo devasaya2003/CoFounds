@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { jobs } from "@/data/jobs";
 import { testimonials } from "@/data/testimonials";
-// import { stories } from "@/data/stories";
 import Footer from './Footer';
 
 const AnimationProvider = dynamic(() => import('@/components/AnimationProvider'), { 
@@ -26,11 +25,6 @@ const TestimonialsSection = dynamic(() => import('@/components/sections/Testimon
   ssr: true,
   loading: () => <div></div>
 });
-
-// const StoriesSection = dynamic(() => import('@/components/sections/StoriesSection'), { 
-//   ssr: true,
-//   loading: () => <div></div>
-// });
 
 const CTASection = dynamic(() => import('@/components/sections/CTASection'), { 
   ssr: true,

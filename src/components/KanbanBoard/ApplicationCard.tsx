@@ -12,9 +12,7 @@ interface ApplicationCardProps {
   onDelete?: (applicationId: string) => void;
 }
 
-// Wrap the component with React.memo to prevent unnecessary re-renders
-export default memo(function ApplicationCard({ application, onStatusChange, onDelete }: ApplicationCardProps) {
-  // Create a ref that we'll combine with the drag ref
+export default memo(function ApplicationCard({ application, onStatusChange, onDelete }: ApplicationCardProps) {  
   const cardRef = useRef<HTMLDivElement>(null);
   
   const [{ isDragging }, connectDrag] = useDrag({
@@ -24,8 +22,7 @@ export default memo(function ApplicationCard({ application, onStatusChange, onDe
       isDragging: !!monitor.isDragging(),
     }),
   });
-
-  // Connect the drag ref to our element when the component mounts
+  
   connectDrag(cardRef);
 
   const formatDate = (dateString: string) => {

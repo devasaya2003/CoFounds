@@ -14,6 +14,6 @@ export const createBulkResources = async (
       updatedBy: resource.created_by || null,
       updatedAt: new Date()
     })),
-    skipDuplicates: true, // Skip duplicate entries
+    skipDuplicates: true,
   });
 };

@@ -3,28 +3,27 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcrypt";
-import prisma from "../../../../../prisma/client"; // Adjust path if needed
-import { sign } from "jsonwebtoken";
+import prisma from "../../../../../prisma/client";
 
 export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/sign-in",
     error: "/error",
   },
-  adapter: PrismaAdapter(prisma), // Prisma as NextAuth database
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       async profile(profile) {
-        // ✅ Extract user details from Google response
+      
         return {
           id: profile.sub,
           email: profile.email,
           name: profile.name,
           image: profile.picture,
-          role: "candidate", // Default role for Google signups
-          verified: true, // Assume Google users are verified
+          role: "candidate",
+          verified: true,
         };
       },
     }),
@@ -65,7 +64,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
     async signIn({ user, account }) {
@@ -84,13 +83,13 @@ export const authOptions: NextAuthOptions = {
           existingUser = await prisma.userMaster.create({
             data: {
               email: user.email!,
-              role: "candidate", // Default role for Google signups
-              verified: true, // Assume Google users are verified
+              role: "candidate",
+              verified: true,
             },
           });
         }
 
-        return true; // ✅ Allow login
+        return true;
       }
 
       return true;

@@ -6,7 +6,7 @@ import { AlertCircle, X } from 'lucide-react';
 interface AlertProps {
   message: string;
   type?: 'error' | 'warning' | 'success' | 'info';
-  duration?: number; // in milliseconds, 0 means don't auto-dismiss
+  duration?: number;
   onClose?: () => void;
 }
 

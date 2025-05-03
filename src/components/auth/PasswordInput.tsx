@@ -14,7 +14,7 @@ interface PasswordInputProps {
   required?: boolean;
   label?: string;
   forgotPasswordLink?: boolean;
-  error?: string; // Add the error prop
+  error?: string; 
 }
 
 const PasswordInput: React.FC<PasswordInputProps> = ({
@@ -26,7 +26,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
   required = true,
   label = "Password",
   forgotPasswordLink = false,
-  error, // Include error in the function props
+  error, 
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 

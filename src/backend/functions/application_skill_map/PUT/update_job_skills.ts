@@ -29,7 +29,7 @@ export const updateJobSkills = async (
         break;
 
       case "replace":
-        // Replace: delete the old one then add the new skill
+        
         operations.push(buildDeleteOperation(job_id, actionDetail.oldSkillId));
         operations.push(
           buildAddOperation(
@@ -56,6 +56,6 @@ export const updateJobSkills = async (
     }
   }
 
-  // Execute all operations atomically
+  
   return await prisma.$transaction(operations);
 };

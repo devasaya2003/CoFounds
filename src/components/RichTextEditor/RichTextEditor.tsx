@@ -14,7 +14,7 @@ interface RichTextEditorProps {
   onChange?: (html: string) => void;
   placeholder?: string;
   minHeight?: string;
-  disabled?: boolean; // Add this prop
+  disabled?: boolean; 
 }
 
 export default function RichTextEditor({
@@ -22,7 +22,7 @@ export default function RichTextEditor({
   onChange,
   placeholder = 'Start writing...',
   minHeight = '200px',
-  disabled = false // Add default value
+  disabled = false 
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -57,11 +57,11 @@ export default function RichTextEditor({
         style: `min-height: ${minHeight}`,
       },
     },
-    editable: !disabled, // Set editor to readonly when disabled
+    editable: !disabled, 
     immediatelyRender: false,
   });
 
-  // Update editable state when disabled prop changes
+  
   useEffect(() => {
     if (editor) {
       editor.setEditable(!disabled);

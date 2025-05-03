@@ -48,8 +48,8 @@ export interface Job {
     id: string;
     email: string;
     userName: string;
-    firstName: string; // Add firstName
-    lastName: string;  // Add lastName
+    firstName: string; 
+    lastName: string;  
     isActive: boolean;
     createdAt: string;
     updatedAt: string;

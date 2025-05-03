@@ -5,7 +5,6 @@ interface JobCardProps {
 }
 
 export default function JobCard({ job }: JobCardProps) {
-  // Create a helper function to get the recruiter's full name
   const getRecruiterFullName = () => {
     if (job.recruiter.firstName || job.recruiter.lastName) {
       return `${job.recruiter.firstName || ""} ${job.recruiter.lastName || ""}`.trim();

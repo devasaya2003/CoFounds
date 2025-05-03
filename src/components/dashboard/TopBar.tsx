@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { UserCircle, Building, LogOut } from 'lucide-react'; // assuming you use lucide icons
+import { UserCircle, Building, LogOut } from 'lucide-react';
 import { useAppSelector } from '@/redux/hooks';
 
 interface TopBarProps {

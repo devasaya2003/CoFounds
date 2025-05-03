@@ -4,7 +4,6 @@ import { RootState } from '../store';
 import { setStatus } from '../slices/candidateOnboardingSlice';
 import { DateField } from '@/types/candidate_onboarding';
 
-// API endpoint constants
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_API || '';
 const API_BASE_URL = `${BASE_URL}/api/v1/candidate`;
 const PROFILE_POST_URL = `${API_BASE_URL}/user-master`;
@@ -14,7 +13,6 @@ const CERTIFICATES_POST_URL = `${API_BASE_URL}/user-certificates`;
 const EXPERIENCE_POST_URL = `${API_BASE_URL}/user-experience`;
 const PROJECTS_POST_URL = `${API_BASE_URL}/user-projects`;
 
-// Response interfaces
 interface ProfileResponse {
   success: boolean;
   message: string;
@@ -22,8 +20,7 @@ interface ProfileResponse {
     id: string;
     userName: string;
     firstName: string;
-    lastName: string;
-    // Add other fields as needed
+    lastName: string;    
   };
 }
 
@@ -57,16 +54,13 @@ interface ProjectResponse {
   projectsAdded: number;
 }
 
-// Helper to format dates properly for API
 const formatDateForAPI = (dateObj: DateField | null): string => {
     if (!dateObj) return '';
-
-    // Handle date object with year/month/day properties
+    
     if (dateObj.year && dateObj.month && dateObj.day) {
         return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}-${String(dateObj.day).padStart(2, '0')}T00:00:00.000Z`;
     }
-
-    // If already ISO string
+    
     if (typeof dateObj === 'string') {
         return dateObj;
     }
@@ -84,8 +78,7 @@ export const submitCandidateOnboarding = createAsyncThunk(
         const authState = state.auth;
         const onboardingData = state.candidateOnboarding;
 
-        try {
-            // 1. POST user_master - profile creation
+        try {            
             dispatch(setStatus({ status: 'submitting', error: 'Submitting profile...' }));
 
             const profilePayload = {
@@ -105,8 +98,7 @@ export const submitCandidateOnboarding = createAsyncThunk(
             );
 
             dispatch(setStatus({ status: 'success', error: 'Profile submitted successfully.' }));
-
-            // 2. POST user_skillset - map skills with user
+            
             dispatch(setStatus({ status: 'submitting', error: 'Submitting skills...' }));
 
             const skillsPayload = {
@@ -125,8 +117,7 @@ export const submitCandidateOnboarding = createAsyncThunk(
             );
 
             dispatch(setStatus({ status: 'success', error: 'Skills submitted successfully.' }));
-
-            // 3. POST user_education - create user education entries
+            
             dispatch(setStatus({ status: 'submitting', error: 'Submitting education...' }));
 
             const educationPayload = {
@@ -147,8 +138,7 @@ export const submitCandidateOnboarding = createAsyncThunk(
             );
 
             dispatch(setStatus({ status: 'success', error: 'Education submitted successfully.' }));
-
-            // 4. POST user_certificates - create user certificates entries
+            
             dispatch(setStatus({ status: 'submitting', error: 'Submitting certificates...' }));
 
             const certificatesPayload = {
@@ -171,8 +161,7 @@ export const submitCandidateOnboarding = createAsyncThunk(
             );
 
             dispatch(setStatus({ status: 'success', error: 'Certificates submitted successfully.' }));
-
-            // 5. POST user_experience - create user experience entries
+            
             dispatch(setStatus({ status: 'submitting', error: 'Submitting experience...' }));
 
             const experiencePayload = {
@@ -194,8 +183,7 @@ export const submitCandidateOnboarding = createAsyncThunk(
             );
 
             dispatch(setStatus({ status: 'success', error: 'Experience submitted successfully.' }));
-
-            // 6. POST user_projects - create user projects entries
+            
             dispatch(setStatus({ status: 'submitting', error: 'Submitting projects...' }));
 
             const projectsPayload = {
@@ -217,8 +205,7 @@ export const submitCandidateOnboarding = createAsyncThunk(
             );
 
             dispatch(setStatus({ status: 'success', error: 'Projects submitted successfully.' }));
-
-            // All steps completed successfully
+            
             dispatch(setStatus({ status: 'success', error: 'Onboarding submission complete.' }));
 
             return {
@@ -233,11 +220,9 @@ export const submitCandidateOnboarding = createAsyncThunk(
                 }
             };
 
-        } catch (error: unknown) {
-            // Convert unknown error to a more specific type
+        } catch (error: unknown) {            
             const err = error as Error;
-
-            // Determine which step failed
+            
             const failedStep = determineFailedStep(err);
 
             dispatch(setStatus({
@@ -254,12 +239,10 @@ export const submitCandidateOnboarding = createAsyncThunk(
     }
 );
 
-// Define a proper type for error processing
 interface ErrorWithUrl extends Error {
     url?: string;
 }
 
-// Helper function to determine which step failed based on error
 function determineFailedStep(error: Error): string {
     const errorWithUrl = error as ErrorWithUrl;
 

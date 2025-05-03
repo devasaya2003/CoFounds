@@ -52,10 +52,8 @@ export const getByRecruiterID = async (id: string, page: number) => {
       },
     },
   });
-
-  // Process jobs to include status counts
-  const jobsWithStatusCounts = jobs.map(job => {
-    // Initialize counts for all statuses
+  
+  const jobsWithStatusCounts = jobs.map(job => {    
     const statusCounts = {
       applied: 0,
       under_review: 0,
@@ -63,15 +61,13 @@ export const getByRecruiterID = async (id: string, page: number) => {
       rejected: 0,
       closed: 0
     };
-    
-    // Count applications by status
+        
     job.applications.forEach(app => {
       if (statusCounts[app.status] !== undefined) {
         statusCounts[app.status]++;
       }
     });
-    
-    // Return job with status counts but without applications array
+        
     const { applications, ...jobWithoutApplications } = job;
     return {
       ...jobWithoutApplications,

@@ -35,7 +35,6 @@ export default function RecruiterSignIn() {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("auth_token");
-    console.log("Page loaded, token in localStorage:", storedToken ? "exists" : "none");
 
     if (storedToken) {
       dispatch(setToken(storedToken));

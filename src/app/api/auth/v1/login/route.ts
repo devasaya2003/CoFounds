@@ -14,19 +14,19 @@ export async function POST(req: NextRequest) {
     const { user, token } = await signInUser(email, password);
     console.log("**** Sign-in successful:", user.email);
     
-    // Create the response
+    
     const response = NextResponse.json({
       user,
       token,
       success: true
     });
     
-    // Set the cookie securely
+    
     response.cookies.set({
       name: "auth_token",
       value: token,
       path: "/",
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24, 
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production"
     });

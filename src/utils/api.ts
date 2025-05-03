@@ -27,19 +27,16 @@ export async function fetchWithAuth_GET<T = unknown>(
   queryParams: Record<string, string> = {}, 
   options: RequestInit = {}
 ): Promise<T> {
-  // Add query parameters to URL if provided
   const queryString = new URLSearchParams(queryParams).toString();
   const finalUrl = queryString ? `${url}?${queryString}` : url;
   
-  // Debug: Log the full URL being requested  
   
   try {
     const response = await fetch(finalUrl, addAuthHeaders({ 
       ...options,
       method: 'GET',
     }));
-    
-    // Debug: Log response status and headers        
+      
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -48,8 +45,7 @@ export async function fetchWithAuth_GET<T = unknown>(
     }
     
     return response.json();
-  } catch (error) {
-    // Log the full error object
+  } catch (error) {  
     console.error("Request failed:", error);
     throw error;
   }
@@ -161,7 +157,6 @@ export async function fetchWithAuth_UPLOAD<T = unknown>(
 ): Promise<T> {
   const token = localStorage.getItem("auth_token");
   
-  // For FormData, we must NOT set Content-Type - browser sets it with boundary
   const headers = {
     "Authorization": token ? `Bearer ${token}` : "",
     ...options.headers,

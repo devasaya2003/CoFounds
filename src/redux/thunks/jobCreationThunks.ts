@@ -3,7 +3,6 @@ import { RootState } from '../store';
 import { setStatus } from '../slices/jobCreationSlice';
 import { fetchWithAuth_POST } from '@/utils/api';
 
-// Interface for the job creation response
 interface JobCreationResponse {
   message: string;
   createdRecruiter: {
@@ -24,7 +23,6 @@ interface JobCreationResponse {
   };
 }
 
-// Interface for the job skills payload
 interface JobSkillPayload {
   job_id: string;
   skills: {
@@ -35,14 +33,12 @@ interface JobSkillPayload {
   created_by: string;
 }
 
-// Interface for the job skills response
 interface JobSkillResponse {
   message: string;
   success: boolean;
   skillsAdded: number;
 }
 
-// Interface for the job questions payload
 interface JobQuestionsPayload {
   job_id: string;
   created_by: string;
@@ -50,14 +46,12 @@ interface JobQuestionsPayload {
   questions: string[];
 }
 
-// Interface for the job questions response
 interface JobQuestionsResponse {
   message: string;
   success: boolean;
   questionsAdded: number;
 }
 
-// Create a job with skills and questions thunk
 export const createJobWithSkillsAndQuestions = createAsyncThunk(
   'jobs/createJob',
   async (_, { getState, dispatch, rejectWithValue }) => {
@@ -69,15 +63,13 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
       const state = getState() as RootState;
       const jobCreation = state.jobCreation;
       const recruiter = state.recruiter;
-      
-      // Get IDs from Redux state instead of parameters
+            
       const company_id = recruiter.companyId;
       const recruiter_id = recruiter.userId;
       const created_by = recruiter.userId;
       
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || '';
-
-      // Step 1: Create job
+      
       const jobPayload = {
         company_id,
         recruiter_id,
@@ -100,8 +92,7 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
       
       const jobId = jobResponse.createdRecruiter.id;
       
-      
-      // Step 2: Associate skills with job - now using skill_level from each skill
+            
       if (jobCreation.required_skills.length > 0) {
         const skillsPayload: JobSkillPayload = {
           job_id: jobId,
@@ -122,8 +113,7 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
         
         
       }
-      
-      // Step 3: Add additional questions
+            
       if (jobCreation.additional_questions.length > 0) {
         const questionsPayload: JobQuestionsPayload = {
           job_id: jobId,
@@ -141,8 +131,7 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
         
         
       }
-      
-      // All steps completed successfully
+            
       dispatch(setStatus({
         status: 'success'
       }));

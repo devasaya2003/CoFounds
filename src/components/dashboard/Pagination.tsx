@@ -10,27 +10,22 @@ export default function Pagination({
   onPageChange 
 }: PaginationProps) {
   if (totalPages <= 1) return null;
-  
-  // Generate page numbers to display
+    
   const getPageNumbers = () => {
     const pages = [];
-    
-    // Always show first page
+        
     pages.push(1);
-    
-    // Current page and neighbors
+        
     for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
       if (!pages.includes(i)) {
         pages.push(i);
       }
     }
-    
-    // Always show last page if more than 1 page
+        
     if (totalPages > 1) {
       pages.push(totalPages);
     }
-    
-    // Add ellipses where needed
+        
     const result = [];
     for (let i = 0; i < pages.length; i++) {
       if (i > 0 && pages[i] - pages[i - 1] > 1) {

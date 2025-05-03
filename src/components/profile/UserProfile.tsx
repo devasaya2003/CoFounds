@@ -15,32 +15,27 @@ interface UserProfileProps {
 
 export default function UserProfile({ profileType }: UserProfileProps) {
   const router = useRouter();
-  
-  // Get recruiter data from the existing Redux store
+    
   const recruiter = useAppSelector((state) => state.recruiter);
   const { 
     filteredJobs, 
     isLoading: jobsLoading 
   } = useAppSelector((state) => state.jobs);
-  
-  // Set up TipTap editor for rendering markdown description
+    
   const editor = useEditor({
     extensions: [StarterKit],
     content: recruiter.description || '',
     editable: false,
   });
-
-  // Update editor content when recruiter description changes
+  
   useEffect(() => {
     if (editor && recruiter.description) {
       editor.commands.setContent(recruiter.description);
     }
   }, [editor, recruiter.description]);
-
-  // Get only the first 3 jobs for the recent jobs section
+  
   const recentJobs = filteredJobs.slice(0, 3);
-
-  // Handle View All Jobs button click
+  
   const handleViewAllJobs = () => {
     router.push(`/recruiter/app/jobs/${encodeURIComponent(recruiter.userName)}`);
   };

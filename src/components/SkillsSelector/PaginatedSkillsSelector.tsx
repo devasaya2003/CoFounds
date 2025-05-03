@@ -12,7 +12,7 @@ interface PaginatedSkillsSelectorProps {
   onSkillRemove: (skillId: string) => void;
   onSkillLevelChange?: (skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => void;
   error?: string;
-  disabled?: boolean; // Add this prop
+  disabled?: boolean; 
 }
 
 export default function PaginatedSkillsSelector({
@@ -21,7 +21,7 @@ export default function PaginatedSkillsSelector({
   onSkillRemove,
   onSkillLevelChange,
   error,
-  disabled = false // Add default value
+  disabled = false 
 }: PaginatedSkillsSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

@@ -12,7 +12,7 @@ interface EmailInputProps {
   disabled?: boolean;
   required?: boolean;
   label?: string;
-  error?: string;  // Add the error prop
+  error?: string;
 }
 
 const EmailInput: React.FC<EmailInputProps> = ({
@@ -23,7 +23,7 @@ const EmailInput: React.FC<EmailInputProps> = ({
   disabled = false,
   required = true,
   label = "Email",
-  error,  // Include error in the function props
+  error,
 }) => {
   return (
     <div className="space-y-2">

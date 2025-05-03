@@ -16,15 +16,15 @@ interface UserJwtPayload extends JWTPayload {
 }
 
 export async function GET(req: NextRequest) {
-  // Get token from cookie
+
   const authToken = req.cookies.get("auth_token")?.value;
-  
+
   if (!authToken) {
-    return NextResponse.json({ 
-      isAuthenticated: false 
+    return NextResponse.json({
+      isAuthenticated: false
     });
   }
-  
+
   try {
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "");
     const { payload } = await jwtVerify(authToken, secret);
@@ -33,10 +33,10 @@ export async function GET(req: NextRequest) {
     const userEmail = jwtPayload.user?.email || jwtPayload.email || "";
     const userRole = jwtPayload.user?.role || jwtPayload.role || "";
     const userVerified = jwtPayload.user?.verified ?? jwtPayload.verified ?? false;
-    
-    // Validate essential fields
+
+
     if (!userId || !userEmail) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         isAuthenticated: false,
         error: "Invalid user data in token"
       });
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("Token verification failed:", error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       isAuthenticated: false,
       error: "Invalid token"
     });

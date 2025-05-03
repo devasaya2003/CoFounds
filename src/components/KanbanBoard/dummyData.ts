@@ -1,20 +1,17 @@
 import { Application, ApplicationStatus } from './types';
 
-// Generate a random date in the past 6 months
 const randomPastDate = () => {
   const date = new Date();
   date.setMonth(date.getMonth() - Math.floor(Math.random() * 6));
   return date.toISOString();
 };
 
-// Generate a random date in the future 6 months
 const randomFutureDate = () => {
   const date = new Date();
   date.setMonth(date.getMonth() + Math.floor(Math.random() * 6) + 1);
   return date.toISOString();
 };
 
-// Create dummy company data
 const companies = [
   {
     id: "company-9999-zzzz-yyyy-xxxx0000wwww",
@@ -42,7 +39,6 @@ const companies = [
   }
 ];
 
-// Create dummy job data
 const jobs = [
   {
     id: "job-5678-ijkl-9012-mnop3456qrst",
@@ -101,20 +97,16 @@ const jobs = [
   }
 ];
 
-// Create dummy application statuses
 const statuses: ApplicationStatus[] = ['applied', 'under_review', 'inprogress', 'rejected', 'closed'];
 
-// Generate a unique ID
 const generateId = () => {
   return `a${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
 };
 
-// Generate a random user ID
 const generateUserId = () => {
   return `user-${Math.random().toString(36).substring(2, 6)}-${Math.random().toString(36).substring(2, 6)}`;
 };
 
-// Generate 30 dummy applications spread across statuses
 export const generateDummyApplications = (count = 30): Application[] => {
   const applications: Application[] = [];
   
@@ -127,7 +119,7 @@ export const generateDummyApplications = (count = 30): Application[] => {
       userId: generateUserId(),
       status: randomStatus,
       assignmentLink: randomJob.assignmentLink,
-      isActive: Math.random() > 0.1, // 90% chance of being active
+    isActive: Math.random() > 0.1, 
       createdAt: randomPastDate(),
       updatedAt: randomPastDate(),
       job: randomJob

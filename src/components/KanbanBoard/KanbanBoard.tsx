@@ -14,11 +14,9 @@ export default function KanbanBoard() {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-
-  // Initial load of applications
+  
   useEffect(() => {
-    const loadInitialData = async () => {
-      // Simulate API call delay
+    const loadInitialData = async () => {      
       await new Promise(resolve => setTimeout(resolve, 800));
       setApplications(generateDummyApplications(40));
       setIsLoading(false);
@@ -26,8 +24,7 @@ export default function KanbanBoard() {
     
     loadInitialData();
   }, []);
-
-  // Filter applications based on search term
+  
   const filteredApplications = useMemo(() => {
     if (!searchTerm) return applications;
     
@@ -37,10 +34,8 @@ export default function KanbanBoard() {
       app.job.company.name.toLowerCase().includes(lowercaseSearchTerm)
     );
   }, [applications, searchTerm]);
-
-  // Optimize the application organization to avoid any sorting
-  const applicationsByStatus = useMemo(() => {
-    // Skip processing if no applications
+  
+  const applicationsByStatus = useMemo(() => {    
     if (filteredApplications.length === 0) {
       return {
         applied: [],
@@ -50,8 +45,7 @@ export default function KanbanBoard() {
         closed: []
       };
     }
-    
-    // Pre-allocate arrays with estimated sizes for better performance
+        
     const statusMap: Record<ApplicationStatus, Application[]> = {
       applied: [],
       under_review: [],
@@ -59,28 +53,22 @@ export default function KanbanBoard() {
       rejected: [],
       closed: []
     };
-    
-    // Use simple loop instead of forEach for better performance
+        
     for (let i = 0; i < filteredApplications.length; i++) {
-      const app = filteredApplications[i];
-      // Push maintains insertion order - no sorting happens
+      const app = filteredApplications[i];      
       statusMap[app.status].push(app);
     }
     
     return statusMap;
   }, [filteredApplications]);
-
-  // Handle status change with optimized implementation
+  
   const handleStatusChange = useCallback((applicationId: string, newStatus: ApplicationStatus) => {
-    setApplications(prevApplications => {
-      // Find the application to update
+    setApplications(prevApplications => {      
       const appIndex = prevApplications.findIndex(app => app.id === applicationId);
       if (appIndex === -1) return prevApplications;
-      
-      // If status is the same, don't update
+            
       if (prevApplications[appIndex].status === newStatus) return prevApplications;
-      
-      // Create a new array with the updated application
+            
       const newApplications = [...prevApplications];
       newApplications[appIndex] = {
         ...newApplications[appIndex],
@@ -91,28 +79,23 @@ export default function KanbanBoard() {
       return newApplications;
     });
   }, []);
-
-  // Handle delete
+  
   const handleDelete = useCallback((applicationId: string) => {
     setApplications(prevApplications => 
       prevApplications.filter(app => app.id !== applicationId)
     );
   }, []);
-
-  // Load more applications
+  
   const loadMore = useCallback(async () => {
     setIsLoading(true);
-    try {
-      // Simulate API call delay
+    try {      
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, you would fetch with pagination params
+            
       const newApplications = generateDummyApplications(10);
       
       setApplications(prev => [...prev, ...newApplications]);
       setPage(prevPage => prevPage + 1);
-      
-      // Simulate running out of data after page 3
+            
       if (page >= 3) {
         setHasMore(false);
       }

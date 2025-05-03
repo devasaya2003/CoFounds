@@ -35,7 +35,7 @@ interface UploadResponse {
     fileUrl: string;
     fileId: string;
     success?: boolean;
-  }  
+}
 
 export default function CertificateForm({
     certificate,
@@ -111,12 +111,10 @@ export default function CertificateForm({
     const handleRemoveFile = async () => {
         if (certificate.tempFileId) {
             try {
-                // Delete file from storage
                 await fetchWithAuth_POST('/api/v1/upload/delete', {
                     fileId: certificate.tempFileId
                 });
 
-                // Update local state
                 onUpdate({ fileUrl: "", tempFileId: "" });
                 setValue(`certificates.${index}.fileUrl`, "");
                 setValue(`certificates.${index}.tempFileId`, "");
@@ -126,7 +124,6 @@ export default function CertificateForm({
                 console.error("Error removing file:", error);
             }
         } else {
-            // Just clear the UI if no tempFileId
             onUpdate({ fileUrl: "", tempFileId: "" });
             setValue(`certificates.${index}.fileUrl`, "");
             setValue(`certificates.${index}.tempFileId`, "");
@@ -281,32 +278,29 @@ export default function CertificateForm({
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 {certificate.fileUrl.toLowerCase().endsWith('.pdf') ? (
-                                                    // PDF icon
                                                     <div className="w-12 h-12 bg-red-100 text-red-600 rounded flex items-center justify-center mr-3">
                                                         <span className="font-bold">PDF</span>
                                                     </div>
                                                 ) : certificate.fileUrl.match(/\.(jpe?g|png|gif|webp)$/i) ? (
-                                                    // Image preview (thumbnail)
-                                                    <img 
-                                                        src={certificate.fileUrl} 
-                                                        alt="Certificate preview" 
+                                                    <img
+                                                        src={certificate.fileUrl}
+                                                        alt="Certificate preview"
                                                         className="w-12 h-12 object-cover rounded mr-3"
                                                         onError={(e) => {
                                                             e.currentTarget.src = 'https://placehold.co/48x48/gray/white?text=IMG';
                                                         }}
                                                     />
                                                 ) : (
-                                                    // Generic file icon
                                                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded flex items-center justify-center mr-3">
                                                         <UploadCloud className="h-6 w-6" />
                                                     </div>
                                                 )}
-                                                
+
                                                 <div className="overflow-hidden">
                                                     <p className="text-sm font-medium truncate">
                                                         {/* Extract file name from URL */}
-                                                        {certificate.tempFileId 
-                                                            ? certificate.tempFileId.split('/').pop() 
+                                                        {certificate.tempFileId
+                                                            ? certificate.tempFileId.split('/').pop()
                                                             : 'Uploaded file'}
                                                     </p>
                                                     <p className="text-xs text-gray-500">
@@ -314,11 +308,11 @@ export default function CertificateForm({
                                                     </p>
                                                 </div>
                                             </div>
-                                            
+
                                             {/* View button */}
-                                            <a 
-                                                href={certificate.fileUrl} 
-                                                target="_blank" 
+                                            <a
+                                                href={certificate.fileUrl}
+                                                target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-sm text-blue-600 hover:text-blue-800"
                                             >
@@ -330,7 +324,7 @@ export default function CertificateForm({
                                     <p className="mb-4 font-medium text-green-600">
                                         File uploaded successfully
                                     </p>
-                                    
+
                                     {/* Single button to remove certificate */}
                                     <button
                                         type="button"
@@ -341,7 +335,6 @@ export default function CertificateForm({
                                     </button>
                                 </div>
                             ) : (
-                                // File upload input (unchanged)
                                 <div>
                                     <input
                                         type="file"

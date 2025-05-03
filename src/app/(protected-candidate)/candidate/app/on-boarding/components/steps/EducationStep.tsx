@@ -22,7 +22,7 @@ export default function EducationStep({
   onRemoveEducation,
   onUpdateEducation,
   maxEducationEntries = 5,
-  isSubmitting = false // Add isSubmitting prop with default value
+  isSubmitting = false
 }: EducationStepProps) {
   const dispatch = useAppDispatch();
   const [degrees, setDegrees] = useState<{ id: string, name: string }[]>([]);
@@ -67,7 +67,7 @@ export default function EducationStep({
   };
 
   const handleAddEducation = () => {
-    // Don't allow adding when submitting
+
     if (isSubmitting) return;
 
     if (educations.length < maxEducationEntries) {
@@ -95,7 +95,7 @@ export default function EducationStep({
   };
 
   const handleRemoveEducation = (id: string) => {
-    // Don't allow removing when submitting
+
     if (isSubmitting) return;
 
     const updatedEducations = educations.filter(edu => edu.id !== id);
@@ -105,7 +105,7 @@ export default function EducationStep({
   };
 
   const handleUpdateEducation = (id: string, updates: Partial<Education>) => {
-    // Don't allow updates when submitting
+
     if (isSubmitting) return;
 
     const updatedEducations = educations.map(edu =>
@@ -117,7 +117,7 @@ export default function EducationStep({
   };
 
   const handleUpdateDegrees = (newDegrees: { id: string, name: string }[]) => {
-    // Don't update degrees when submitting
+
     if (isSubmitting) return;
 
     setAllDegrees(newDegrees);
@@ -189,7 +189,7 @@ export default function EducationStep({
                 isLoadingDegrees={isLoading}
                 onUpdateDegrees={handleUpdateDegrees}
                 excludeDegreeIds={excludeIds}
-                disabled={isSubmitting} // Pass disabled state to the form
+                disabled={isSubmitting}
               />
             );
           })}

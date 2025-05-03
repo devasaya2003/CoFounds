@@ -3,18 +3,15 @@ import { supabase } from "../../../../../../prisma/supabase_client";
 import { BUCKETS } from "../../../../../../prisma/seed";
 
 export async function POST(req: NextRequest) {
-  try {
-    // Only allow this to be called with an admin key
+  try {    
     const authHeader = req.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.ADMIN_CLEANUP_KEY}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
-    // List all files in temp folders older than 24 hours
+        
     const twentyFourHoursAgo = new Date();
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-    
-    // List all files in /temp
+        
     const { data: tempFiles, error } = await supabase.storage
       .from(BUCKETS.COF)
       .list('', {
@@ -26,8 +23,7 @@ export async function POST(req: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    
-    // Filter for temp files older than 24 hours
+        
     const filesToDelete = tempFiles
       .filter(file => file.id.includes('/temp/'))
       .filter(file => new Date(file.created_at) < twentyFourHoursAgo)
@@ -36,8 +32,7 @@ export async function POST(req: NextRequest) {
     if (filesToDelete.length === 0) {
       return NextResponse.json({ message: "No files to clean up" });
     }
-    
-    // Delete old temp files
+        
     const { data, error: deleteError } = await supabase.storage
       .from(BUCKETS.COF)
       .remove(filesToDelete);
