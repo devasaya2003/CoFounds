@@ -7,10 +7,10 @@ import { fetchWithAuth_POST } from '@/utils/api';
 const API_ENDPOINTS = {
     PROFILE: '/api/v1/candidate/profile',
     SKILLS: '/api/v1/candidate/skills',
-    EDUCATION: '/api/v1/candidate/user-education',
-    CERTIFICATES: '/api/v1/candidate/user-certificates',
-    EXPERIENCE: '/api/v1/candidate/user-experience',
-    PROJECTS: '/api/v1/candidate/user-projects'
+    EDUCATION: '/api/v1/candidate/education',
+    CERTIFICATES: '/api/v1/candidate/certificates',
+    EXPERIENCE: '/api/v1/candidate/experience',
+    PROJECTS: '/api/v1/candidate/projects'
 };
 
 const formatDateForAPI = (dateObj: DateField | null): string => {
@@ -155,15 +155,21 @@ export const submitEducationStep = createAsyncThunk(
         const state = getState() as RootState;
         const authState = state.auth;
         const onboardingData = state.candidateOnboarding;
+        
+        const DEV_MODE = process.env.NODE_ENV === 'development';
+        const fallbackUserId = DEV_MODE ? 'dev-test-user-123' : null;
+        const userId = authState.user?.id || fallbackUserId;
+        
+        if (!userId) {
+            return rejectWithValue("Authentication required: No user ID available");
+        }
 
         try {
-            dispatch(setStatus({ status: 'submitting', error: 'Submitting education...' }));
+            dispatch(setStatus({ status: 'submitting' }));
             dispatch(setSubmissionStatus({ step: 'education', status: 'loading' }));
-
+            
             const educationPayload = {
-                user_id: authState.user?.id,
-                created_by: authState.user?.id,
-                updated_by: authState.user?.id,
+                user_id: userId,
                 education: (onboardingData.education || []).map(edu => ({
                     degree_id: edu.degree,
                     edu_from: edu.institution,
@@ -172,19 +178,30 @@ export const submitEducationStep = createAsyncThunk(
                 }))
             };
 
-            const response = await simulateApiCall(
+            console.log('Submitting education with payload:', educationPayload);
+            
+            const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.EDUCATION,
                 educationPayload
             );
 
-            dispatch(setStatus({ status: 'success', error: 'Education submitted successfully.' }));
+            console.log('Education update response:', response);
+
+            dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'education', status: 'success' }));
 
             return response;
         } catch (error: unknown) {
             const err = error as Error;
+            console.error('Error updating education:', err);
+            
             dispatch(setStatus({ status: 'error', error: err.message || 'Failed to submit education' }));
-            dispatch(setSubmissionStatus({ step: 'education', status: 'error', error: err.message }));
+            dispatch(setSubmissionStatus({ 
+                step: 'education', 
+                status: 'error', 
+                error: err.message 
+            }));
+            
             return rejectWithValue(err.message || 'Failed to submit education');
         }
     }
@@ -197,30 +214,86 @@ export const submitCertificatesStep = createAsyncThunk(
         const authState = state.auth;
         const onboardingData = state.candidateOnboarding;
 
+        const DEV_MODE = process.env.NODE_ENV === 'development';
+        const fallbackUserId = DEV_MODE ? 'dev-test-user-123' : null;
+        const userId = authState.user?.id || fallbackUserId;
+        
+        if (!userId) {
+            return rejectWithValue("Authentication required: No user ID available");
+        }
+
         try {
-            dispatch(setStatus({ status: 'submitting', error: 'Submitting certificates...' }));
+            dispatch(setStatus({ status: 'submitting' }));
             dispatch(setSubmissionStatus({ step: 'certificates', status: 'loading' }));
-
+            
+            const tempFiles = onboardingData.certificates
+                .filter(cert => cert.fileUrl && cert.tempFileId)
+                .map(cert => ({ 
+                    tempFileId: cert.tempFileId, 
+                    certificateId: cert.id 
+                }));
+                
+            const finalizedFiles: Record<string, string> = {};
+                
+            if (tempFiles.length > 0) {                
+                interface FileUploadResult {
+                    originalId: string;
+                    publicUrl: string;
+                    success: boolean;
+                    certificateId?: string;
+                }
+                
+                const finalizationResponse = await fetchWithAuth_POST('/api/v1/upload/finalize', {
+                    userId,
+                    files: tempFiles
+                }) as { results?: Array<FileUploadResult> };
+                                
+                if (finalizationResponse && finalizationResponse.results) {                    
+                    finalizationResponse.results.forEach((result: FileUploadResult) => {
+                        if (result.success && result.certificateId) {                            
+                            finalizedFiles[result.certificateId] = result.publicUrl;
+                            console.log(`Mapped certificate ${result.certificateId} to URL: ${result.publicUrl}`);
+                        }
+                    });
+                }
+            }
+                        
+            console.log('Finalized files mapping:', finalizedFiles);
+            
             const certificatesPayload = {
-                user_id: authState.user?.id,
-                created_by: authState.user?.id,
-                updated_by: authState.user?.id,
-                certificates: (onboardingData.certificates || []).map(cert => ({
-                    title: cert.title,
-                    description: cert.description || '',
-                    url: cert.externalUrl || null,
-                    file_path: cert.fileUrl || null,
-                    started_at: formatDateForAPI(cert.startDate),
-                    end_at: cert.endDate ? formatDateForAPI(cert.endDate) : null
-                }))
+                user_id: userId,
+                created_by: userId,
+                updated_by: userId,
+                certificates: (onboardingData.certificates || []).map(cert => {                    
+                    const finalFileUrl = finalizedFiles[cert.id] || cert.fileUrl || null;
+                    
+                    console.log(`Certificate ${cert.id} using file path: ${finalFileUrl}`);
+                    
+                    return {
+                        title: cert.title,
+                        description: cert.description || '',
+                        url: cert.externalUrl || null,                        file_path: finalFileUrl, 
+                        started_at: formatDateForAPI(cert.startDate),
+                        end_at: cert.endDate ? formatDateForAPI(cert.endDate) : null
+                    };
+                })
             };
-
-            const response = await simulateApiCall(
+            
+            console.log('Certificates payload with file paths:', 
+                certificatesPayload.certificates.map(c => ({
+                    title: c.title,
+                    file_path: c.file_path
+                }))
+            );
+            
+            const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.CERTIFICATES,
                 certificatesPayload
             );
 
-            dispatch(setStatus({ status: 'success', error: 'Certificates submitted successfully.' }));
+            console.log('Certificate update response:', response);
+
+            dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'certificates', status: 'success' }));
 
             return response;
@@ -246,8 +319,6 @@ export const submitExperienceStep = createAsyncThunk(
 
             const experiencePayload = {
                 user_id: authState.user?.id,
-                created_by: authState.user?.id,
-                updated_by: authState.user?.id,
                 experiences: (onboardingData.proofsOfWork || []).map(exp => ({
                     title: exp.title,
                     company_name: exp.company_name,
@@ -288,8 +359,6 @@ export const submitProjectsStep = createAsyncThunk(
 
             const projectsPayload = {
                 user_id: authState.user?.id,
-                created_by: authState.user?.id,
-                updated_by: authState.user?.id,
                 projects: (onboardingData.projects || []).map(proj => ({
                     title: proj.title,
                     description: proj.description || '',

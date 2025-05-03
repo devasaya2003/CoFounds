@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   SkillWithId,
   Education,
@@ -7,6 +7,8 @@ import {
   Project,
   DateField
 } from '@/types/candidate_onboarding';
+import { RootState } from '../store';
+import { fetchWithAuth_POST } from '@/utils/api';
 
 
 interface CandidateOnboardingState {
@@ -165,12 +167,17 @@ export const candidateOnboardingSlice = createSlice({
       }
       state.isDirty = true;
     },
-    removeCertificate: (state, action: PayloadAction<string>) => {
+    _removeCertificate: (state, action: PayloadAction<string>) => {
       state.certificates = state.certificates.filter(cert => cert.id !== action.payload);
-      state.isDirty = true;
     },
-    
-    
+    clearCertificateFile: (state, action: PayloadAction<string>) => {
+      const certificateId = action.payload;
+      const certificate = state.certificates.find(cert => cert.id === certificateId);
+      if (certificate) {
+        certificate.fileUrl = "";
+        certificate.tempFileId = "";
+      }
+    },
     addProofOfWork: (state, action: PayloadAction<ProofOfWork>) => {
       if (!state.proofsOfWork) {
         state.proofsOfWork = [];
@@ -251,7 +258,6 @@ export const {
   removeEducation,
   addCertificate,
   updateCertificate,
-  removeCertificate,
   addProofOfWork,
   updateProofOfWork,
   removeProofOfWork,
@@ -259,7 +265,67 @@ export const {
   updateProject,
   removeProject,
   resetForm,
-  setSubmissionStatus
+  setSubmissionStatus,
+  clearCertificateFile
 } = candidateOnboardingSlice.actions;
+
+export const removeCertificate = createAsyncThunk(
+  'candidateOnboarding/removeCertificate',
+  async (certificateId: string, { getState, dispatch }) => {
+
+    console.log("inside the thunk...")
+
+    const state = getState() as RootState;
+    const certificate = state.candidateOnboarding.certificates
+      .find(cert => cert.id === certificateId);
+
+    console.log(certificate);
+    
+    // If this certificate has a file URL and a temp file ID, clean it up
+    if (certificate?.fileUrl && certificate?.tempFileId) {
+      try {
+        const res = await fetchWithAuth_POST(
+          '/api/v1/upload/delete',
+          { fileId: certificate.tempFileId }
+        );
+        console.log(JSON.stringify(res));
+      } catch (error) {
+        console.error('Failed to clean up temporary file:', error);
+      }
+    }
+    
+    dispatch(candidateOnboardingSlice.actions._removeCertificate(certificateId));
+  }
+);
+
+export const removeFileFromCertificate = createAsyncThunk(
+  'candidateOnboarding/removeFileFromCertificate',
+  async (certificateId: string, { getState, dispatch }) => {
+    const state = getState() as RootState;
+    const certificate = state.candidateOnboarding.certificates
+      .find(cert => cert.id === certificateId);
+    
+    if (certificate?.tempFileId) {
+      try {
+        await fetchWithAuth_POST(
+          '/api/v1/upload/delete',
+          { fileId: certificate.tempFileId }
+        );
+        
+        // Update Redux state with clear action
+        dispatch(clearCertificateFile(certificateId));
+        
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to delete file:', error);
+        return { success: false, error };
+      }
+    }
+    
+    // Even if no file to delete, still clear the state
+    dispatch(clearCertificateFile(certificateId));
+    return { success: true, message: 'No file to delete' };
+  }
+);
 
 export default candidateOnboardingSlice.reducer;

@@ -27,6 +27,7 @@ export interface Certificate {
   endDate: DateField | null;
   fileUrl?: string;
   externalUrl?: string;
+  tempFileId?: string;
 }
 
 export interface ProofOfWork {

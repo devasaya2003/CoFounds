@@ -4,7 +4,7 @@ export const BUCKETS = {
 };
 
 export const PATHS = {
-    CERTIFICATES_FOLDER: 'files/',
+    CERTIFICATES_FOLDER: 'files',
 };
 
 import { supabase } from "./supabase_client";

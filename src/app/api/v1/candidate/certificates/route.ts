@@ -1,34 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createBulkCertificates } from "@/backend/functions/user_certificates/POST/create_bulk_certificates";
-import { CreateBulkCertificatesRequest } from "@/backend/functions/user_certificates/POST/types";
 
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
 
-
-    if (!data.user_id || !data.created_by || !data.updated_by) {
+    // Validate required fields
+    if (!data.user_id) {
       return NextResponse.json(
-        { success: false, message: "Missing user_id, created_by, or updated_by fields" },
+        { success: false, message: "User ID is required" },
         { status: 400 }
       );
     }
 
+    // Use user_id for both created_by and updated_by if not provided
+    const requestData = {
+      user_id: data.user_id,
+      created_by: data.created_by || data.user_id,
+      updated_by: data.updated_by || data.user_id,
+      certificates: data.certificates || []
+    };
 
-    if (!data.certificates || !Array.isArray(data.certificates) || data.certificates.length === 0) {
+    if (!requestData.certificates || !Array.isArray(requestData.certificates) || requestData.certificates.length === 0) {
       return NextResponse.json(
         { success: false, message: "At least one certificate is required" },
         { status: 400 }
       );
     }
 
-
-    interface Certificate {
-      title: string;
-      [key: string]: string | number | boolean | Date | null | undefined;
-    }
-
-    const invalidCertificates: Certificate[] = data.certificates.filter((cert: Certificate) => !cert.title);
+    // Validate each certificate has a title
+    const invalidCertificates = requestData.certificates.filter(cert => !cert.title);
     if (invalidCertificates.length > 0) {
       return NextResponse.json(
         { success: false, message: "All certificates must have a title" },
@@ -36,22 +37,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
-    const requestData: CreateBulkCertificatesRequest = {
-      user_id: data.user_id,
-      created_by: data.created_by,
-      updated_by: data.updated_by,
-      certificates: data.certificates
-    };
-
     const result = await createBulkCertificates(requestData);
 
-
     if (!result.success) {
-      return NextResponse.json(
-        result,
-        { status: 400 }
-      );
+      return NextResponse.json(result, { status: 400 });
     }
 
     return NextResponse.json(result, { status: 201 });

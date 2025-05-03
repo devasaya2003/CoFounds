@@ -2,9 +2,6 @@ import prisma from "../../../../../prisma/client";
 import { uploadCertificateFile } from "./fileUtils";
 import { CreateBulkCertificatesRequest, CreateBulkCertificatesResponse, DbCertificate } from "./types";
 
-/**
- * Create bulk certificates for a user
- */
 export async function createBulkCertificates(
     requestData: CreateBulkCertificatesRequest
 ): Promise<CreateBulkCertificatesResponse> {
@@ -36,12 +33,15 @@ export async function createBulkCertificates(
                 };
 
                 if (cert.file_path) {
-                    try {
-                        const fileUrl = await uploadCertificateFile(cert.file_path, user_id, cert.title);
-                        certificateData.filePath = fileUrl;
-                    } catch (uploadError) {
-                        console.error('Error uploading certificate file:', uploadError);
-                        // Continue without the file if upload fails
+                    if (cert.file_path.startsWith('http')) {
+                        certificateData.filePath = cert.file_path;
+                    } else {
+                        try {
+                            const fileUrl = await uploadCertificateFile(cert.file_path, user_id, cert.title);
+                            certificateData.filePath = fileUrl;
+                        } catch (uploadError) {
+                            console.error('Error uploading certificate file:', uploadError);
+                        }
                     }
                 }
 
