@@ -2,22 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify, JWTPayload } from "jose";
 
 export const config = {
-  matcher: [
+  matcher: [    
     '/api/v1/:path*',
     '/candidate/:path*',
     '/recruiter/:path*',
     '/auth',
-    '/auth/:path*',
+    '/auth/:path*',            
+    '/((?!_next/|static/|favicon.ico).*)',
   ],
 };
 
-// Pages that don't require authentication
 const PUBLIC_PATHS = [
   "/auth/sign-in",
   "/auth/sign-up",
   "/auth/recruiter-sign-in",
   "/auth/forgot-password",
   "/auth/reset-password",
+  "/portfolio/",
+  "/api/portfolio/",
 ];
 
 interface TokenPayload extends JWTPayload {
@@ -26,6 +28,45 @@ interface TokenPayload extends JWTPayload {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const hostname = req.headers.get('host') || '';
+  
+  const mainDomain = process.env.NEXT_PUBLIC_BASE_URL || 'cofounds.in';
+  const isDevEnvironment = process.env.NODE_ENV === 'development';
+  
+  
+  if (isDevEnvironment && hostname.includes('localhost')) {
+        
+        
+    const subdomainMatch = hostname.match(/^([^.]+)\.localhost/);
+    
+    if (subdomainMatch && subdomainMatch[1] !== 'www') {
+      console.log("Local subdomain detected:", subdomainMatch[1]);
+      
+      const url = req.nextUrl.clone();
+      url.pathname = `/portfolio/${subdomainMatch[1]}`;
+      
+      console.log(`Rewriting ${hostname}${pathname} to ${url.pathname}`);
+      return NextResponse.rewrite(url);
+    }
+  }
+    
+  else {
+    const isSubdomain = !hostname.startsWith('www.') &&
+                        hostname !== mainDomain &&
+                        hostname.endsWith(`.${mainDomain}`);
+                        
+    if (isSubdomain) {
+      console.log("Production subdomain detected:", hostname);
+      
+      const username = hostname.split('.')[0];
+      
+      const url = req.nextUrl.clone();
+      url.pathname = `/portfolio/${username}`;
+      
+      console.log(`Rewriting ${hostname}${pathname} to ${url.pathname}`);
+      return NextResponse.rewrite(url);
+    }
+  }
   
   console.log("Middleware executing for:", pathname);
   

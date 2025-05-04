@@ -90,10 +90,7 @@ export default function StepContainer({
       default:
         isValid = false;
     }
-    
-    console.log(`Step ${currentStep} validation result:`, isValid);
-    console.log("Current errors:", form.formState.errors);
-    
+            
     if (!isValid) return;
 
     setIsSubmitting(true);
@@ -123,8 +120,7 @@ export default function StepContainer({
           break;
       }
             
-      if (response) {
-        console.log("API response successful, moving to next step");
+      if (response) {        
         onValidateAndProceed();
       }
     } catch (error) {

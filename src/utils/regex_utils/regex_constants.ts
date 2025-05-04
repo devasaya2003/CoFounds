@@ -34,8 +34,8 @@ export const PINCODE_REGEX = INDIAN_PINCODE_REGEX;
 // Name - allows alphabets, spaces, and some special characters
 export const NAME_REGEX = /^[a-zA-Z\s.']{2,50}$/;
 
-// Username - alphanumeric with underscore and dot, 3-30 characters
-export const USERNAME_REGEX = /^[a-zA-Z0-9_.]{3,30}$/;
+// Username - lowercase alphanumeric (3-8 chars), with hyphens/underscores only in middle
+export const USERNAME_REGEX = /^[a-z0-9][a-z0-9_-]{1,6}[a-z0-9]$/;
 
 // GST Number - updated as per new format
 export const GST_REGEX = /^[0-9]{2}[A-Z]{10}[0-9]{1}[A-Z]{1}[0-9]{1}[A-Z]{1}$/;
@@ -103,7 +103,7 @@ export const VALIDATION_MESSAGES = {
   CITY: "Please enter a valid city name",
   DISTRICT: "Please enter a valid district name",
   NAME: "Please enter a valid name",
-  USERNAME: "Username must be 3-30 alphanumeric characters, dots or underscores",
+  USERNAME: "Username must be 3-8 characters, lowercase letters and numbers only, with hyphens or underscores only in the middle",
   GST: "Please enter a valid GST number",
   HSN: "Please enter a valid HSN code (4-8 digits)",
   BANK_ACCOUNT: "Please enter a valid bank account number (9-18 digits)",

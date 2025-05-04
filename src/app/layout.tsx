@@ -18,7 +18,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* Add the suppressHydrationWarning attribute to the body */}
       <body className={inter.className} suppressHydrationWarning={true}>
         <Providers>
         <AuthInitializer />

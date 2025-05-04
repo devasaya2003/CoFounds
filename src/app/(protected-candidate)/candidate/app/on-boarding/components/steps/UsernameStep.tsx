@@ -30,16 +30,16 @@ export default function UsernameStep({
   const [validationMessage, setValidationMessage] = useState('');
 
   const checkUsernameImmediate = useCallback(async (username: string) => {
-    if (!username || username.length < 3) {
+    if (!username || username.length < 3 || username.length > 8) {
       setIsAvailable(null);
-      setValidationMessage('');
+      setValidationMessage('Username must be between 3-8 characters');
       setIsChecking(false);
       return;
     }
 
     if (!VALIDATE_USERNAME(username)) {
       setIsAvailable(false);
-      setValidationMessage('Username format is invalid. Use only letters, numbers, underscores, and dots.');
+      setValidationMessage('Username must be 3-8 characters, lowercase letters and numbers only, with hyphens or underscores only in the middle');
       setIsChecking(false);
       return;
     }
@@ -103,13 +103,14 @@ export default function UsernameStep({
           {...register('userName', {
             required: 'Username is required',
             minLength: { value: 3, message: 'Username must be at least 3 characters' },
+            maxLength: { value: 8, message: 'Username must be at most 8 characters' },
             pattern: {
-              value: /^[a-zA-Z0-9_-]+$/,
-              message: 'Username can only contain letters, numbers, underscores and hyphens'
+              value: /^[a-z0-9][a-z0-9_-]{1,6}[a-z0-9]$/,
+              message: 'Username must be lowercase letters and numbers only, with hyphens or underscores only in the middle'
             }
           })}
           onChange={handleUsernameChange}
-          placeholder="e.g., john_doe"
+          placeholder="e.g., dev123"
           disabled={isSubmitting}
         />
 

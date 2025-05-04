@@ -56,8 +56,6 @@ export const submitUserNameStep = createAsyncThunk(
         const authState = state.auth;
         const onboardingData = state.candidateOnboarding;
 
-        console.log("USER ID: ", authState);
-
         try {
             dispatch(setStatus({ status: 'submitting' }));
             dispatch(setSubmissionStatus({ step: 'set-username', status: 'loading' }));
@@ -67,14 +65,10 @@ export const submitUserNameStep = createAsyncThunk(
                 user_name: onboardingData.userName
             };
 
-            console.log('Submitting username with payload:', profilePayload);
-
             const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.PROFILE,
                 profilePayload
             );
-
-            console.log('Username update response:', response);
 
             dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'set-username', status: 'success' }));
@@ -129,7 +123,6 @@ export const submitPersonalInfoStep = createAsyncThunk(
                 }))
               };
               
-              console.log('Submitting skills with payload:', skillsPayload);
               
               const skillsResponse = await fetchWithAuth_POST(
                 API_ENDPOINTS.SKILLS,
@@ -154,8 +147,7 @@ export const submitEducationStep = createAsyncThunk(
     async (_, { getState, dispatch, rejectWithValue }) => {
         const state = getState() as RootState;
         const authState = state.auth;
-        const onboardingData = state.candidateOnboarding;
-        
+        const onboardingData = state.candidateOnboarding;        
         const DEV_MODE = process.env.NODE_ENV === 'development';
         const fallbackUserId = DEV_MODE ? 'dev-test-user-123' : null;
         const userId = authState.user?.id || fallbackUserId;
@@ -177,15 +169,11 @@ export const submitEducationStep = createAsyncThunk(
                     end_at: edu.endDate ? formatDateForAPI(edu.endDate) : null
                 }))
             };
-
-            console.log('Submitting education with payload:', educationPayload);
             
             const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.EDUCATION,
                 educationPayload
             );
-
-            console.log('Education update response:', response);
 
             dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'education', status: 'success' }));
@@ -227,7 +215,7 @@ export const submitCertificatesStep = createAsyncThunk(
             dispatch(setSubmissionStatus({ step: 'certificates', status: 'loading' }));
 
             if (onboardingData.certificates.length === 0) {
-                console.log('No certificates added - skipping API call');
+                
                                 
                 dispatch(setStatus({ status: 'success' }));
                 dispatch(setSubmissionStatus({ step: 'certificates', status: 'success' }));
@@ -261,13 +249,11 @@ export const submitCertificatesStep = createAsyncThunk(
                     finalizationResponse.results.forEach((result: FileUploadResult) => {
                         if (result.success && result.certificateId) {                            
                             finalizedFiles[result.certificateId] = result.publicUrl;
-                            console.log(`Mapped certificate ${result.certificateId} to URL: ${result.publicUrl}`);
+                            
                         }
                     });
                 }
             }
-                        
-            console.log('Finalized files mapping:', finalizedFiles);
             
             const certificatesPayload = {
                 user_id: userId,
@@ -275,9 +261,7 @@ export const submitCertificatesStep = createAsyncThunk(
                 updated_by: userId,
                 certificates: (onboardingData.certificates || []).map(cert => {                    
                     const finalFileUrl = finalizedFiles[cert.id] || cert.fileUrl || null;
-                    
-                    console.log(`Certificate ${cert.id} using file path: ${finalFileUrl}`);
-                    
+   
                     return {
                         title: cert.title,
                         description: cert.description || '',
@@ -288,20 +272,11 @@ export const submitCertificatesStep = createAsyncThunk(
                 })
             };
             
-            console.log('Certificates payload with file paths:', 
-                certificatesPayload.certificates.map(c => ({
-                    title: c.title,
-                    file_path: c.file_path
-                }))
-            );
-            
             const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.CERTIFICATES,
                 certificatesPayload
             );
-
-            console.log('Certificate update response:', response);
-
+          
             dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'certificates', status: 'success' }));
 
@@ -358,20 +333,11 @@ export const submitExperienceStep = createAsyncThunk(
                     end_at: exp.endDate ? formatDateForAPI(exp.endDate) : null
                 }))
             };
-
-            console.log('Submitting experiences with payload:', 
-                experiencePayload.experiences.map(e => ({
-                    title: e.title,
-                    company: e.company_name
-                }))
-            );
             
             const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.EXPERIENCE,
                 experiencePayload
             );
-
-            console.log('Experience update response:', response);
 
             dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'proof-of-work', status: 'success' }));
@@ -415,7 +381,7 @@ export const submitProjectsStep = createAsyncThunk(
 
             // Check if there are any projects to submit
             if (onboardingData.projects.length === 0) {
-                console.log('No projects added - skipping API call');
+                
                 
                 // Mark step as success without API call
                 dispatch(setStatus({ status: 'success' }));
@@ -435,20 +401,11 @@ export const submitProjectsStep = createAsyncThunk(
                 }))
             };
 
-            console.log('Submitting projects with payload:', 
-                projectsPayload.projects.map(p => ({
-                    title: p.title,
-                    link: p.link
-                }))
-            );
-
             // Use real API call instead of simulation
             const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.PROJECTS,
                 projectsPayload
             );
-
-            console.log('Projects update response:', response);
 
             dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'projects', status: 'success' }));
