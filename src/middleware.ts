@@ -23,6 +23,17 @@ const PUBLIC_PATHS = [
   "/api/banner-image"
 ];
 
+const PUBLIC_PATH_PREFIXES = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/recruiter-sign-in",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/portfolio/",
+  "/api/portfolio/",
+  "/api/banner-image"
+];
+
 interface TokenPayload extends JWTPayload {
   role?: string;
 }
@@ -34,6 +45,12 @@ export async function middleware(req: NextRequest) {
   const mainDomain = process.env.NEXT_PUBLIC_BASE_URL || 'cofounds.in';
   const isDevEnvironment = process.env.NODE_ENV === 'development';
   
+  console.log("Middleware executing for:", pathname);
+
+  if (pathname.startsWith("/api/portfolio/")) {
+    console.log("Portfolio API request, allowing access");
+    return NextResponse.next();
+  }
   
   if (isDevEnvironment && hostname.includes('localhost')) {
         
@@ -69,34 +86,9 @@ export async function middleware(req: NextRequest) {
     }
   }
   
-  console.log("Middleware executing for:", pathname);
-  
-  if (PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
-    console.log("Auth page detected, checking if already logged in");
-        
-    const authToken = req.cookies.get("auth_token")?.value;
-    
-    if (authToken) {
-      try {        
-        const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-        const { payload } = await jwtVerify(authToken, secret);
-        const typedPayload = payload as TokenPayload;
-        const userRole = typedPayload.role;
-        
-        console.log("User already logged in, redirecting based on role:", userRole);
-                
-        if (userRole === "recruiter") {
-          return NextResponse.redirect(new URL("/recruiter/app", req.url));
-        } else if (userRole === "candidate") {
-          return NextResponse.redirect(new URL("/candidate/app", req.url));
-        }
-      } catch (error) {
-        console.log("Invalid token, allowing access to auth page");        
-      }
-    }
-        
-    console.log("No valid token, allowing access to auth page");
-    return NextResponse.next();
+  if (PUBLIC_PATH_PREFIXES.some(prefix => pathname.startsWith(prefix))) {
+    console.log("Public path detected, allowing access without auth check");
+    return NextResponse.next(); // Immediately return next() without further checks
   }
     
   if (pathname === "/auth") {

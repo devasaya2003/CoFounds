@@ -17,16 +17,15 @@ export async function signInUser(email: string, password: string) {
     throw new Error("Invalid email or password");
   }
 
-  const token = sign(
-    {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      verified: user.verified,
-    },
-    process.env.NEXTAUTH_SECRET!,
-    { expiresIn: "30d" }
-  );
+  const payload = {
+    id: user.id,
+    email: user.email, 
+    role: user.role,
+    verified: user.verified,
+    userName: user.userName
+  };
+
+  const token = sign(payload, process.env.NEXTAUTH_SECRET!, { expiresIn: "30d" });
   
   return { user, token };
 }

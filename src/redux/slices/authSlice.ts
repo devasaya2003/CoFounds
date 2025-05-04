@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { getUserFromApiStatus } from "@/utils/authHelpers";
+import { RootState } from "../store";
 
 interface UserProfile {
   id: string;
@@ -27,24 +28,29 @@ interface AuthState {
   email: string;
   password: string;
   isLoading: boolean;
+  isLoadingUserDetails: boolean;
   error: string | null;
+  userDetailsError: string | null;
   isAuthenticated: boolean;
   userRole: string | null;
   token: string | null;
   user: UserProfile | null;
+  layoutInitialized: boolean;
 }
 
 const initialState: AuthState = {
   email: "",
   password: "",
   isLoading: false,
+  isLoadingUserDetails: false,
   error: null,
+  userDetailsError: null,
   isAuthenticated: false,
   userRole: null,
   token: null,
   user: null,
+  layoutInitialized: false,
 };
-
 
 export const restoreUserSession = createAsyncThunk(
   "auth/restoreUserSession",
@@ -86,6 +92,8 @@ export const signIn = createAsyncThunk(
       }
 
       const data = await response.json();
+
+      console.log("DATA OF REDUX LOGIN: ", JSON.stringify(data));
 
       if (data.token) {
         localStorage.setItem("auth_token", data.token);
@@ -167,6 +175,54 @@ export const signUp = createAsyncThunk(
   }
 );
 
+export const fetchUserDetails = createAsyncThunk(
+  'auth/fetchUserDetails',
+  async (_, { getState }) => {
+    const state = getState() as RootState;
+    
+    if (state.auth.isAuthenticated && state.auth.user?.userName) {
+      try {
+
+        console.log("USER: ", state.auth.user);
+
+        const userName = state.auth.user.userName;
+        const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}`;
+        const url = `${baseUrl}/api/portfolio/${userName}`;
+
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("API error response:", errorText.substring(0, 200));
+          throw new Error(`Failed to fetch user details: ${response.status}`);
+        }
+        
+        // First get as text to debug if needed
+        const responseText = await response.text();
+        
+        // Try to parse JSON
+        try {
+          const data = JSON.parse(responseText);
+          
+          if (data.success && data.data) {
+            return data.data;
+          } else {
+            throw new Error(data.error || 'Failed to fetch user details');
+          }
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError);
+          console.error("Raw response:", responseText.substring(0, 200));
+          throw new Error("Invalid response format");
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        throw error;
+      }
+    }
+    
+    throw new Error('User not authenticated or username missing');
+  }
+);
 
 export const getFullName = (user: UserProfile | null): string => {
   if (!user) return "";
@@ -208,6 +264,9 @@ export const authSlice = createSlice({
       localStorage.removeItem("auth_token");
       document.cookie =
         "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    },
+    setLayoutInitialized: (state, action: PayloadAction<boolean>) => {
+      state.layoutInitialized = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -266,6 +325,21 @@ export const authSlice = createSlice({
       .addCase(signUp.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(fetchUserDetails.pending, (state) => {
+        state.isLoadingUserDetails = true;
+        state.userDetailsError = null;
+      })
+      .addCase(fetchUserDetails.fulfilled, (state, action) => {
+        state.isLoadingUserDetails = false;
+        state.user = {
+          ...state.user,
+          ...action.payload
+        };
+      })
+      .addCase(fetchUserDetails.rejected, (state, action) => {
+        state.isLoadingUserDetails = false;
+        state.userDetailsError = action.error.message || 'Failed to fetch user details';
       });
   },
 });
@@ -277,5 +351,6 @@ export const {
   resetAuth,
   setToken,
   logout,
+  setLayoutInitialized,
 } = authSlice.actions;
 export default authSlice.reducer;

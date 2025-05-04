@@ -5,25 +5,25 @@ import { useEffect, useState, useRef } from 'react';
 interface AuroraEffectProps {
   className?: string;
   baseHue?: number;
-  random?: boolean; // New prop to enable random colors
+  random?: boolean; 
   children?: React.ReactNode;
   size?: 'small' | 'medium' | 'large';
 }
 
-// Generate a random color in HSL format
+
 const randomHue = () => Math.floor(Math.random() * 360);
 
 export default function AuroraEffect({ 
   className = '', 
   baseHue,
-  random = false, // Default to false
+  random = false, 
   children,
   size = 'medium'
 }: AuroraEffectProps) {
-  // Store random hue in a ref so it's stable between renders
+  
   const randomHueRef = useRef<number | null>(null);
   
-  // Initialize random hue if needed
+  
   if (random && randomHueRef.current === null) {
     randomHueRef.current = randomHue();
   }
@@ -35,10 +35,10 @@ export default function AuroraEffect({
   });
   
   useEffect(() => {
-    // Use different sources for the base hue with priority:
-    // 1. If random=true, use the stored random hue
-    // 2. If baseHue is provided, use that
-    // 3. Otherwise generate a new random hue
+    
+    
+    
+    
     const hue = random 
       ? randomHueRef.current! 
       : baseHue !== undefined 
@@ -52,7 +52,7 @@ export default function AuroraEffect({
     });
   }, [baseHue, random]);
 
-  // Define gradient sizes based on the size prop
+  
   const gradientSizes = {
     small: {
       primary: 40,

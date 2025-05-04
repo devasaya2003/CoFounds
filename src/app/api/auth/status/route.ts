@@ -7,16 +7,21 @@ interface UserJwtPayload extends JWTPayload {
     email: string;
     role: string;
     verified: boolean;
+    userName?: string | null;
+    phone?: string | null;
+    description?: string | null;
   };
   id?: string;
   email?: string;
   role?: string;
   sub?: string;
   verified?: boolean;
+  userName?: string | null;
+  phone?: string | null;
+  description?: string | null;
 }
 
 export async function GET(req: NextRequest) {
-
   const authToken = req.cookies.get("auth_token")?.value;
 
   if (!authToken) {
@@ -29,11 +34,13 @@ export async function GET(req: NextRequest) {
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "");
     const { payload } = await jwtVerify(authToken, secret);
     const jwtPayload = payload as UserJwtPayload;
+    
+    // Extract just the essential fields
     const userId = jwtPayload.user?.id || jwtPayload.id || jwtPayload.sub || "";
     const userEmail = jwtPayload.user?.email || jwtPayload.email || "";
     const userRole = jwtPayload.user?.role || jwtPayload.role || "";
     const userVerified = jwtPayload.user?.verified ?? jwtPayload.verified ?? false;
-
+    const userName = jwtPayload.user?.userName || jwtPayload.userName || null;
 
     if (!userId || !userEmail) {
       return NextResponse.json({
@@ -50,9 +57,8 @@ export async function GET(req: NextRequest) {
         role: userRole,
         verified: userVerified,
         isActive: true,
-        userName: null,
-        phone: null,
-        description: null
+        userName: userName,
+        phone: null
       }
     });
   } catch (error) {

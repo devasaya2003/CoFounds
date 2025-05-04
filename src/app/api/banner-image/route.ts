@@ -1,20 +1,17 @@
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
-  try {
-    // Generate a random page number (1-10)
+  try {    
     const randomPage = Math.floor(Math.random() * 10) + 1;
     const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
-    
-    // Get origin for CORS
+        
     const origin = req.headers.get('origin');
     const isValidOrigin = origin && (
       origin === 'http://localhost:3000' ||
       origin.endsWith('.localhost:3000') || 
       origin.includes('cofounds')
     );
-    
-    // Fetch image from Pexels API
+        
     const response = await fetch(
       `https://api.pexels.com/v1/search?query=abstract+background&per_page=1&page=${randomPage}&size=large`,
       {
@@ -37,19 +34,16 @@ export async function GET(req: Request) {
     };
     
     if (data.photos && data.photos.length > 0) {
-      const photo = data.photos[0];
-      // Use the original size for maximum quality
+      const photo = data.photos[0];      
       result = {
-        url: photo.src.original, // Use original for highest quality
+      url: photo.src.original, 
         photographer: photo.photographer,
         photographerUrl: photo.photographer_url,
       };
     }
-    
-    // Create response
+        
     const nextResponse = NextResponse.json(result);
-    
-    // Add CORS headers
+        
     if (isValidOrigin && origin) {
       nextResponse.headers.set('Access-Control-Allow-Origin', origin);
       nextResponse.headers.set('Access-Control-Allow-Methods', 'GET');
@@ -69,8 +63,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function OPTIONS(req: Request) {
-  // CORS preflight handler
+export async function OPTIONS(req: Request) {  
   const origin = req.headers.get('origin');
   const isValidOrigin = origin && (
     origin === 'http://localhost:3000' ||
