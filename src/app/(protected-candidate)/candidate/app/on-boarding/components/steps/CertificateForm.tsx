@@ -100,14 +100,6 @@ export default function CertificateForm({
         }
     };
 
-    const handleDelete = async () => {
-        console.log("inside handle delete...!")
-        await dispatch(removeCertificate(certificate.id));
-        if (onDelete) {
-            onDelete(certificate.id);
-        }
-    };
-
     const handleRemoveFile = async () => {
         if (certificate.tempFileId) {
             try {
