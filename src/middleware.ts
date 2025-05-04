@@ -20,6 +20,7 @@ const PUBLIC_PATHS = [
   "/auth/reset-password",
   "/portfolio/",
   "/api/portfolio/",
+  "/api/banner-image"
 ];
 
 interface TokenPayload extends JWTPayload {

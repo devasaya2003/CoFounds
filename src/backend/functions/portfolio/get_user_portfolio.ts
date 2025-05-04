@@ -31,6 +31,7 @@ export async function getUserPortfolio(userName: string) {
                 // Select education with needed fields
                 education: {
                     select: {
+                        eduFrom: true,
                         degree: {
                             select: {
                                 name: true,
