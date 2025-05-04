@@ -2,7 +2,7 @@ import prisma from "../../../../../prisma/client";
 
 export interface CreateBulkUserExperience {
   user_id: string;
-  data: {
+  experiences: {
     end_at: Date;
     started_at: Date;
     company_name: string;
@@ -13,7 +13,7 @@ export interface CreateBulkUserExperience {
 }
 
 export const createBulkUserExperience = async (data: CreateBulkUserExperience) => {
-  const formattedData = data.data.map((experience) => ({
+  const formattedData = data.experiences.map((experience) => ({
     userId: data.user_id,
     startedAt: experience.started_at,
     endAt: experience.end_at,

@@ -1,27 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createUserExperience } from "@/backend/functions/user_experience/POST/create_experience";
+import { createBulkUserProjects } from "@/backend/functions/user_projects/POST/create_bulk_projects";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
+    const { user_id, projects } = data;
 
-    if (!data.user_id || !data.started_at || !data.end_at || !data.company_name || !data.title) {
+    // Check required fields
+    if (!user_id || !projects || !Array.isArray(projects)) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { success: false, message: "Missing required fields or invalid projects format" },
         { status: 400 }
       );
     }
 
-    const createdExperience = await createUserExperience(data);
+    const result = await createBulkUserProjects(data);
+
     return NextResponse.json(
-      { message: "User experience created successfully", createdExperience },
+      {
+        success: true,
+        message: "User projects created successfully",
+        count: result.count
+      },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating user experience:", error);
-    return NextResponse.json(
-      { error: "Failed to create user experience" },
-      { status: 500 }
-    );
+    console.error("Error creating user projects:", error);
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Failed to create user projects" }, { status: 500 });
   }
 }

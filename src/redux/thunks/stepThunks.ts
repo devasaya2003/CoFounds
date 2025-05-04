@@ -225,6 +225,15 @@ export const submitCertificatesStep = createAsyncThunk(
         try {
             dispatch(setStatus({ status: 'submitting' }));
             dispatch(setSubmissionStatus({ step: 'certificates', status: 'loading' }));
+
+            if (onboardingData.certificates.length === 0) {
+                console.log('No certificates added - skipping API call');
+                                
+                dispatch(setStatus({ status: 'success' }));
+                dispatch(setSubmissionStatus({ step: 'certificates', status: 'success' }));
+                
+                return { success: true, message: "Step completed - no certificates to submit" };
+            }
             
             const tempFiles = onboardingData.certificates
                 .filter(cert => cert.fileUrl && cert.tempFileId)
@@ -313,12 +322,34 @@ export const submitExperienceStep = createAsyncThunk(
         const authState = state.auth;
         const onboardingData = state.candidateOnboarding;
 
-        try {
-            dispatch(setStatus({ status: 'submitting', error: 'Submitting work experience...' }));
-            dispatch(setSubmissionStatus({ step: 'proof-of-work', status: 'loading' }));
+        const DEV_MODE = process.env.NODE_ENV === 'development';
+        const fallbackUserId = DEV_MODE ? 'dev-test-user-123' : null;
+        const userId = authState.user?.id || fallbackUserId;
+        
+        if (!userId) {
+            return rejectWithValue("Authentication required: No user ID available");
+        }
 
+        try {
+            dispatch(setStatus({ status: 'submitting' }));
+            dispatch(setSubmissionStatus({ step: 'proof-of-work', status: 'loading' }));
+            
+            if (onboardingData.proofsOfWork.length === 0) {
+                dispatch(setStatus({ 
+                    status: 'error', 
+                    error: 'You must add at least one work experience to continue' 
+                }));
+                dispatch(setSubmissionStatus({ 
+                    step: 'proof-of-work', 
+                    status: 'error', 
+                    error: 'At least one work experience is required' 
+                }));
+                
+                return rejectWithValue("At least one work experience is required");
+            }
+            
             const experiencePayload = {
-                user_id: authState.user?.id,
+                user_id: userId,
                 experiences: (onboardingData.proofsOfWork || []).map(exp => ({
                     title: exp.title,
                     company_name: exp.company_name,
@@ -328,19 +359,35 @@ export const submitExperienceStep = createAsyncThunk(
                 }))
             };
 
-            const response = await simulateApiCall(
+            console.log('Submitting experiences with payload:', 
+                experiencePayload.experiences.map(e => ({
+                    title: e.title,
+                    company: e.company_name
+                }))
+            );
+            
+            const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.EXPERIENCE,
                 experiencePayload
             );
 
-            dispatch(setStatus({ status: 'success', error: 'Work experience submitted successfully.' }));
+            console.log('Experience update response:', response);
+
+            dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'proof-of-work', status: 'success' }));
 
             return response;
         } catch (error: unknown) {
             const err = error as Error;
+            console.error('Error updating experiences:', err);
+            
             dispatch(setStatus({ status: 'error', error: err.message || 'Failed to submit work experience' }));
-            dispatch(setSubmissionStatus({ step: 'proof-of-work', status: 'error', error: err.message }));
+            dispatch(setSubmissionStatus({ 
+                step: 'proof-of-work', 
+                status: 'error', 
+                error: err.message 
+            }));
+            
             return rejectWithValue(err.message || 'Failed to submit work experience');
         }
     }
@@ -353,12 +400,32 @@ export const submitProjectsStep = createAsyncThunk(
         const authState = state.auth;
         const onboardingData = state.candidateOnboarding;
 
+        // Use development fallback for consistency with other thunks
+        const DEV_MODE = process.env.NODE_ENV === 'development';
+        const fallbackUserId = DEV_MODE ? 'dev-test-user-123' : null;
+        const userId = authState.user?.id || fallbackUserId;
+        
+        if (!userId) {
+            return rejectWithValue("Authentication required: No user ID available");
+        }
+
         try {
-            dispatch(setStatus({ status: 'submitting', error: 'Submitting projects...' }));
+            dispatch(setStatus({ status: 'submitting' }));
             dispatch(setSubmissionStatus({ step: 'projects', status: 'loading' }));
 
+            // Check if there are any projects to submit
+            if (onboardingData.projects.length === 0) {
+                console.log('No projects added - skipping API call');
+                
+                // Mark step as success without API call
+                dispatch(setStatus({ status: 'success' }));
+                dispatch(setSubmissionStatus({ step: 'projects', status: 'success' }));
+                
+                return { success: true, message: "Step completed - no projects to submit" };
+            }
+
             const projectsPayload = {
-                user_id: authState.user?.id,
+                user_id: userId,
                 projects: (onboardingData.projects || []).map(proj => ({
                     title: proj.title,
                     description: proj.description || '',
@@ -368,19 +435,36 @@ export const submitProjectsStep = createAsyncThunk(
                 }))
             };
 
-            const response = await simulateApiCall(
+            console.log('Submitting projects with payload:', 
+                projectsPayload.projects.map(p => ({
+                    title: p.title,
+                    link: p.link
+                }))
+            );
+
+            // Use real API call instead of simulation
+            const response = await fetchWithAuth_POST(
                 API_ENDPOINTS.PROJECTS,
                 projectsPayload
             );
 
-            dispatch(setStatus({ status: 'success', error: 'Projects submitted successfully.' }));
+            console.log('Projects update response:', response);
+
+            dispatch(setStatus({ status: 'success' }));
             dispatch(setSubmissionStatus({ step: 'projects', status: 'success' }));
 
             return response;
         } catch (error: unknown) {
             const err = error as Error;
+            console.error('Error updating projects:', err);
+            
             dispatch(setStatus({ status: 'error', error: err.message || 'Failed to submit projects' }));
-            dispatch(setSubmissionStatus({ step: 'projects', status: 'error', error: err.message }));
+            dispatch(setSubmissionStatus({ 
+                step: 'projects', 
+                status: 'error', 
+                error: err.message 
+            }));
+            
             return rejectWithValue(err.message || 'Failed to submit projects');
         }
     }
