@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 export interface DateSelectorProps {
@@ -28,9 +28,55 @@ export default function DateSelector({
   onMonthChange,
   onDayChange,
   disabled = false,
-  error,
+  error
 }: DateSelectorProps) {  
   const [availableDays, setAvailableDays] = useState<string[]>([]);
+  const initialized = useRef(false);
+  
+  // Get current date values for defaults
+  const today = new Date();
+  const currentYear = today.getFullYear().toString();
+  const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0');
+  const currentDay = today.getDate().toString().padStart(2, '0');
+  
+  // Fix the initialization issue - make sure it runs with the right dependencies
+  useEffect(() => {
+    if (!initialized.current) {
+      console.log('Initializing date selector with defaults', {
+        selectedYear, 
+        selectedMonth, 
+        selectedDay,
+        currentYear,
+        currentMonth,
+        currentDay
+      });
+      
+      // Set initialized to true, but after a delay
+      setTimeout(() => {
+        initialized.current = true;
+      }, 100);
+      
+      const isYearMissing = !selectedYear || selectedYear === '';
+      const isMonthMissing = !selectedMonth || selectedMonth === '';
+      const isDayMissing = !selectedDay || selectedDay === '';
+      
+      // Immediately dispatch updates for any missing values
+      if (isYearMissing) {
+        console.log('Setting default year:', currentYear);
+        onYearChange(currentYear);
+      }
+      
+      if (isMonthMissing) {
+        console.log('Setting default month:', currentMonth);
+        onMonthChange(currentMonth);
+      }
+      
+      if (isDayMissing) {
+        // We'll handle days later after days are calculated
+        console.log('Day is missing, will set in next effect');
+      }
+    }
+  }, [selectedYear, selectedMonth, selectedDay, onYearChange, onMonthChange, onDayChange, currentYear, currentMonth, currentDay]);
     
   const isLeapYear = (year: number): boolean => {
     if (year % 400 === 0) return true;
@@ -42,25 +88,62 @@ export default function DateSelector({
     return new Date(year, month, 0).getDate();
   };
     
+  // Calculate available days based on selected year and month
   useEffect(() => {
-    if (!selectedYear || !selectedMonth) return;
+    console.log('Calculating days for', { selectedYear, selectedMonth, selectedDay });
     
-    const yearNum = parseInt(selectedYear, 10);
-    const monthNum = parseInt(selectedMonth, 10);
+    // Always get valid values - use current date as fallback
+    const yearToUse = selectedYear || currentYear;
+    const monthToUse = selectedMonth || currentMonth;
+    
+    const yearNum = parseInt(yearToUse, 10);
+    const monthNum = parseInt(monthToUse, 10);
+    
+    if (isNaN(yearNum) || isNaN(monthNum)) {
+      console.log('Invalid year or month', { yearNum, monthNum });
+      return;
+    }
         
     const daysInMonth = getDaysInMonth(yearNum, monthNum);
-        
+    console.log('Days in month:', daysInMonth);
+    
     const newDays = Array.from({ length: daysInMonth }, (_, i) => 
       (i + 1).toString().padStart(2, '0')
     );
     
     setAvailableDays(newDays);
+    
+    // Handle day selection
+    if (!selectedDay || selectedDay === '') {
+      // If day is missing, select current day or first day of month
+      const dayToUse = (monthToUse === currentMonth && yearToUse === currentYear) 
+        ? currentDay 
+        : '01';
         
-    const dayNum = parseInt(selectedDay, 10);
-    if (dayNum > daysInMonth) {
-      onDayChange(daysInMonth.toString().padStart(2, '0'));
+      // Make sure the default day is valid for this month
+      const finalDay = parseInt(dayToUse, 10) > daysInMonth 
+        ? daysInMonth.toString().padStart(2, '0')
+        : dayToUse;
+        
+      console.log('Setting default day:', finalDay);
+      onDayChange(finalDay);
+    } else {
+      // If day exists but is invalid for the month, adjust it
+      const dayNum = parseInt(selectedDay, 10);
+      if (dayNum > daysInMonth) {
+        console.log('Fixing invalid day:', selectedDay, 'to', daysInMonth);
+        onDayChange(daysInMonth.toString().padStart(2, '0'));
+      }
     }
-  }, [selectedYear, selectedMonth, selectedDay, onDayChange]);
+  }, [selectedYear, selectedMonth, selectedDay, onDayChange, currentYear, currentMonth, currentDay]);
+  
+  // Debug values being displayed
+  console.log('Rendering with values:', { 
+    selectedYear, 
+    selectedMonth, 
+    selectedDay,
+    availableDays: availableDays.length
+  });
 
   return (
     <div className="flex gap-3">
@@ -71,11 +154,15 @@ export default function DateSelector({
         </label>
         <div className="relative">
           <select
-            value={selectedYear}
-            onChange={(e) => onYearChange(e.target.value)}
+            value={selectedYear || ''}
+            onChange={(e) => {
+              console.log('Year changed to', e.target.value);
+              onYearChange(e.target.value);
+            }}
             className={`w-full appearance-none px-3 py-2.5 bg-white border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             disabled={disabled}
           >
+            <option value="">Select Year</option>
             {years.map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
@@ -93,11 +180,12 @@ export default function DateSelector({
         </label>
         <div className="relative">
           <select
-            value={selectedMonth}
+            value={selectedMonth || ''}
             onChange={(e) => onMonthChange(e.target.value)}
             className={`w-full appearance-none px-3 py-2.5 bg-white border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             disabled={disabled}
           >
+            <option value="">Select Month</option>
             {months.map(month => (
               <option key={month.value} value={month.value}>{month.label}</option>
             ))}
@@ -115,11 +203,12 @@ export default function DateSelector({
         </label>
         <div className="relative">
           <select
-            value={selectedDay}
+            value={selectedDay || ''}
             onChange={(e) => onDayChange(e.target.value)}
             className={`w-full appearance-none px-3 py-2.5 bg-white border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-            disabled={disabled}
+            disabled={disabled || availableDays.length === 0}
           >
+            <option value="">Select Day</option>
             {availableDays.map(day => (
               <option key={day} value={day}>{day}</option>
             ))}

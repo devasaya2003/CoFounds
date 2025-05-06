@@ -6,6 +6,11 @@ import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { restoreUserSession, fetchUserDetails, setLayoutInitialized } from '@/redux/slices/authSlice';
 
+// DEVELOPMENT SETTINGS - Set to true during development to bypass redirects
+const DEV_SETTINGS = {
+  BYPASS_ONBOARDING_REDIRECT: true, // Set to true to allow access to onboarding even with complete profile
+};
+
 export default function CandidateLayout({
   children,
 }: {
@@ -15,6 +20,8 @@ export default function CandidateLayout({
   const router = useRouter();
   const pathname = usePathname();
   
+  console.log('📍 Current pathname:', pathname);
+  
   const { 
     user, 
     isAuthenticated, 
@@ -22,6 +29,20 @@ export default function CandidateLayout({
     isLoadingUserDetails,
     layoutInitialized: authInitialized
   } = useAppSelector((state) => state.auth);
+  
+  console.log('🔐 Auth state:', { 
+    isAuthenticated, 
+    authLoading, 
+    isLoadingUserDetails,
+    authInitialized,
+    user: user ? {
+      id: user.id,
+      userName: user.userName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      verified: user.verified
+    } : null
+  });
   
   const [userDetailsFetched, setUserDetailsFetched] = useState(false);
   
@@ -49,16 +70,46 @@ export default function CandidateLayout({
   // Set layout as initialized when auth checks are complete
   useEffect(() => {
     // Only mark as initialized when authentication is no longer loading
-    if (!authLoading && !isLoadingUserDetails && authInitialized) {
+    if (!authLoading && !isLoadingUserDetails) {
       dispatch(setLayoutInitialized(true));
     }
-  }, [authLoading, isLoadingUserDetails, authInitialized, dispatch]);
+  }, [authLoading, isLoadingUserDetails, dispatch]);
   
-  // Determine if we're in any loading state
-  const isLoading = authLoading || isLoadingUserDetails;
-  
-  // Show loading state during authentication or fetching user details
-  if (isLoading) {
+  // Helper function to check if the current route matches a pattern
+  const isPathMatching = (pattern: string): boolean => {
+    const result = pathname.startsWith(pattern);
+    console.log(`🔍 Path matching check: "${pathname}" starts with "${pattern}" = ${result}`);
+    return result;
+  };
+
+  // Helper function to check if we're on the onboarding page
+  const isOnboardingPage = (): boolean => {
+    const result = isPathMatching('/candidate/app/on-boarding');
+    console.log(`📝 Is onboarding page: ${result}`);
+    return result;
+  };
+
+  // Helper function to check if user has a complete profile
+  const hasCompleteProfile = (): boolean => {
+    const result = !!(user?.userName && user?.firstName && user?.lastName);
+    console.log(`👤 Has complete profile: ${result}`, {
+      userName: user?.userName || 'missing',
+      firstName: user?.firstName || 'missing',
+      lastName: user?.lastName || 'missing'
+    });
+    return result;
+  };
+
+  // Helper function to check if user is verified
+  const isUserVerified = (): boolean => {
+    const result = user?.verified !== false;
+    console.log(`✅ User verified: ${result}`);
+    return result;
+  };
+
+  // LOADING STATE
+  if (authLoading || isLoadingUserDetails) {
+    console.log('⏳ Showing loading state');
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200 mb-4"></div>
@@ -69,28 +120,28 @@ export default function CandidateLayout({
     );
   }
   
-  // Redirect to sign-in if not authenticated
+  // NOT AUTHENTICATED - Redirect to sign-in
   if (authInitialized && !authLoading && !isAuthenticated) {
-    // Use replace instead of push for cleaner history
+    console.log('🚫 Not authenticated, redirecting to sign-in');
     router.replace('/auth/sign-in');
     return null;
   }
-  
-  // Helper function to check if the current route matches a pattern
-  const isPathMatching = (pattern: string): boolean => {
-    return pathname.startsWith(pattern);
-  };
-  
-  // Show verification pending page if user is not verified
-  if (isAuthenticated && user && user.verified === false) {
-    // Allow access to the profile edit page even when not verified
-    if (isPathMatching('/candidate/profile/edit')) {
+
+  // AUTHENTICATED BUT NOT VERIFIED
+  if (isAuthenticated && !isUserVerified()) {
+    console.log('⚠️ User not verified');
+    
+    // Allow access to profile edit OR onboarding even when not verified
+    if (isPathMatching('/candidate/profile/edit') || isOnboardingPage()) {
+      console.log('✅ All2owing access to profile edit or onboarding for unverified user');
       return <>{children}</>;
     }
     
+    console.log('🔄 Showing verification pending page');
+    // Render verification pending page
     return (
       <div className="flex flex-col h-screen bg-gray-50">
-        {/* Top Bar - moved from page.tsx */}
+        {/* Top Bar */}
         <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-800">
             Account Status
@@ -137,7 +188,7 @@ export default function CandidateLayout({
               
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 <Link 
-                  href={`/portfolio/${user.userName || ''}`}
+                  href={`/portfolio/${user?.userName || ''}`}
                   className="flex-1 px-4 py-2 bg-white border border-blue-500 text-blue-600 rounded hover:bg-blue-50 transition-colors text-center"
                   target="_blank"
                 >
@@ -164,20 +215,19 @@ export default function CandidateLayout({
     );
   }
   
-  // Handle incomplete profile redirects using precise path matching
-  if (isAuthenticated && user && (!user.userName || !user.firstName || !user.lastName)) {
-    // Check for profile edit page specifically 
-    if (isPathMatching('/candidate/profile/edit')) {
+  // AUTHENTICATED BUT INCOMPLETE PROFILE
+  if (isAuthenticated && !hasCompleteProfile()) {
+    console.log('⚠️ User has incomplete profile');
+    
+    // Allow access to profile edit or onboarding
+    if (isPathMatching('/candidate/profile/edit') || isOnboardingPage()) {
+      console.log('✅ Allowing access to profile edit or onboarding for incomplete profile');
       return <>{children}</>;
     }
     
-    // Check for onboarding page
-    if (isPathMatching('/candidate/onboarding')) {
-      return <>{children}</>;
-    }
-    
+    console.log('🔄 Redirecting incomplete profile to onboarding');
     // Redirect to onboarding for all other routes
-    router.replace('/candidate/onboarding');
+    router.replace('/candidate/app/on-boarding');
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200 mb-4"></div>
@@ -186,19 +236,30 @@ export default function CandidateLayout({
     );
   }
   
-  // Handle completed profile redirects from onboarding
-  if (isAuthenticated && user && user.userName && user.firstName && user.lastName) {
-    if (isPathMatching('/candidate/onboarding')) {
-      router.replace('/candidate/app');
-      return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200 mb-4"></div>
-          <p className="text-lg text-gray-600">Redirecting to dashboard...</p>
-        </div>
-      );
+  // AUTHENTICATED WITH COMPLETE PROFILE
+  // Handle completed profile redirects from onboarding 
+  if (isAuthenticated && hasCompleteProfile() && isOnboardingPage()) {
+    console.log('⚠️ User with complete profile trying to access onboarding');
+    console.log('🔧 DEV_SETTINGS.BYPASS_ONBOARDING_REDIRECT =', DEV_SETTINGS.BYPASS_ONBOARDING_REDIRECT);
+    
+    // Always check DEV_SETTINGS first before redirecting
+    if (DEV_SETTINGS.BYPASS_ONBOARDING_REDIRECT) {
+      console.log('✅ DEV MODE: Bypassing onboarding redirect for completed profile');
+      return <>{children}</>;
     }
+    
+    console.log('🔄 Redirecting complete profile away from onboarding');
+    // Normal production behavior - redirect away from onboarding if profile is complete
+    router.replace('/candidate/app');
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200 mb-4"></div>
+        <p className="text-lg text-gray-600">Redirecting to dashboard...</p>
+      </div>
+    );
   }
 
+  console.log('✅ All checks passed, rendering children');
   // Render children if all checks pass
   return <>{children}</>;
 }

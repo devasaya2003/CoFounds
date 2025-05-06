@@ -13,19 +13,26 @@ const API_ENDPOINTS = {
     PROJECTS: '/api/v1/candidate/projects'
 };
 
-const formatDateForAPI = (dateObj: DateField | null): string => {
-    if (!dateObj) return '';
-
-    if (dateObj.year && dateObj.month && dateObj.day) {
-        return `${dateObj.year}-${String(dateObj.month).padStart(2, '0')}-${String(dateObj.day).padStart(2, '0')}T00:00:00.000Z`;
+const formatDateForAPI = (dateObj: DateField | null): string | null => {
+    if (!dateObj || !dateObj.year || !dateObj.month || !dateObj.day) {
+        return null;
     }
 
-    if (typeof dateObj === 'string') {
-        return dateObj;
+    const year = parseInt(dateObj.year, 10);
+    const month = parseInt(dateObj.month, 10);
+    const day = parseInt(dateObj.day, 10);
+    
+    if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        return null;
+    }
+    
+    if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) {
+        return null;
     }
 
-    return '';
-};
+    // Changed format: remove the time part that could cause timezone issues
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
 
 /**
  * Simulate an API call with console logging
@@ -109,6 +116,8 @@ export const submitPersonalInfoStep = createAsyncThunk(
                 description: onboardingData.description,
                 updated_by: authState.user?.id,
             };
+
+            console.log("DOB: ", profilePayload.dob);
 
             const profileResponse = await fetchWithAuth_POST(
                 API_ENDPOINTS.PROFILE,

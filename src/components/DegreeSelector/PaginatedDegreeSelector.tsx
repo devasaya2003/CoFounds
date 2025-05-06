@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { AlertCircle, ChevronDown, X, Loader2 } from 'lucide-react';
-import { fetchDegreesPaginated } from '@/redux/masters/degreeMaster';
+import { fetchDegreesPaginated, fetchAllDegrees } from '@/redux/masters/degreeMaster';
 import { useAppDispatch } from '@/redux/hooks';
 
 interface Degree {
@@ -19,6 +19,7 @@ interface PaginatedDegreeSelectorProps {
   initialDegrees?: Degree[];
   excludeDegreeIds?: string[];
   disabled?: boolean;
+  fetchAll?: boolean; // New prop to choose between fetching all degrees or paginated
 }
 
 export default function PaginatedDegreeSelector({
@@ -29,7 +30,8 @@ export default function PaginatedDegreeSelector({
   isLoading: externalLoading,
   initialDegrees = [],
   excludeDegreeIds = [],
-  disabled = false
+  disabled = false,
+  fetchAll = false // Default to paginated behavior
 }: PaginatedDegreeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,10 +43,8 @@ export default function PaginatedDegreeSelector({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
 
-
   useEffect(() => {
     if (selectedDegree) {
-
       const found = degrees.find(d => d.id === selectedDegree);
       if (found) {
         setSelectedDegreeName(found.name);
@@ -56,21 +56,25 @@ export default function PaginatedDegreeSelector({
     }
   }, [selectedDegree, degrees]);
 
-
   useEffect(() => {
     const loadDegrees = async () => {
       setIsLoading(true);
       try {
-        const result = await dispatch(fetchDegreesPaginated(currentPage)).unwrap();
-
-
-        if (currentPage === 1) {
-          setDegrees(result.degrees);
+        if (fetchAll) {
+          // Use the fetchAllDegrees thunk when fetchAll is true
+          const allDegrees = await dispatch(fetchAllDegrees()).unwrap();
+          setDegrees(allDegrees);
+          setTotalPages(1); // No pagination needed
         } else {
-          setDegrees(prev => [...prev, ...result.degrees]);
+          // Use the paginated thunk
+          const result = await dispatch(fetchDegreesPaginated(currentPage)).unwrap();
+          if (currentPage === 1) {
+            setDegrees(result.degrees);
+          } else {
+            setDegrees(prev => [...prev, ...result.degrees]);
+          }
+          setTotalPages(result.totalPages);
         }
-
-        setTotalPages(result.totalPages);
       } catch (error) {
         console.error('Failed to load degrees:', error);
       } finally {
@@ -79,8 +83,7 @@ export default function PaginatedDegreeSelector({
     };
 
     loadDegrees();
-  }, [dispatch, currentPage]);
-
+  }, [dispatch, currentPage, fetchAll]); // Added fetchAll to dependencies
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -95,7 +98,6 @@ export default function PaginatedDegreeSelector({
     };
   }, []);
 
-
   const filteredDegrees = searchTerm
     ? [...degrees].filter(degree =>
       degree.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -105,19 +107,16 @@ export default function PaginatedDegreeSelector({
       degree.id === selectedDegree || !excludeDegreeIds.includes(degree.id)
     );
 
-
   const loadMoreDegrees = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prev => prev + 1);
     }
   };
 
-
   const handleToggleDropdown = () => {
     if (disabled) return;
     setIsOpen(!isOpen);
   };
-
 
   const handleClear = (e: React.MouseEvent) => {
     if (disabled) return;
@@ -200,7 +199,7 @@ export default function PaginatedDegreeSelector({
                 </div>
               )}
 
-              {!isLoading && !externalLoading && currentPage < totalPages && (
+              {!isLoading && !externalLoading && !fetchAll && currentPage < totalPages && (
                 <button
                   type="button"
                   onClick={loadMoreDegrees}

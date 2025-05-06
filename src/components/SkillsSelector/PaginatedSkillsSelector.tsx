@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { AlertCircle, ChevronDown, X, Loader2, Settings } from 'lucide-react';
-import { fetchSkillsPaginated, Skill as ApiSkill } from '@/redux/masters/skillMaster';
+import { fetchSkillsPaginated, fetchAllSkills, Skill as ApiSkill } from '@/redux/masters/skillMaster';
 import { useAppDispatch } from '@/redux/hooks';
 import { SkillWithLevel } from '@/types/shared';
 
@@ -12,7 +12,8 @@ interface PaginatedSkillsSelectorProps {
   onSkillRemove: (skillId: string) => void;
   onSkillLevelChange?: (skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => void;
   error?: string;
-  disabled?: boolean; 
+  disabled?: boolean;
+  fetchAll?: boolean; // New prop to choose between fetching all skills or paginated
 }
 
 export default function PaginatedSkillsSelector({
@@ -21,7 +22,8 @@ export default function PaginatedSkillsSelector({
   onSkillRemove,
   onSkillLevelChange,
   error,
-  disabled = false 
+  disabled = false,
+  fetchAll = false // Default to paginated behavior
 }: PaginatedSkillsSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,22 +40,30 @@ export default function PaginatedSkillsSelector({
     const loadSkills = async () => {
       setIsLoading(true);
       try {
-        const result = await dispatch(fetchSkillsPaginated(currentPage)).unwrap();
-        if (currentPage === 1) {
-          setAvailableSkills(result.skills);
+        if (fetchAll) {
+          // Use the fetchAllSkills thunk when fetchAll is true
+          const allSkills = await dispatch(fetchAllSkills()).unwrap();
+          setAvailableSkills(allSkills);
+          setTotalPages(1); // No pagination needed
         } else {
-          setAvailableSkills(prev => [...prev, ...result.skills]);
+          // Use the paginated thunk
+          const result = await dispatch(fetchSkillsPaginated(currentPage)).unwrap();
+          if (currentPage === 1) {
+            setAvailableSkills(result.skills);
+          } else {
+            setAvailableSkills(prev => [...prev, ...result.skills]);
+          }
+          setTotalPages(result.totalPages);
         }
-        setTotalPages(result.totalPages);
       } catch (error) {
-  
+        // Error handling remains unchanged
       } finally {
         setIsLoading(false);
       }
     };
 
     loadSkills();
-  }, [dispatch, currentPage]);
+  }, [dispatch, currentPage, fetchAll]); // Added fetchAll to dependencies
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -251,7 +261,7 @@ export default function PaginatedSkillsSelector({
                 </div>
               )}
               
-              {!isLoading && currentPage < totalPages && (
+              {!isLoading && !fetchAll && currentPage < totalPages && (
                 <button
                   type="button"
                   onClick={loadMoreSkills}
