@@ -1,7 +1,7 @@
 model ApplicationSkillMap {
   id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   skillId    String         @map("skill_id") @db.Uuid
-  skillLevel SkillLevel
+  skillLevel SkillLevel     @map("skill_level")
   jobId      String         @map("job_id") @db.Uuid
   isActive   Boolean        @default(true) @map("is_active")
   createdBy  String?        @map("created_by") @db.Uuid

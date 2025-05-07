@@ -2,7 +2,7 @@ model UserSkillset {
   id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId     String      @map("user_id") @db.Uuid
   skillId    String      @map("skill_id") @db.Uuid
-  skillLevel SkillLevel
+  skillLevel SkillLevel  @map("skill_level")
   isActive   Boolean     @default(true) @map("is_active")
   createdBy  String?     @map("created_by") @db.Uuid
   updatedBy  String?     @map("updated_by") @db.Uuid

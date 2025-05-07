@@ -7,6 +7,7 @@ model UserMaster {
   phone              String?                   @unique
   userName           String?                   @unique @map("user_name")
   dob                DateTime?                 @db.Date
+  profileImage       String?                   @map("profile_image")
   role               UserRole
   verified           Boolean                   @default(false)
   description        String?
