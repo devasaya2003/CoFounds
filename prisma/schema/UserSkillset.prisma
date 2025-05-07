@@ -11,5 +11,6 @@ model UserSkillset {
   skill      SkillMaster @relation(fields: [skillId], references: [id])
   user       UserMaster  @relation(fields: [userId], references: [id])
 
+  @@unique([userId, skillId], name: "user_skill_unique")
   @@map("user_skillset")
 }
