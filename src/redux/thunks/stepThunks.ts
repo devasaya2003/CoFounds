@@ -108,6 +108,8 @@ export const submitPersonalInfoStep = createAsyncThunk(
             dispatch(setStatus({ status: 'submitting', error: 'Submitting personal info...' }));
             dispatch(setSubmissionStatus({ step: 'personal-info', status: 'loading' }));
 
+            console.log("DOB in REDUX: ", onboardingData.dateOfBirth);
+
             const profilePayload = {
                 user_id: authState.user?.id,
                 first_name: onboardingData.firstName,
