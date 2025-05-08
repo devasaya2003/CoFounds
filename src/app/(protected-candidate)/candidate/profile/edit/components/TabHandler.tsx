@@ -16,6 +16,16 @@ import PersonalInfoForm, { PersonalInfoFormRef } from "./PersonalInfoForm";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TabHandlerProps {
     defaultTab: string;
@@ -30,15 +40,28 @@ interface StatusMessage {
     message: string;
 }
 
+// Valid tab values - used for validation
+const VALID_TABS = [
+  "personal-info", 
+  "skills", 
+  "education", 
+  "projects", 
+  "certificates", 
+  "experience"
+];
+
 export default function TabHandler({ defaultTab, renderJsonData, profileData, refetchProfile, isRefetching }: TabHandlerProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
   const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null);
-    
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  
+  // Get tab from URL or use default if invalid
   const tabParam = searchParams?.get('tab');
-  const [activeTab, setActiveTab] = useState(tabParam || defaultTab);
+  const isValidTab = tabParam && VALID_TABS.includes(tabParam);
+  const [activeTab, setActiveTab] = useState(isValidTab ? tabParam : defaultTab);
     
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,12 +72,14 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
     
   const [formData, setFormData] = useState<Partial<UserProfile> | null>(null);
     
+  // Redirect to default tab if tab is missing or invalid
   useEffect(() => {
-    if (pathname === "/candidate/profile/edit" && !tabParam) {
+    if (pathname === "/candidate/profile/edit" && (!tabParam || !VALID_TABS.includes(tabParam))) {
       router.push(`/candidate/profile/edit?tab=${defaultTab}`);
     }
   }, [pathname, router, tabParam, defaultTab]);
   
+  // Auto-dismiss status messages after 5 seconds
   useEffect(() => {
     if (statusMessage) {
       const timer = setTimeout(() => {
@@ -77,15 +102,26 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
     setActiveTab(value);
     router.push(`/candidate/profile/edit?tab=${value}`);
   };
+  
+  // Pre-save function - shows confirmation dialog
+  const handleSaveClick = () => {
+    if (activeTab === "personal-info" && personalFormRef.current) {
+      personalFormRef.current.saveForm();
+    }
     
+    // Only show dialog if we have data to save
+    if (formData) {
+      setShowConfirmDialog(true);
+    }
+  };
+    
+  // Actual save function - called after confirmation
   const handleSaveChanges = async () => {
     try {
       setIsSubmitting(true);
-            
-      if (activeTab === "personal-info" && personalFormRef.current) {
-        personalFormRef.current.saveForm();
-      }
-            
+      
+      // We already called saveForm in handleSaveClick
+      
       if (formData) {
         // Use the specific update function based on the active tab
         let result;
@@ -218,6 +254,29 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
         </div>
       )}
       
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save your changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to save these changes to your profile? Don't worry, you can 
+              always come back and update your information anytime if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleSaveChanges}
+              disabled={isSubmitting}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              {isSubmitting ? "Saving..." : "Yes, Save Changes"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid grid-cols-6 w-full mb-8">
           <TabsTrigger value="personal-info">Personal Info</TabsTrigger>
@@ -288,7 +347,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
             Cancel
           </Button>
           <Button 
-            onClick={handleSaveChanges}
+            onClick={handleSaveClick}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Saving..." : "Save Changes"}
