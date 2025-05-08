@@ -2,7 +2,7 @@
 
 import { useAppDispatch } from '@/redux/hooks';
 import { PersonalInfoStepProps } from '../types';
-import { 
+import {
   setFirstName,
   setLastName,
   setDescription,
@@ -13,7 +13,7 @@ import {
 } from '@/redux/slices/candidateOnboardingSlice';
 import { SkillWithLevel } from '@/types/shared';
 import PersonalInfoForm from '@/components/forms/PersonalInfoForm';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function PersonalInfoStep({
   formState,
@@ -23,17 +23,19 @@ export default function PersonalInfoStep({
   setValue,
   onNextStep,
   onPreviousStep,
-  isSubmitting 
+  isSubmitting
 }: PersonalInfoStepProps) {
   const dispatch = useAppDispatch();
+  const initDoneRef = useRef(false);
 
   useEffect(() => {
-    // Initialize dateOfBirth if empty or incomplete
-    const isDateOfBirthIncomplete = !formState.dateOfBirth || 
-      !formState.dateOfBirth.year || 
-      !formState.dateOfBirth.month || 
+    if (initDoneRef.current) return;
+
+    const isDateOfBirthIncomplete = !formState.dateOfBirth ||
+      !formState.dateOfBirth.year ||
+      !formState.dateOfBirth.month ||
       !formState.dateOfBirth.day;
-      
+
     if (isDateOfBirthIncomplete) {
       console.log("Initializing DOB with today's date");
       const today = new Date();
@@ -42,38 +44,39 @@ export default function PersonalInfoStep({
         month: (today.getMonth() + 1).toString().padStart(2, '0'),
         day: today.getDate().toString().padStart(2, '0')
       };
-      
-      // Update both form and Redux state
+
       setValue('dateOfBirth', defaultDOB);
       dispatch(setDateOfBirth(defaultDOB));
       console.log("DOB initialized to:", defaultDOB);
     }
-  }, []);
-  
+
+    initDoneRef.current = true;
+  }, [dispatch, formState.dateOfBirth, setValue]);
+
   const handleFirstNameChange = (value: string) => {
     dispatch(setFirstName(value));
   };
-  
+
   const handleLastNameChange = (value: string) => {
     dispatch(setLastName(value));
   };
-  
+
   const handleDescriptionChange = (html: string) => {
     dispatch(setDescription(html));
   };
-  
+
   const handleSkillAdd = (skill: SkillWithLevel) => {
     dispatch(addSkill(skill));
   };
-  
+
   const handleSkillRemove = (skillId: string) => {
     dispatch(removeSkill(skillId));
   };
-  
+
   const handleSkillLevelChange = (skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => {
     dispatch(updateSkillLevel({ skillId, level }));
   };
-  
+
   const handleDateOfBirthChange = (field: 'year' | 'month' | 'day', value: string) => {
     const currentDOB = formState.dateOfBirth || { year: '', month: '', day: '' };
     const updatedDOB = {
@@ -84,7 +87,7 @@ export default function PersonalInfoStep({
     dispatch(setDateOfBirth(updatedDOB));
     console.log('Updated DOB:', updatedDOB);
   };
-  
+
   return (
     <PersonalInfoForm
       formState={{

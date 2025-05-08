@@ -1,75 +1,18 @@
 import { fetchWithAuth_GET, fetchWithAuth_PUT } from '@/utils/api';
+import { UserMaster, UserSkillset, UserProjects, UserCertificates, UserEducation, UserExperience, SkillMaster, DegreeMaster } from '@prisma/client';
 
-// Type definition for user data based on your API response
-export interface UserProfile {
-  id: string;
-  userName: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  skillset: Array<{
-    id: string;
-    skill: {
-      id: string;
-      name: string;
-      createdAt: string;
-      updatedAt: string;
-    };
-    skillLevel: 'beginner' | 'intermediate' | 'advanced';
-    createdAt: string;
-    updatedAt: string;
-  }>;
-  education: Array<{
-    id: string;
-    eduFrom: string;
-    degree: {
-      id: string;
-      name: string;
-      createdAt: string;
-      updatedAt: string;
-    };
-    startedAt: string;
-    endAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-  }>;
-  projects: Array<{
-    id: string;
-    title: string;
-    description: string;
-    link: string | null;
-    startedAt: string;
-    endAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-  }>;
-  certificates: Array<{
-    id: string;
-    title: string;
-    description: string | null;
-    filePath: string | null;
-    link: string | null;
-    startedAt: string | null;
-    endAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-  }>;
-  experience: Array<{
-    id: string;
-    title: string;
-    companyName: string;
-    description: string | null;
-    startedAt: string;
-    endAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-  }>;
+export interface UserProfile extends Omit<UserMaster, 'passwordHash'> {
+    skillset: (UserSkillset & {
+        skill: SkillMaster;
+    })[];
+    education: (UserEducation & {
+        degree: DegreeMaster;
+    })[];
+    projects: UserProjects[];
+    certificates: UserCertificates[];
+    experience: UserExperience[];
 }
 
-// API response type
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;

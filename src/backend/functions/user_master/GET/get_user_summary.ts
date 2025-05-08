@@ -11,6 +11,7 @@ export async function getUserSummary(userName: string) {
                 userName: true,
                 firstName: true,
                 lastName: true,
+                dob: true,
                 email: true,
                 description: true,
                 createdAt: true,

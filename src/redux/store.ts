@@ -7,7 +7,6 @@ import skillReducer from "./slices/skillSlice";
 import degreeReducer from "./slices/degreeSlice";
 import jobCreationReducer from './slices/jobCreationSlice';
 import candidateOnboardingReducer from './slices/candidateOnboardingSlice';
-import portfolioEditReducer from './slices/portfolioEditSlice';
 
 export const store = configureStore({
   reducer: {
@@ -19,7 +18,6 @@ export const store = configureStore({
     degree: degreeReducer,
     jobCreation: jobCreationReducer,
     candidateOnboarding: candidateOnboardingReducer,
-    portfolioEdit: portfolioEditReducer,
   },
 });
 
