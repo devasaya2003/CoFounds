@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState, Suspense, useCallback } from "react";
 import { getUserProfile } from "./api";
 import { UserProfile } from "./api";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";import TabHandler from "./components/TabHandler"; 
+import { Loader2 } from "lucide-react";
+import TabHandler from "./components/TabHandler"; 
 import { useAppSelector } from "@/redux/hooks";
 
 export default function EditProfilePage() {
@@ -16,25 +16,29 @@ export default function EditProfilePage() {
   
   const defaultTab = "personal-info";
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const username = "dev123";
-        const data = await getUserProfile(username);
-        setProfileData(data);
-      } catch (err) {
-        setError("Failed to load profile data");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
+  // Extract fetch profile logic to a reusable function
+  const fetchProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      const username = "dev123";
+      const data = await getUserProfile(username);
+      setProfileData(data);
+      return data;
+    } catch (err) {
+      setError("Failed to load profile data");
+      console.error(err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  if (loading) {
+  // Initial data load
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  if (loading && !profileData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -68,7 +72,13 @@ export default function EditProfilePage() {
       <Card>
         <CardContent className="p-6">
           <Suspense fallback={<div>Loading tabs...</div>}>
-            <TabHandler defaultTab={defaultTab} renderJsonData={renderJsonData} profileData={profileData} />
+            <TabHandler 
+              defaultTab={defaultTab} 
+              renderJsonData={renderJsonData} 
+              profileData={profileData}
+              refetchProfile={fetchProfile} 
+              isRefetching={loading && !!profileData}
+            />
           </Suspense>
         </CardContent>
       </Card>
