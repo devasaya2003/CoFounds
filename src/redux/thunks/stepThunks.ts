@@ -18,6 +18,8 @@ const formatDateForAPI = (dateObj: DateField | null): string | null => {
         return null;
     }
 
+    console.log("date from redux: ", dateObj);
+
     const year = parseInt(dateObj.year, 10);
     const month = parseInt(dateObj.month, 10);
     const day = parseInt(dateObj.day, 10);
@@ -109,12 +111,14 @@ export const submitPersonalInfoStep = createAsyncThunk(
             dispatch(setSubmissionStatus({ step: 'personal-info', status: 'loading' }));
 
             console.log("DOB in REDUX: ", onboardingData.dateOfBirth);
+            const formattedDate = formatDateForAPI(onboardingData.dateOfBirth);
+            console.log("AFTER FORMATTING: ", formattedDate);
 
             const profilePayload = {
                 user_id: authState.user?.id,
                 first_name: onboardingData.firstName,
                 last_name: onboardingData.lastName,
-                dob: formatDateForAPI(onboardingData.dateOfBirth),
+                dob: formattedDate,
                 description: onboardingData.description,
                 updated_by: authState.user?.id,
             };

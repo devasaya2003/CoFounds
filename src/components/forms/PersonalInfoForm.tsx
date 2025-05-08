@@ -8,6 +8,8 @@ import DateSelector from '@/components/DateSelector/DateSelector';
 import { Label } from '@/components/ui/label';
 import { SkillWithLevel } from '@/types/shared';
 import { DateField } from '@/types/candidate_onboarding';
+import { setDateOfBirth } from '@/redux/slices/candidateOnboardingSlice';
+import { useAppDispatch } from '@/redux/hooks';
 
 interface PersonalInfoFormData {
   firstName: string;
@@ -64,6 +66,8 @@ export default function PersonalInfoForm({
   navigationLabel = { next: 'Next Step', previous: 'Previous Step' }
 }: PersonalInfoFormProps) {
   const selectedSkills = watch('skills') || [];
+
+  const dispatch = useAppDispatch();
   
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 101 }, (_, i) => (currentYear - 100 + i).toString());
@@ -89,13 +93,27 @@ export default function PersonalInfoForm({
     }
   };
   
-  const handleDOBChange = (field: 'year' | 'month' | 'day', value: string) => {
-    if (disabled || isSubmitting) return;
+  const handleDateOfBirthChange = (field: 'year' | 'month' | 'day', value: string) => {
+    // Get current DOB from form state AND validate
+    const currentYear = watch('dateOfBirth.year') || '';
+    const currentMonth = watch('dateOfBirth.month') || '';
+    const currentDay = watch('dateOfBirth.day') || '';
     
+    // Create complete DOB object with the new value
+    const updatedDOB = {
+      year: field === 'year' ? value : currentYear,
+      month: field === 'month' ? value : currentMonth,
+      day: field === 'day' ? value : currentDay,
+    };
+    
+    // Update form value
     setValue(`dateOfBirth.${field}`, value);
-    if (onDateOfBirthChange) {
-      onDateOfBirthChange(field, value);
-    }
+    
+    // Update Redux state with complete object
+    dispatch(setDateOfBirth(updatedDOB));
+    
+    // Verify what was updated
+    console.log('Updated DOB in Redux:', updatedDOB);
   };
   
   return (
@@ -141,9 +159,9 @@ export default function PersonalInfoForm({
             selectedYear={dobYear}
             selectedMonth={dobMonth}
             selectedDay={dobDay}
-            onYearChange={(year) => handleDOBChange('year', year)}
-            onMonthChange={(month) => handleDOBChange('month', month)}
-            onDayChange={(day) => handleDOBChange('day', day)}
+            onYearChange={(year) => handleDateOfBirthChange('year', year)}
+            onMonthChange={(month) => handleDateOfBirthChange('month', month)}
+            onDayChange={(day) => handleDateOfBirthChange('day', day)}
             error={errors.dateOfBirth?.message}
             disabled={disabled || isSubmitting}
             />

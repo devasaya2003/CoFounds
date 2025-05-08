@@ -28,8 +28,14 @@ export default function PersonalInfoStep({
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    // Initialize dateOfBirth if not present
-    if (!formState.dateOfBirth) {
+    // Initialize dateOfBirth if empty or incomplete
+    const isDateOfBirthIncomplete = !formState.dateOfBirth || 
+      !formState.dateOfBirth.year || 
+      !formState.dateOfBirth.month || 
+      !formState.dateOfBirth.day;
+      
+    if (isDateOfBirthIncomplete) {
+      console.log("Initializing DOB with today's date");
       const today = new Date();
       const defaultDOB = {
         year: today.getFullYear().toString(),
@@ -37,11 +43,12 @@ export default function PersonalInfoStep({
         day: today.getDate().toString().padStart(2, '0')
       };
       
-      // Initialize the form and redux state with today's date
+      // Update both form and Redux state
       setValue('dateOfBirth', defaultDOB);
       dispatch(setDateOfBirth(defaultDOB));
+      console.log("DOB initialized to:", defaultDOB);
     }
-  }, [formState.dateOfBirth, dispatch, setValue]);
+  }, []);
   
   const handleFirstNameChange = (value: string) => {
     dispatch(setFirstName(value));
