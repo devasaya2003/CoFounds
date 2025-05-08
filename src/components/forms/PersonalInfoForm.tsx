@@ -192,7 +192,7 @@ export default function PersonalInfoForm({
           onSkillRemove={(skillId: string) => {
             if (disabled || isSubmitting) return;
             
-            const updatedSkills = selectedSkills.filter(s => s.id !== skillId);
+            const updatedSkills = selectedSkills.filter((s: SkillWithLevel) => s.id !== skillId);
             setValue('skills', updatedSkills);
             if (onSkillRemove) {
               onSkillRemove(skillId);
@@ -201,7 +201,7 @@ export default function PersonalInfoForm({
           onSkillLevelChange={(skillId: string, level: 'beginner' | 'intermediate' | 'advanced') => {
             if (disabled || isSubmitting) return;
             
-            const updatedSkills = selectedSkills.map(skill => 
+            const updatedSkills = selectedSkills.map((skill: SkillWithLevel) => 
               skill.id === skillId ? { ...skill, level } : skill
             );
             setValue('skills', updatedSkills);
