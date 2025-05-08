@@ -13,5 +13,6 @@ model UserProjects {
   startedAt   DateTime?  @map("started_at") @db.Date
   user        UserMaster @relation(fields: [userId], references: [id])
 
+  @@unique([userId, title], name: "user_project_unique")
   @@map("user_projects")
 }

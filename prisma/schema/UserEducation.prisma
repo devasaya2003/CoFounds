@@ -13,5 +13,6 @@ model UserEducation {
   degree    DegreeMaster @relation(fields: [degreeId], references: [id])
   user      UserMaster   @relation(fields: [userId], references: [id])
 
+  @@unique([userId, degreeId], name: "user_education_unique")
   @@map("user_education")
 }

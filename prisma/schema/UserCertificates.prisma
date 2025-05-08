@@ -14,5 +14,6 @@ model UserCertificates {
   updatedAt   DateTime   @updatedAt @map("updated_at")
   user        UserMaster @relation(fields: [userId], references: [id])
 
+  @@unique([userId, title], name: "user_certificate_unique")
   @@map("user_certificates")
 }

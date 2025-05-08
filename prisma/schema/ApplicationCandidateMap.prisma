@@ -13,5 +13,6 @@ model ApplicationCandidateMap {
   user           UserMaster        @relation(fields: [userId], references: [id])
   extraAnswers   ExtraAnswers[]
 
+  @@unique([userId, jobId], name: "user_application_unique")
   @@map("application_candidate_map")
 }
