@@ -8,21 +8,9 @@ export const config = {
     '/recruiter/:path*',
     '/auth',
     '/auth/:path*',
-    '/((?!_next/|static/|favicon.ico).*)',
+    '/((?!_next/|static/|favicon.ico|api/).*)',
   ],
 };
-
-const PUBLIC_PATHS = [
-  "/auth/sign-in",
-  "/auth/sign-up",
-  "/auth/recruiter-sign-in",
-  "/auth/forgot-password",
-  "/auth/reset-password",
-  "/portfolio",
-  "/portfolio/",
-  "/api/portfolio/",
-  "/api/banner-image"
-];
 
 const PUBLIC_PATH_PREFIXES = [
   "/auth/sign-in",
@@ -59,7 +47,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get('host') || '';
 
-  // IMPORTANT: Check for API paths FIRST - before any subdomain handling
+
   if (pathname.startsWith('/api/')) {
     console.log("API request detected, bypassing subdomain logic:", pathname);
     return NextResponse.next();
@@ -93,7 +81,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Only rewrite non-API paths
+
   if (subdomain) {
     const url = req.nextUrl.clone();
     url.pathname = `/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`;

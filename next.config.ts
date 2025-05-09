@@ -7,11 +7,11 @@ const nextConfig = {
       "lh3.googleusercontent.com",
     ],
   },
-  // Add this rewrites section for subdomain handling
+
   async rewrites() {
     return [
       {
-        // This handles username.cofounds.in routing
+
         source: '/:path*',
         has: [
           {
@@ -20,6 +20,11 @@ const nextConfig = {
           },
         ],
         destination: '/portfolio/:username/:path*',
+      },
+
+      {
+        source: '/api/:path*',
+        destination: '/api/:path*',
       },
     ];
   },
