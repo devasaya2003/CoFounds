@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
   "/auth/recruiter-sign-in",
   "/auth/forgot-password",
   "/auth/reset-password",
+  "/portfolio",
   "/portfolio/",
   "/api/portfolio/",
   "/api/banner-image"
@@ -30,6 +31,7 @@ const PUBLIC_PATH_PREFIXES = [
   "/auth/forgot-password",
   "/auth/reset-password",
   "/portfolio/",
+  "/portfolio",
   "/api/portfolio/",
   "/api/banner-image"
 ];
@@ -79,10 +81,15 @@ export async function middleware(req: NextRequest) {
       const username = hostname.split('.')[0];
       
       const url = req.nextUrl.clone();
-      url.pathname = `/portfolio/${username}`;
+      // Preserve the path after the username
+      url.pathname = `/portfolio/${username}${pathname === '/' ? '' : pathname}`;
       
       console.log(`Rewriting ${hostname}${pathname} to ${url.pathname}`);
-      return NextResponse.rewrite(url);
+      
+      // Add debugging header
+      const response = NextResponse.rewrite(url);
+      response.headers.set('x-subdomain-rewrite', url.pathname);
+      return response;
     }
   }
   
