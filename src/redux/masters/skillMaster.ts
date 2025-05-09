@@ -66,7 +66,7 @@ export const skillInitialState: SkillState = {
 };
 
 
-const getBaseUrl = () => process.env.NEXT_PUBLIC_BASE_URL_API || "";
+const getBaseUrl = () => "/api/v1";
 
 
 
@@ -138,7 +138,7 @@ export const updateSkill = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
+      const baseUrl = "/api/v1";
       const response = await fetchWithAuth_PUT<Skill, Partial<UpdateSkill>>(
         `${baseUrl}/skills/${skillId}`,
         data
@@ -155,7 +155,7 @@ export const bulkUpdateSkills = createAsyncThunk(
   "skill/bulkUpdateSkills",
   async (updates: UpdateBulkSkill[], { rejectWithValue }) => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
+      const baseUrl = "/api/v1";
       const response = await fetchWithAuth_PUT<
         { success: boolean; updatedCount: number },
         UpdateBulkSkill[]
@@ -172,7 +172,7 @@ export const createSkill = createAsyncThunk(
   "skill/createSkill",
   async (data: CreateSkill, { rejectWithValue }) => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
+      const baseUrl = "/api/v1";
       const response = await fetchWithAuth_POST<Skill, CreateSkill>(
         `${baseUrl}/skills`,
         data
@@ -189,7 +189,7 @@ export const bulkCreateSkills = createAsyncThunk(
   "skill/bulkCreateSkills",
   async (skills: CreateSkill[], { rejectWithValue }) => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
+      const baseUrl = "/api/v1";
       const response = await fetchWithAuth_POST<
         { success: boolean; createdCount: number },
         CreateSkill[]

@@ -68,7 +68,7 @@ export const createJobWithSkillsAndQuestions = createAsyncThunk(
       const recruiter_id = recruiter.userId;
       const created_by = recruiter.userId;
       
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || '';
+      const baseUrl = "/api/v1";
       
       const jobPayload = {
         company_id,

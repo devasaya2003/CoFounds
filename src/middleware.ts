@@ -59,17 +59,18 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get('host') || '';
 
+  // IMPORTANT: Check for API paths FIRST - before any subdomain handling
+  if (pathname.startsWith('/api/')) {
+    console.log("API request detected, bypassing subdomain logic:", pathname);
+    return NextResponse.next();
+  }
+
   const isDevEnvironment = process.env.NODE_ENV === 'development';
   const rawDomain = process.env.NEXT_PUBLIC_DOMAIN || (isDevEnvironment ? 'localhost' : 'cofounds.in');
   const mainDomain = extractDomain(rawDomain);
 
   console.log("Middleware executing for:", pathname, "on host:", hostname);
   console.log("Domain info:", { rawDomain, mainDomain, isDevEnvironment });
-
-  if (pathname.startsWith("/api/portfolio/")) {
-    console.log("Portfolio API request, allowing access");
-    return NextResponse.next();
-  }
 
   let subdomain: string | null = null;
 
@@ -92,6 +93,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Only rewrite non-API paths
   if (subdomain) {
     const url = req.nextUrl.clone();
     url.pathname = `/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`;

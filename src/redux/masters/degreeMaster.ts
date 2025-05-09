@@ -107,7 +107,7 @@ export const degreeInitialState: DegreeState = {
 };
 
 
-const getBaseUrl = () => process.env.NEXT_PUBLIC_BASE_URL_API || "";
+const getBaseUrl = () => "/api/v1";
 
 
 

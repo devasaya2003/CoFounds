@@ -58,7 +58,7 @@ export const fetchJobsByCompany = createAsyncThunk(
         return rejectWithValue("Company information not loaded");
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
+      const baseUrl = "/api/v1";
       const requestPayload: JobsRequestPayload = {
         type: COMPANY,
         id: companyId,
@@ -84,7 +84,7 @@ export const fetchJobsByRecruiter = createAsyncThunk(
     try {
       const state = getState() as RootState;
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
+      const baseUrl = "/api/v1";
       const requestPayload: JobsRequestPayload = {
         type: RECRUITER,
         id: recruiterId,

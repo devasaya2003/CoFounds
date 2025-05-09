@@ -4,7 +4,7 @@ import { RootState } from '../store';
 import { setStatus } from '../slices/candidateOnboardingSlice';
 import { DateField } from '@/types/candidate_onboarding';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_API || '';
+const BASE_URL = "/api/v1";
 const API_BASE_URL = `${BASE_URL}/api/v1/candidate`;
 const PROFILE_POST_URL = `${API_BASE_URL}/user-master`;
 const SKILLS_POST_URL = `${API_BASE_URL}/user-skillset`;

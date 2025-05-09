@@ -32,8 +32,7 @@ export default function Banner() {
     const fetchRandomImage = async () => {
       try {
         setIsLoading(true);
-        const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || '';
-        const response = await fetch(`${BASE_URL}/api/banner-image`);
+        const response = await fetch(`/api/banner-image`);
                 
         if (!response.ok) throw new Error(`Failed to fetch banner image: ${response.status}`);
         

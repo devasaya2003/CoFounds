@@ -9,7 +9,7 @@ import ExperienceSection from './components/ExperienceSection';
 import ProjectsSection from './components/ProjectsSection';
 import EducationSection from './components/EducationSection';
 import BuildPortfolioButton from './components/BuildPortfolioButton';
-
+import { headers } from 'next/headers';
 
 type PortfolioParams = {
   params: Promise<{ username: string }>;
@@ -65,7 +65,6 @@ interface PortfolioResponse {
   error?: string;
 }
 
-
 function formatDate(date: string | Date | null, context: 'experience' | 'education' | 'project' = 'experience'): string {
   if (!date) {
     
@@ -83,9 +82,14 @@ function formatDate(date: string | Date | null, context: 'experience' | 'educati
 
 async function fetchPortfolio(username: string): Promise<PortfolioResponse> {
   try {    
-    const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}`;
+    const headersList = await headers();
+    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
+    const host = headersList.get('host') || 'cofounds.in';
+        
+    const url = `${protocol}://${host}/api/portfolio/${username}`;
+    console.log(`Fetching portfolio from: ${url}`);
     
-    const res = await fetch(`${baseUrl}/api/portfolio/${username}`, {
+    const res = await fetch(url, {
       cache: 'no-store',
       next: { revalidate: 3600 }
     });
@@ -104,7 +108,6 @@ async function fetchPortfolio(username: string): Promise<PortfolioResponse> {
   }
 }
 
-
 export async function generateMetadata({ params }: PortfolioParams): Promise<Metadata> {
   const { username } = await params;
   const portfolioResult = await fetchPortfolio(username);
@@ -122,7 +125,6 @@ export async function generateMetadata({ params }: PortfolioParams): Promise<Met
     description: 'The requested portfolio could not be found.'
   };
 }
-
 
 export default async function PortfolioPage({ params }: PortfolioParams) {
   const { username } = await params;

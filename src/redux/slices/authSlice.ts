@@ -186,8 +186,7 @@ export const fetchUserDetails = createAsyncThunk(
         console.log("USER: ", state.auth.user);
 
         const userName = state.auth.user.userName;
-        const baseUrl = `${process.env.NEXT_PUBLIC_BASE_URL}`;
-        const url = `${baseUrl}/api/portfolio/${userName}`;
+        const url = `/api/portfolio/${userName}`;
 
         const response = await fetch(url);
         

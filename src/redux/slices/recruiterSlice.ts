@@ -66,7 +66,7 @@ export const fetchRecruiterProfile = createAsyncThunk(
   "recruiter/fetchProfile",
   async (userId: string, { rejectWithValue }) => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL_API || "";
+      const baseUrl = "/api/v1";
       const response = await fetchWithAuth_GET<RecruiterApiResponse>(`${baseUrl}/recruiter/user/${userId}`);
       
       return {
