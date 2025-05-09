@@ -40,6 +40,14 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
+export interface SkillsUpdateResult {
+  updated: number;
+  created: number;
+  reactivated: number;
+  deleted: number;
+  total: number;
+}
+
 export async function getUserProfile(username: string): Promise<UserProfile> {
   try {
     const response = await fetchWithAuth_GET<ApiResponse<UserProfile>>(`/api/v1/candidate/summary/${username}`);
@@ -57,10 +65,8 @@ export async function getUserProfile(username: string): Promise<UserProfile> {
 
 export async function updatePersonalInfo(personalData: Partial<UserProfile>): Promise<UserProfile> {
   try {
-    console.log('Updating personal info with data:', personalData);
 
     const formattedDate = personalData.dob ? formatDateForAPI(personalData.dob) : null;
-    console.log("Formatted date for API:", formattedDate);
 
     const profilePayload = {
       user_id: personalData.id,
@@ -71,15 +77,10 @@ export async function updatePersonalInfo(personalData: Partial<UserProfile>): Pr
       updated_by: personalData.id,
     };
 
-    console.log("DOB:", profilePayload.dob);
-    console.log("Sending payload to API:", profilePayload);
-
-    const profileResponse = await fetchWithAuth_POST(
+    await fetchWithAuth_POST(
       API_ENDPOINTS.PROFILE,
       profilePayload
     );
-
-    console.log("API response:", profileResponse);
 
     return {
       ...personalData,
@@ -90,15 +91,24 @@ export async function updatePersonalInfo(personalData: Partial<UserProfile>): Pr
   }
 }
 
-export async function updateSkills(skills: UserSkillset[]): Promise<UserSkillset[]> {
+export async function updateSkills(skillsData: {
+  user_id: string;
+  updated_skillset: Array<{ skill_id: string; skill_level: string }>;
+  new_skillset: Array<{ skill_id: string; skill_level: string }>;
+  deleted_skillset: string[];
+}): Promise<SkillsUpdateResult> {
   try {
-    console.log('Updating skills with data:', skills);
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    console.log('Skills update completed:', skills);
-
-    return skills;
+    
+    const response = await fetchWithAuth_PUT<ApiResponse<SkillsUpdateResult>>(
+      API_ENDPOINTS.SKILLS, 
+      skillsData
+    );
+    
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update skills');
+    }
+    
+    return response.data;
   } catch (error) {
     console.error('Error updating skills:', error);
     throw error;

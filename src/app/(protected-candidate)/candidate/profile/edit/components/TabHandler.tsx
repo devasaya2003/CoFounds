@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  UserProfile, 
+import {
+  UserProfile,
   updatePersonalInfo,
   updateSkills,
   updateEducation,
@@ -13,6 +13,7 @@ import {
   updateExperience
 } from "../api";
 import PersonalInfoForm, { PersonalInfoFormRef } from "./PersonalInfoForm";
+import SkillsForm, { SkillsFormRef } from "./SkillsForm";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,27 +27,55 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useAppSelector } from "@/redux/hooks";
 
 interface TabHandlerProps {
-    defaultTab: string;
-    renderJsonData: (data: unknown) => React.ReactElement;
-    profileData: UserProfile;
-    refetchProfile: () => Promise<UserProfile | null>;
-    isRefetching?: boolean;
+  defaultTab: string;
+  renderJsonData: (data: unknown) => React.ReactElement;
+  profileData: UserProfile;
+  refetchProfile: () => Promise<UserProfile | null>;
+  isRefetching?: boolean;
 }
 
 interface StatusMessage {
-    type: "success" | "error" | "info" | "warning";
-    message: string;
+  type: "success" | "error" | "info" | "warning";
+  message: string;
 }
 
-// Valid tab values - used for validation
+interface SkillsUpdatePayload {
+  user_id?: string;
+  updated_skillset: Array<{
+    skill_id: string;
+    skill_level: string;
+  }>;
+  new_skillset: Array<{
+    skill_id: string;
+    skill_level: string;
+  }>;
+  deleted_skillset: string[];
+}
+
+type PersonalInfoFormData = Partial<UserProfile>;
+type SkillsFormData = {
+  skillsUpdateData: {
+    user_id: string;
+    updated_skillset: Array<{ skill_id: string; skill_level: string }>;
+    new_skillset: Array<{ skill_id: string; skill_level: string }>;
+    deleted_skillset: string[];
+  };
+};
+
+type FormDataState =
+  | { type: 'personal-info'; data: PersonalInfoFormData }
+  | { type: 'skills'; data: SkillsFormData }
+  | { type: 'other' };
+
 const VALID_TABS = [
-  "personal-info", 
-  "skills", 
-  "education", 
-  "projects", 
-  "certificates", 
+  "personal-info",
+  "skills",
+  "education",
+  "projects",
+  "certificates",
   "experience"
 ];
 
@@ -54,43 +83,43 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+  const { user } = useAppSelector((state) => state.auth);
+  const userId = user?.id || "";
+
   const [statusMessage, setStatusMessage] = useState<StatusMessage | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  
-  // Get tab from URL or use default if invalid
+
   const tabParam = searchParams?.get('tab');
   const isValidTab = tabParam && VALID_TABS.includes(tabParam);
   const [activeTab, setActiveTab] = useState(isValidTab ? tabParam : defaultTab);
-    
+
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
   const personalFormRef = useRef<PersonalInfoFormRef>(null);
-    
+  const skillsFormRef = useRef<SkillsFormRef>(null);
+
   const [activeForm, setActiveForm] = useState<string | null>(null);
-    
-  const [formData, setFormData] = useState<Partial<UserProfile> | null>(null);
-    
-  // Redirect to default tab if tab is missing or invalid
+
+  const [formData, setFormData] = useState<FormDataState | null>(null);
+
   useEffect(() => {
     if (pathname === "/candidate/profile/edit" && (!tabParam || !VALID_TABS.includes(tabParam))) {
       router.push(`/candidate/profile/edit?tab=${defaultTab}`);
     }
   }, [pathname, router, tabParam, defaultTab]);
-  
-  // Auto-dismiss status messages after 5 seconds
+
   useEffect(() => {
     if (statusMessage) {
       const timer = setTimeout(() => {
         setStatusMessage(null);
       }, 5000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [statusMessage]);
-  
-  const handleTabChange = (value: string) => {    
+
+  const handleTabChange = (value: string) => {
     if (hasUnsavedChanges) {
       setStatusMessage({
         type: "warning",
@@ -98,66 +127,56 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
       });
       return;
     }
-    
+
     setActiveTab(value);
     router.push(`/candidate/profile/edit?tab=${value}`);
   };
-  
-  // Pre-save function - shows confirmation dialog
+
   const handleSaveClick = () => {
     if (activeTab === "personal-info" && personalFormRef.current) {
       personalFormRef.current.saveForm();
+    } else if (activeTab === "skills" && skillsFormRef.current) {
+      skillsFormRef.current.saveForm();
     }
-    
-    // Only show dialog if we have data to save
+
     if (formData) {
       setShowConfirmDialog(true);
     }
   };
-    
-  // Actual save function - called after confirmation
+
   const handleSaveChanges = async () => {
     try {
       setIsSubmitting(true);
-      
-      // We already called saveForm in handleSaveClick
-      
+
       if (formData) {
-        // Use the specific update function based on the active tab
         let result;
-        
-        switch (activeTab) {
+
+        switch (formData.type) {
           case "personal-info":
-            result = await updatePersonalInfo(formData);
+            result = await updatePersonalInfo(formData.data);
             break;
           case "skills":
-            result = await updateSkills(formData.skillset ?? []);
+            result = await updateSkills(formData.data.skillsUpdateData);
             break;
-          case "education":
-            result = await updateEducation(formData.education ?? []);
-            break;
-          case "projects":
-            result = await updateProjects(formData.projects ?? []);
-            break;
-          case "certificates":
-            result = await updateCertificates(formData.certificates ?? []);
-            break;
-          case "experience":
-            result = await updateExperience(formData.experience ?? []);
+          case "other":
             break;
           default:
-            console.warn('Unknown tab type for save:', activeTab);
+            console.warn('Unknown form data type for save:', formData);
         }
-        
-        // Show success message
+
         setStatusMessage({
-          type: "success", 
+          type: "success",
           message: "Changes saved successfully!"
         });
-        
-        // Refetch the profile data after successful save
+
         await refetchProfile();
-        
+
+        if (activeTab === "skills" && skillsFormRef.current) {
+          skillsFormRef.current.resetForm();
+        } else if (activeTab === "personal-info" && personalFormRef.current) {
+          personalFormRef.current.resetForm();
+        }
+
         setHasUnsavedChanges(false);
         setFormData(null);
       }
@@ -171,12 +190,14 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
       setIsSubmitting(false);
     }
   };
-    
-  const handleCancelChanges = () => {    
+
+  const handleCancelChanges = () => {
     if (activeTab === "personal-info" && personalFormRef.current) {
       personalFormRef.current.resetForm();
+    } else if (activeTab === "skills" && skillsFormRef.current) {
+      skillsFormRef.current.resetForm();
     }
-    
+
     setHasUnsavedChanges(false);
     setFormData(null);
     setStatusMessage({
@@ -184,7 +205,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
       message: "Changes discarded."
     });
   };
-    
+
   const handlePersonalInfoChange = (hasChanges: boolean) => {
     setHasUnsavedChanges(hasChanges);
     if (hasChanges) {
@@ -193,9 +214,35 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
       setActiveForm(null);
     }
   };
-    
+
   const handlePersonalInfoData = (data: Partial<UserProfile>) => {
-    setFormData(data);
+    setFormData({
+      type: 'personal-info',
+      data
+    });
+  };
+
+  const handleSkillsChange = (hasChanges: boolean) => {
+    setHasUnsavedChanges(hasChanges);
+    if (hasChanges) {
+      setActiveForm("skills");
+    } else if (activeForm === "skills") {
+      setActiveForm(null);
+    }
+  };
+
+  const handleSkillsData = (data: SkillsUpdatePayload) => {
+    setFormData({
+      type: 'skills',
+      data: {
+        skillsUpdateData: {
+          user_id: userId,
+          updated_skillset: data.updated_skillset,
+          new_skillset: data.new_skillset,
+          deleted_skillset: data.deleted_skillset
+        }
+      }
+    });
   };
 
   const getStatusStyles = (type: StatusMessage['type']) => {
@@ -236,7 +283,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
           </Alert>
         </div>
       )}
-      
+
       {/* Add refetching indicator */}
       {isRefetching && (
         <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md flex items-center">
@@ -244,7 +291,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
           <span className="text-blue-700 text-sm">Refreshing profile data...</span>
         </div>
       )}
-      
+
       {hasUnsavedChanges && (
         <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-md flex items-center">
           <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
@@ -253,20 +300,20 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
           </span>
         </div>
       )}
-      
+
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Save your changes?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to save these changes to your profile? Don't worry, you can 
+              Are you sure you want to save these changes to your profile? Don't worry, you can
               always come back and update your information anytime if needed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleSaveChanges}
               disabled={isSubmitting}
               className="bg-blue-600 text-white hover:bg-blue-700"
@@ -276,7 +323,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
+
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid grid-cols-6 w-full mb-8">
           <TabsTrigger value="personal-info">Personal Info</TabsTrigger>
@@ -286,24 +333,25 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
           <TabsTrigger value="certificates" disabled={hasUnsavedChanges}>Certificates</TabsTrigger>
           <TabsTrigger value="experience" disabled={hasUnsavedChanges}>Experience</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="personal-info">
-          <PersonalInfoForm 
+          <PersonalInfoForm
             ref={personalFormRef}
-            profile={profileData} 
+            profile={profileData}
             onChange={handlePersonalInfoChange}
             onSaveData={handlePersonalInfoData}
           />
         </TabsContent>
-        
+
         <TabsContent value="skills">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Skills Data</h2>
-            <p className="text-gray-500 mb-4">Raw JSON data from the API - will be replaced with forms later</p>
-            {renderJsonData(profileData.skillset)}
-          </div>
+          <SkillsForm
+            ref={skillsFormRef}
+            profile={profileData}
+            onChange={handleSkillsChange}
+            onSaveData={handleSkillsData}
+          />
         </TabsContent>
-        
+
         <TabsContent value="education">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Education Data</h2>
@@ -311,7 +359,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
             {renderJsonData(profileData.education)}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="projects">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Projects Data</h2>
@@ -319,7 +367,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
             {renderJsonData(profileData.projects)}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="certificates">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Certificates Data</h2>
@@ -327,7 +375,7 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
             {renderJsonData(profileData.certificates)}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="experience">
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Experience Data</h2>
@@ -336,17 +384,17 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
           </div>
         </TabsContent>
       </Tabs>
-      
+
       {hasUnsavedChanges && (
         <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleCancelChanges}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSaveClick}
             disabled={isSubmitting}
           >

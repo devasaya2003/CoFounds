@@ -13,14 +13,15 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAppSelector((state) => state.auth);
-  
+  const userName = user?.userName || "";
   const defaultTab = "personal-info";
 
   // Extract fetch profile logic to a reusable function
   const fetchProfile = useCallback(async () => {
     try {
+      console.log("FETCHING PROFILE.......")
       setLoading(true);
-      const username = "dev123";
+      const username = userName;
       const data = await getUserProfile(username);
       setProfileData(data);
       return data;
@@ -31,7 +32,7 @@ export default function EditProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userName]);
 
   // Initial data load
   useEffect(() => {
