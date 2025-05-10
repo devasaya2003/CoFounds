@@ -5,7 +5,7 @@ import { setStatus } from '../slices/candidateOnboardingSlice';
 import { DateField } from '@/types/candidate_onboarding';
 
 const BASE_URL = "/api/v1";
-const API_BASE_URL = `${BASE_URL}/api/v1/candidate`;
+const API_BASE_URL = `${BASE_URL}/candidate`;
 const PROFILE_POST_URL = `${API_BASE_URL}/user-master`;
 const SKILLS_POST_URL = `${API_BASE_URL}/user-skillset`;
 const EDUCATION_POST_URL = `${API_BASE_URL}/user-education`;

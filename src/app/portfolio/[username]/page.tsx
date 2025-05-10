@@ -9,7 +9,7 @@ import ExperienceSection from './components/ExperienceSection';
 import ProjectsSection from './components/ProjectsSection';
 import EducationSection from './components/EducationSection';
 import BuildPortfolioButton from './components/BuildPortfolioButton';
-import { headers } from 'next/headers';
+import { getUserPortfolio } from '@/backend/functions/portfolio/get_user_portfolio';
 
 type PortfolioParams = {
   params: Promise<{ username: string }>;
@@ -67,7 +67,6 @@ interface PortfolioResponse {
 
 function formatDate(date: string | Date | null, context: 'experience' | 'education' | 'project' = 'experience'): string {
   if (!date) {
-    
     switch (context) {
       case 'project':
         return 'Currently Building';
@@ -80,27 +79,45 @@ function formatDate(date: string | Date | null, context: 'experience' | 'educati
   return new Date(date).getFullYear().toString();
 }
 
-async function fetchPortfolio(username: string): Promise<PortfolioResponse> {
-  try {    
-    const headersList = await headers();
-    const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-    const host = headersList.get('host') || 'cofounds.in';
-        
-    const url = `${protocol}://${host}/api/portfolio/${username}`;
-    console.log(`Fetching portfolio from: ${url}`);
-    
-    const res = await fetch(url, {
-      cache: 'no-store',
-      next: { revalidate: 3600 }
-    });
-    
-    if (!res.ok) {
-      throw new Error(`Failed to fetch portfolio: ${res.status}`);
+
+async function getPortfolio(username: string): Promise<PortfolioResponse> {
+  try {
+    console.log(`Fetching portfolio directly from database for: ${username}`);
+
+    const result = await getUserPortfolio(username);
+
+    console.log(`Database query result success: ${result.success}`);
+
+    if (result.success && result.data) {
+      const transformedData: Portfolio = {
+        ...result.data,
+        experience: result.data.experience.map(exp => ({
+          ...exp,
+          startedAt: exp.startedAt || new Date().toISOString(),
+          endAt: exp.endAt
+        })),
+        education: result.data.education.map(edu => ({
+          ...edu,
+          startedAt: edu.startedAt || new Date().toISOString(),
+          endAt: edu.endAt,
+          eduFrom: edu.eduFrom || ''
+        })),
+        projects: result.data.projects.map(proj => ({
+          ...proj,
+          startedAt: proj.startedAt || new Date().toISOString(),
+          endAt: proj.endAt
+        }))
+      };
+
+      return {
+        success: true,
+        data: transformedData
+      };
     }
-    
-    return await res.json();
+
+    return result as PortfolioResponse;
   } catch (error) {
-    console.error('Error fetching portfolio:', error);
+    console.error('Error fetching portfolio from database:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch portfolio'
@@ -110,8 +127,8 @@ async function fetchPortfolio(username: string): Promise<PortfolioResponse> {
 
 export async function generateMetadata({ params }: PortfolioParams): Promise<Metadata> {
   const { username } = await params;
-  const portfolioResult = await fetchPortfolio(username);
-  
+  const portfolioResult = await getPortfolio(username);
+
   if (portfolioResult.success && portfolioResult.data) {
     const portfolio = portfolioResult.data;
     return {
@@ -119,7 +136,7 @@ export async function generateMetadata({ params }: PortfolioParams): Promise<Met
       description: 'Professional Portfolio'
     };
   }
-  
+
   return {
     title: 'Portfolio Not Found',
     description: 'The requested portfolio could not be found.'
@@ -128,18 +145,18 @@ export async function generateMetadata({ params }: PortfolioParams): Promise<Met
 
 export default async function PortfolioPage({ params }: PortfolioParams) {
   const { username } = await params;
-  const portfolioResult = await fetchPortfolio(username);
-  
+  const portfolioResult = await getPortfolio(username);
+
   if (!portfolioResult.success || !portfolioResult.data) {
     notFound();
   }
-  
+
   const portfolio = portfolioResult.data;
-  
-  const currentJob = portfolio.experience && portfolio.experience.length > 0 
-    ? portfolio.experience[0] 
+
+  const currentJob = portfolio.experience && portfolio.experience.length > 0
+    ? portfolio.experience[0]
     : { title: '', companyName: '', startedAt: '', endAt: null, description: null };
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -161,10 +178,10 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
 
       {/* Banner */}
       <Banner />
-      
+
       {/* Profile Header (overlaps banner) */}
-      <ProfileHeader 
-        firstName={portfolio.firstName} 
+      <ProfileHeader
+        firstName={portfolio.firstName}
         lastName={portfolio.lastName}
         title={currentJob.title}
         companyName={currentJob.companyName}
@@ -174,13 +191,13 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
       <main className="max-w-5xl mx-auto px-4 py-12 mt-24">
         {/* About section */}
         <AboutSection description={portfolio.description} />
-        
+
         {/* Skills section */}
         <SkillsSection skills={portfolio.skillset} />
 
         {/* Experience Section */}
         <ExperienceSection experiences={portfolio.experience} formatDate={(date) => formatDate(date, 'experience')} />
-        
+
         {/* Education Section */}
         <EducationSection education={portfolio.education} formatDate={(date) => formatDate(date, 'education')} />
 
