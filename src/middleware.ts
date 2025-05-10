@@ -81,15 +81,20 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-
   if (subdomain) {
-    const url = req.nextUrl.clone();
-    url.pathname = `/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`;
-
-    console.log(`Rewriting ${hostname}${pathname} to ${url.pathname}`);
-
-    const response = NextResponse.rewrite(url);
-    response.headers.set('x-subdomain-rewrite', url.pathname);
+    
+    const protocol = req.nextUrl.protocol; 
+    
+    const mainDomainWithProtocol = process.env.NEXT_PUBLIC_BASE_URL || 
+      (isDevEnvironment ? 'http://localhost:3000' : 'https://cofounds.in');
+    
+    const rewriteUrl = new URL(`/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`, 
+      mainDomainWithProtocol);
+    
+    console.log(`Rewriting ${hostname}${pathname} to ${rewriteUrl.toString()}`);
+    
+    const response = NextResponse.rewrite(rewriteUrl);
+    response.headers.set('x-subdomain-rewrite', rewriteUrl.toString());
     return response;
   }
 
