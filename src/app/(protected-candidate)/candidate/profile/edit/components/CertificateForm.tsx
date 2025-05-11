@@ -30,9 +30,9 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
         const [certificates, setCertificates] = useState<Certificate[]>([]);
         const [originalCertificates, setOriginalCertificates] = useState<Certificate[]>([]);
         const [deletedCertificates, setDeletedCertificates] = useState<string[]>([]);
-        const [isPending, startTransition] = useTransition();
+        const [isPending, startTransition] = useTransition(); 
         const [lastAddedId, setLastAddedId] = useState<string | null>(null);
-
+        
         // Create a ref map to store references to each certificate item
         const certificateRefs = useRef<Map<string, HTMLDivElement>>(new Map());
         // Create a ref for the container to use for scrolling
@@ -121,9 +121,9 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                 if (certificateElement) {
                     // Small delay to ensure DOM is updated and any animations have completed
                     setTimeout(() => {
-                        certificateElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
+                        certificateElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center' 
                         });
                     }, 100);
                     setLastAddedId(null); // Reset after scrolling
@@ -215,17 +215,11 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
         return (
             <div className="space-y-6">
                 <div className="flex justify-between items-start mb-6">
-                    <div className='w-full'>
+                    <div>
                         <h2 className="text-2xl font-semibold">Your Certificates</h2>
                         <p className="text-gray-600">
                             Add and manage your professional certifications and credentials.
                         </p>
-                        <div className="mt-2 text-sm text-gray-500 flex items-center bg-blue-50 p-3 rounded-md">
-                            <Info className="h-5 mr-2 text-blue-500" />
-                            <p>
-                                <strong>Coming soon:</strong> File uploads for certificate attachments will be available in the next update.
-                            </p>
-                        </div>
                     </div>
                     {certificates.length > 0 && remainingCertificates > 0 && (
                         <Button
@@ -258,13 +252,14 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                             ) : (
                                 <div className="space-y-6">
                                     {certificates.map((certificate, index) => (
-                                        <div
+                                        <div 
                                             key={certificate.id}
                                             ref={(el) => setCertificateRef(certificate.id, el)}
-                                            className={`transition-opacity duration-300 ${lastAddedId === certificate.id && isPending
-                                                    ? 'opacity-70'
+                                            className={`transition-opacity duration-300 ${
+                                                lastAddedId === certificate.id && isPending 
+                                                    ? 'opacity-70' 
                                                     : 'opacity-100'
-                                                }`}
+                                            }`}
                                         >
                                             <CertificateItem
                                                 certificate={certificate}
@@ -306,7 +301,7 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                                     </div>
                                 </div>
                             )}
-
+                            
                             {/* Loading indicator when adding a new certificate */}
                             {isPending && (
                                 <div className="fixed bottom-6 right-6 bg-primary text-white px-4 py-2 rounded-full shadow-lg flex items-center z-50">
@@ -317,6 +312,13 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                         </div>
                     </CardContent>
                 </Card>
+
+                <div className="mt-2 text-sm text-gray-500 flex items-center bg-blue-50 p-3 rounded-md">
+                    <Info className="h-5 w-5 mr-2 text-blue-500" />
+                    <p>
+                        <strong>Coming soon:</strong> File uploads for certificate attachments will be available in the next update.
+                    </p>
+                </div>
             </div>
         );
     }
