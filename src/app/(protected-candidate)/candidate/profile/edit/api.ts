@@ -210,7 +210,6 @@ export async function updateCertificates(certificateData: {
   total: number;
 }> {
   try {
-    // Extensive logging for debugging
     console.log('==================== CERTIFICATE FORM DATA ====================');
     console.log('User ID:', certificateData.user_id);
     
@@ -241,20 +240,7 @@ export async function updateCertificates(certificateData: {
     console.log(certificateData.deleted_certificates);
     console.log('================================================================');
 
-    // Mock API response for testing
-    // Comment this section when the actual API is ready
-    const mockResponse = {
-      updated: certificateData.updated_certificates.length,
-      created: certificateData.new_certificates.length,
-      deleted: certificateData.deleted_certificates.length,
-      total: certificateData.updated_certificates.length + certificateData.new_certificates.length
-    };
-    
-    console.log('Mock response:', mockResponse);
-    return mockResponse;
-
-    /* 
-    // Uncomment this section when the actual API is ready
+    // Use the actual API call now
     const response = await fetchWithAuth_PUT<ApiResponse<{
       updated: number;
       created: number;
@@ -271,7 +257,6 @@ export async function updateCertificates(certificateData: {
 
     console.log('Certificates update completed:', response.data);
     return response.data;
-    */
   } catch (error) {
     console.error('Error updating certificates:', error);
     throw error;
