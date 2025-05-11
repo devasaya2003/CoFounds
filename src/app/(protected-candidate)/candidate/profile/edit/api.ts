@@ -1,7 +1,6 @@
 import { fetchWithAuth_GET, fetchWithAuth_POST, fetchWithAuth_PUT } from '@/utils/api';
 import { UserMaster, UserSkillset, UserProjects, UserCertificates, UserEducation, UserExperience, SkillMaster, DegreeMaster } from '@prisma/client';
 
-
 interface PendingRequest {
   promise: Promise<UserProfile>;
   timestamp: number;
@@ -9,6 +8,7 @@ interface PendingRequest {
 
 const pendingRequests: Record<string, PendingRequest> = {};
 const responseCache: Record<string, { data: UserProfile; timestamp: number }> = {};
+const profileCache: Record<string, { data: UserProfile; timestamp: number }> = {};
 const CACHE_TTL = 30000;
 
 const API_ENDPOINTS = {
@@ -58,61 +58,55 @@ export interface SkillsUpdateResult {
   total: number;
 }
 
-
-export async function getUserProfile(username: string): Promise<UserProfile> {
-  const now = Date.now();
+export async function getUserProfile(username: string, forceRefresh = false): Promise<UserProfile> {
   const cacheKey = `profile_${username}`;
+  const now = Date.now();
 
-
-  if (responseCache[cacheKey] && now - responseCache[cacheKey].timestamp < CACHE_TTL) {
-    console.log(`🔄 USING CACHED DATA for ${username}`);
-    return responseCache[cacheKey].data;
+  if (!forceRefresh &&
+      profileCache[cacheKey] &&
+      now - profileCache[cacheKey].timestamp < CACHE_TTL) {
+    console.log(`Using cached profile for ${username}`);
+    return profileCache[cacheKey].data;
   }
 
+  console.log(`Fetching fresh profile data for ${username}`);
+  try {
+    const response = await fetch(`/api/v1/candidate/summary/${username}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch user profile');
+    }
 
-  if (pendingRequests[cacheKey] && now - pendingRequests[cacheKey].timestamp < 5000) {
-    console.log(`🔄 REUSING IN-FLIGHT REQUEST for ${username}`);
-    return pendingRequests[cacheKey].promise;
+    const result = await response.json();
+
+    if (!result.success || !result.data) {
+      throw new Error(result.error || 'Failed to fetch user profile');
+    }
+
+    profileCache[cacheKey] = {
+      data: result.data,
+      timestamp: now
+    };
+
+    return result.data;
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    throw error;
   }
+}
 
-
-  console.log(`🔄 FETCHING NEW DATA for ${username}`);
-  const promise = fetch(`/api/v1/candidate/summary/${username}`)
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to fetch profile');
-      return response.json();
-    })
-    .then(response => {
-
-      if (response.success && response.data) {
-        responseCache[cacheKey] = {
-          data: response.data,
-          timestamp: Date.now()
-        };
-
-        delete pendingRequests[cacheKey];
-        return response.data;
-      }
-      throw new Error(response.error || 'Failed to fetch user profile');
-    })
-    .catch(error => {
-
-      delete pendingRequests[cacheKey];
-      throw error;
-    });
-
-
-  pendingRequests[cacheKey] = {
-    promise,
-    timestamp: now
-  };
-
-  return promise;
+// Add this function to explicitly clear cache for a user
+export function clearUserProfileCache(username: string) {
+  const cacheKey = `profile_${username}`;
+  if (profileCache[cacheKey]) {
+    console.log(`Clearing cache for ${username}`);
+    delete profileCache[cacheKey];
+    return true;
+  }
+  return false;
 }
 
 export async function updatePersonalInfo(personalData: Partial<UserProfile>): Promise<UserProfile> {
   try {
-
     const formattedDate = personalData.dob ? formatDateForAPI(personalData.dob) : null;
 
     const profilePayload = {
@@ -145,7 +139,6 @@ export async function updateSkills(skillsData: {
   deleted_skillset: string[];
 }): Promise<SkillsUpdateResult> {
   try {
-
     const response = await fetchWithAuth_PUT<ApiResponse<SkillsUpdateResult>>(
       API_ENDPOINTS.SKILLS,
       skillsData

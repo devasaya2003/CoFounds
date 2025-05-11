@@ -180,14 +180,13 @@ export function useFormManagement(
             
             if (formData.type === 'personal-info') {
                 updatedProfile = await updatePersonalInfo(formData.data);
+                updatedProfile = await refetchProfile();
             } else if (formData.type === 'skills') {
-                const result = await updateSkills(formData.data.skillsUpdateData);
-                // Fetch the updated profile after skills update
+                updatedProfile = await updateSkills(formData.data.skillsUpdateData);
                 updatedProfile = await refetchProfile();
             }
             
             if (updatedProfile) {
-                // Call the success handler with updated profile
                 handleSubmitSuccess(updatedProfile);
             }
         } catch (error) {

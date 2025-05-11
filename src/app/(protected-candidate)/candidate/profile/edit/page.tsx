@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense, useRef } from "react"; // Add useRef
-import { getUserProfile } from "./api";
+import { clearUserProfileCache, getUserProfile } from "./api";
 import { UserProfile } from "./api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -59,9 +59,12 @@ export default function EditProfilePage() {
   const refetchProfile = async () => {
     try {
       setLoading(true);
-      const data = await getUserProfile(userName);
-      
-      // Important: update the local state with new data
+      console.log("FORCE REFETCHING PROFILE DATA...");
+
+      clearUserProfileCache(userName);
+
+      const data = await getUserProfile(userName, true);
+
       setProfileData(data);
       
       setLoading(false);
