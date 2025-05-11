@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useCallback } from "react";
+import { useEffect, useState, Suspense, useRef } from "react"; // Add useRef
 import { getUserProfile } from "./api";
 import { UserProfile } from "./api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import TabHandler from "./components/TabHandler";
 import { useAppSelector } from "@/redux/hooks";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 export default function EditProfilePage() {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
@@ -20,27 +20,59 @@ export default function EditProfilePage() {
   const defaultTab = "personal-info";
   const searchParams = useSearchParams();
   const isNewUser = searchParams.get('newUser') === 'true';
+  const initialFetchPerformed = useRef(false); // Add this ref
 
-  const fetchProfile = useCallback(async () => {
-    try {
-      console.log("FETCHING PROFILE.......")
-      setLoading(true);
-      const username = userName;
-      const data = await getUserProfile(username);
-      setProfileData(data);
-      return data;
-    } catch (err) {
-      setError("Failed to load profile data");
-      console.error(err);
-      return null;
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Only fetch if not already fetched
+    if (!initialFetchPerformed.current && userName) {
+      let isMounted = true;
+
+      async function fetchProfile() {
+        try {
+          console.log("FETCHING PROFILE.......")
+          setLoading(true);
+
+          const data = await getUserProfile(userName);
+
+          if (isMounted) {
+            setProfileData(data);
+            setLoading(false);
+            initialFetchPerformed.current = true; // Mark as fetched
+          }
+        } catch (err) {
+          if (isMounted) {
+            setError("Failed to load profile data");
+            setLoading(false);
+            console.error(err);
+          }
+        }
+      }
+
+      fetchProfile();
+
+      return () => {
+        isMounted = false;
+      };
     }
   }, [userName]);
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  const refetchProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await getUserProfile(userName);
+      
+      // Important: update the local state with new data
+      setProfileData(data);
+      
+      setLoading(false);
+      return data;
+    } catch (err) {
+      setError("Failed to load profile data");
+      setLoading(false);
+      console.error(err);
+      return null;
+    }
+  };
 
   if (loading && !profileData) {
     return (
@@ -94,7 +126,7 @@ export default function EditProfilePage() {
               defaultTab={defaultTab}
               renderJsonData={renderJsonData}
               profileData={profileData}
-              refetchProfile={fetchProfile}
+              refetchProfile={refetchProfile}
               isRefetching={loading && !!profileData}
               isNewUser={isNewUser}
             />
