@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState, Suspense, useRef } from "react"; // Add useRef
+import { useEffect, useState, Suspense, useRef } from "react";
 import { clearUserProfileCache, getUserProfile } from "./api";
 import { UserProfile } from "./api";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import TabHandler from "./components/TabHandler";
+import { Loader2, AlertCircle } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import TabHandler from "./components/tab";
 
 export default function EditProfilePage() {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
@@ -20,7 +19,7 @@ export default function EditProfilePage() {
   const defaultTab = "personal-info";
   const searchParams = useSearchParams();
   const isNewUser = searchParams.get('newUser') === 'true';
-  const initialFetchPerformed = useRef(false); // Add this ref
+  const initialFetchPerformed = useRef(false);
 
   useEffect(() => {
     // Only fetch if not already fetched

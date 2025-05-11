@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -10,6 +10,7 @@ import {
 } from "../api";
 import PersonalInfoForm from "./PersonalInfoForm";
 import SkillsForm from "./SkillsForm";
+import CertificateForm, { CertificateFormRef } from "./CertificateForm";
 import { StatusAlert } from "./StatusAlert";
 import { CompletionGuide } from "./CompletionGuide";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -66,10 +67,25 @@ export default function TabHandler({
     refetchProfile
   );
 
+  const certificateFormRef = useRef<CertificateFormRef>(null);
+
+  const formRefs = {
+    personalFormRef,
+    skillsFormRef,
+    certificateFormRef
+  };
+
+  const [certificateChanges, setCertificateChanges] = useState(false);
+  const handleCertificateChange = useCallback((hasChanges: boolean) => {
+    setCertificateChanges(hasChanges);
+  }, []);
+
+  const handleCertificateData = useCallback((data: any) => {
+    // Handle certificate form data
+  }, []);
+
   // Set up route handling
   useEffect(() => {
-    // Only call handleTabChange when there is NO tab parameter in the URL
-    // This prevents overriding user selection with the default
     if (pathname === "/candidate/profile/edit" && !searchParams?.has('tab')) {
       handleTabChange(defaultTab);
     }
@@ -162,7 +178,18 @@ export default function TabHandler({
           <TabsTrigger value="skills" disabled={hasUnsavedChanges}>Skills</TabsTrigger>
           <TabsTrigger value="education" disabled={hasUnsavedChanges}>Education</TabsTrigger>
           <TabsTrigger value="projects" disabled={hasUnsavedChanges}>Projects</TabsTrigger>
-          <TabsTrigger value="certificates" disabled={hasUnsavedChanges}>Certificates</TabsTrigger>
+          <TabsTrigger 
+            value="certificates" 
+            className="gap-2"
+            disabled={hasUnsavedChanges && activeTab !== "certificates"}
+          >
+            <span>Certificates</span>
+            {isNewUser && !profileData.certificates?.length && (
+              <span className="ml-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">
+                Optional
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="experience" disabled={hasUnsavedChanges}>Experience</TabsTrigger>
         </TabsList>
 
@@ -203,12 +230,13 @@ export default function TabHandler({
           </div>
         </TabsContent>
 
-        <TabsContent value="certificates">
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Certificates Data</h2>
-            <p className="text-gray-500 mb-4">Raw JSON data from the API - will be replaced with forms later</p>
-            {renderJsonData(profileData.certificates)}
-          </div>
+        <TabsContent value="certificates" className="py-6 space-y-6">
+          <CertificateForm
+            ref={certificateFormRef}
+            profile={profileData}
+            onChange={handleCertificateChange}
+            onSaveData={handleCertificateData}
+          />
         </TabsContent>
 
         <TabsContent value="experience">
