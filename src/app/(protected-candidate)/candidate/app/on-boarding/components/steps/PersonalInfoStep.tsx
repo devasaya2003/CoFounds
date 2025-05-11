@@ -109,7 +109,6 @@ export default function PersonalInfoStep({
       onSkillLevelChange={handleSkillLevelChange}
       onDateOfBirthChange={handleDateOfBirthChange}
       onNext={onNextStep}
-      onPrevious={onPreviousStep}
       isSubmitting={isSubmitting}
       fetchAllSkills={false}
     />

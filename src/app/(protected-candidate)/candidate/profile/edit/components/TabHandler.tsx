@@ -15,7 +15,7 @@ import {
 import PersonalInfoForm, { PersonalInfoFormRef } from "./PersonalInfoForm";
 import SkillsForm, { SkillsFormRef } from "./SkillsForm";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, XCircle, Loader2, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -35,6 +35,7 @@ interface TabHandlerProps {
   profileData: UserProfile;
   refetchProfile: () => Promise<UserProfile | null>;
   isRefetching?: boolean;
+  isNewUser?: boolean; // Add this new prop
 }
 
 interface StatusMessage {
@@ -79,7 +80,14 @@ const VALID_TABS = [
   "experience"
 ];
 
-export default function TabHandler({ defaultTab, renderJsonData, profileData, refetchProfile, isRefetching }: TabHandlerProps) {
+export default function TabHandler({ 
+  defaultTab, 
+  renderJsonData, 
+  profileData, 
+  refetchProfile, 
+  isRefetching,
+  isNewUser = false 
+}: TabHandlerProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -270,6 +278,55 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
     }
   };
 
+  // Add completion tracking
+  const isPersonalInfoComplete = Boolean(
+    profileData.firstName && 
+    profileData.lastName
+  );
+  
+  const hasSkills = profileData.skillset && profileData.skillset.length > 0;
+  
+  // Render guide banner if new user
+  const renderCompletionGuide = () => {
+    if (!isNewUser) return null;
+    
+    return (
+      <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
+        <h3 className="font-medium mb-2">Profile Completion Guide:</h3>
+        <ul className="space-y-2">
+          <li className="flex items-center">
+            {isPersonalInfoComplete ? (
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
+            )}
+            <span className={isPersonalInfoComplete ? "text-green-700" : "text-amber-700"}>
+              Personal Information {isPersonalInfoComplete ? "(Completed)" : "(Required)"}
+            </span>
+          </li>
+          <li className="flex items-center">
+            {hasSkills ? (
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
+            )}
+            <span className={hasSkills ? "text-green-700" : "text-amber-700"}>
+              Skills {hasSkills ? "(Completed)" : "(Recommended)"}
+            </span>
+          </li>
+          <li className="flex items-center opacity-75">
+            <span className="h-5 w-5 mr-2">•</span>
+            <span>Education (Optional)</span>
+          </li>
+          <li className="flex items-center opacity-75">
+            <span className="h-5 w-5 mr-2">•</span>
+            <span>Projects (Optional)</span>
+          </li>
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <div className="relative">
       {/* Status message alert */}
@@ -300,6 +357,9 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
           </span>
         </div>
       )}
+
+      {/* Add completion guide for new users */}
+      {renderCompletionGuide()}
 
       {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
@@ -399,6 +459,18 @@ export default function TabHandler({ defaultTab, renderJsonData, profileData, re
             disabled={isSubmitting}
           >
             {isSubmitting ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      )}
+
+      {/* Add a "Continue to Dashboard" button for new users when minimum is complete */}
+      {isNewUser && isPersonalInfoComplete && (
+        <div className="mt-6 text-center">
+          <Button
+            onClick={() => router.push('/candidate/app')}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {hasSkills ? "Continue to Dashboard" : "Continue (Adding Skills Recommended)"}
           </Button>
         </div>
       )}

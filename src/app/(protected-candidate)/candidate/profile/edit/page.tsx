@@ -5,8 +5,11 @@ import { getUserProfile } from "./api";
 import { UserProfile } from "./api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import TabHandler from "./components/TabHandler"; 
+import TabHandler from "./components/TabHandler";
 import { useAppSelector } from "@/redux/hooks";
+import { useSearchParams } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle, AlertCircle } from "lucide-react";
 
 export default function EditProfilePage() {
   const [profileData, setProfileData] = useState<UserProfile | null>(null);
@@ -15,8 +18,9 @@ export default function EditProfilePage() {
   const { user } = useAppSelector((state) => state.auth);
   const userName = user?.userName || "";
   const defaultTab = "personal-info";
+  const searchParams = useSearchParams();
+  const isNewUser = searchParams.get('newUser') === 'true';
 
-  // Extract fetch profile logic to a reusable function
   const fetchProfile = useCallback(async () => {
     try {
       console.log("FETCHING PROFILE.......")
@@ -34,7 +38,6 @@ export default function EditProfilePage() {
     }
   }, [userName]);
 
-  // Initial data load
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
@@ -55,7 +58,7 @@ export default function EditProfilePage() {
       </div>
     );
   }
-  
+
   const renderJsonData = (data: unknown) => {
     return (
       <div className="bg-gray-50 dark:bg-gray-900 rounded-md p-4 overflow-auto max-h-[500px]">
@@ -68,17 +71,32 @@ export default function EditProfilePage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">Edit Your Profile</h1>
+      <h1 className="text-3xl font-bold mb-8">
+        {isNewUser ? "Complete Your Profile" : "Edit Your Profile"}
+      </h1>
+
+      {isNewUser && (
+        <Alert className="mb-6 bg-blue-50 border-blue-200">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-blue-500 mr-2" />
+            <AlertDescription>
+              Welcome to CoFounds! Please complete your profile to get started.
+              We recommend filling out at least the Personal Info and Skills sections.
+            </AlertDescription>
+          </div>
+        </Alert>
+      )}
 
       <Card>
         <CardContent className="p-6">
           <Suspense fallback={<div>Loading tabs...</div>}>
-            <TabHandler 
-              defaultTab={defaultTab} 
-              renderJsonData={renderJsonData} 
+            <TabHandler
+              defaultTab={defaultTab}
+              renderJsonData={renderJsonData}
               profileData={profileData}
-              refetchProfile={fetchProfile} 
+              refetchProfile={fetchProfile}
               isRefetching={loading && !!profileData}
+              isNewUser={isNewUser}
             />
           </Suspense>
         </CardContent>

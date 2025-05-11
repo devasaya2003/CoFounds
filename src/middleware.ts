@@ -24,6 +24,12 @@ const PUBLIC_PATH_PREFIXES = [
   "/api/banner-image"
 ];
 
+const AUTH_PAGES = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/recruiter-sign-in"
+];
+
 interface TokenPayload extends JWTPayload {
   role?: string;
 }
@@ -46,7 +52,6 @@ function extractDomain(url: string): string {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get('host') || '';
-
 
   if (pathname.startsWith('/api/')) {
     console.log("API request detected, bypassing subdomain logic:", pathname);
@@ -96,6 +101,33 @@ export async function middleware(req: NextRequest) {
     const response = NextResponse.rewrite(rewriteUrl);
     response.headers.set('x-subdomain-rewrite', rewriteUrl.toString());
     return response;
+  }
+
+  // Check if user is already logged in and trying to access auth pages
+  if (AUTH_PAGES.some(path => pathname.startsWith(path))) {
+    console.log("Auth page access detected, checking if already logged in");
+    const authToken = req.cookies.get("auth_token")?.value;
+
+    if (authToken) {
+      try {
+        const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+        const { payload } = await jwtVerify(authToken, secret);
+        const typedPayload = payload as TokenPayload;
+        const userRole = typedPayload.role;
+
+        console.log("Logged in user trying to access auth page, redirecting to dashboard");
+        
+        // Redirect to appropriate dashboard based on role
+        if (userRole === "candidate") {
+          return NextResponse.redirect(new URL("/candidate/app", req.url));
+        } else if (userRole === "recruiter") {
+          return NextResponse.redirect(new URL("/recruiter/app", req.url));
+        }
+      } catch (error) {
+        console.log("Invalid token, allowing access to auth page");
+        // Token is invalid, allow access to auth pages
+      }
+    }
   }
 
   if (PUBLIC_PATH_PREFIXES.some(prefix => pathname.startsWith(prefix))) {

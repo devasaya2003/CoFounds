@@ -183,8 +183,6 @@ export const fetchUserDetails = createAsyncThunk(
     if (state.auth.isAuthenticated && state.auth.user?.userName) {
       try {
 
-        console.log("USER: ", state.auth.user);
-
         const userName = state.auth.user.userName;
         const url = `/api/portfolio/${userName}`;
 
@@ -195,11 +193,9 @@ export const fetchUserDetails = createAsyncThunk(
           console.error("API error response:", errorText.substring(0, 200));
           throw new Error(`Failed to fetch user details: ${response.status}`);
         }
-        
-        // First get as text to debug if needed
+
         const responseText = await response.text();
-        
-        // Try to parse JSON
+
         try {
           const data = JSON.parse(responseText);
           

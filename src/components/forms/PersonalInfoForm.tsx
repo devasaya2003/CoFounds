@@ -62,7 +62,6 @@ export default function PersonalInfoForm({
   disabled = false,
   showNavigation = true,
   onNext,
-  onPrevious,
   isSubmitting = false,
   fetchAllSkills = false,
   navigationLabel = { next: 'Next Step', previous: 'Previous Step' }
@@ -238,21 +237,7 @@ export default function PersonalInfoForm({
       
       {/* Navigation buttons - only show if navigation is enabled */}
       {showNavigation && (
-        <div className="flex justify-between pt-4">
-          {onPrevious && (
-            <button
-              type="button"
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={onPrevious}
-              disabled={disabled || isSubmitting} 
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="mr-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {navigationLabel.previous}
-            </button>
-          )}
-          
+        <div className="flex justify-end pt-4">                    
           {onNext && (
             <button
               type="button"
