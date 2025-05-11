@@ -1,14 +1,22 @@
 'use client';
 
+import React, { ChangeEvent, memo, useCallback, useMemo, Suspense, lazy } from 'react';
 import { X, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import DateSelector from '@/components/DateSelector/DateSelector';
-import MarkdownEditor from '@/components/RichTextEditor/RichTextEditor';
 import { Certificate } from './types';
 import { generateYears, generateMonths, generateDays } from './utils';
+
+// Lazy-load the markdown editor since it's heavy
+const MarkdownEditor = lazy(() => import('@/components/RichTextEditor/RichTextEditor'));
+
+// Pre-generate these values once to avoid regenerating them for each certificate
+const years = generateYears();
+const months = generateMonths();
+const days = generateDays();
 
 interface CertificateItemProps {
     certificate: Certificate;
@@ -17,24 +25,35 @@ interface CertificateItemProps {
     onRemove: (id: string) => void;
 }
 
-export default function CertificateItem({
+const CertificateItem = memo(({
     certificate,
     index,
     onUpdate,
     onRemove
-}: CertificateItemProps) {
-    const years = generateYears();
-    const months = generateMonths();
-    const days = generateDays();
-
-    // Determine if this certificate has no expiry date
+}: CertificateItemProps) => {
     const hasNoExpiryDate = certificate.noExpiryDate === true;
+
+    const handleRemove = useCallback(() => {
+        onRemove(certificate.id);
+    }, [certificate.id, onRemove]);
+
+    const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+        onUpdate(certificate.id, { title: e.target.value });
+    }, [certificate.id, onUpdate]);
+
+    const handleDescriptionChange = useCallback((value: string) => {
+        onUpdate(certificate.id, { description: value });
+    }, [certificate.id, onUpdate]);
+
+    const handleLinkChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+        onUpdate(certificate.id, { link: e.target.value });
+    }, [certificate.id, onUpdate]);
 
     return (
         <div className="p-6 border border-gray-200 rounded-lg relative bg-white shadow-sm hover:shadow-md transition-shadow">
             <button
                 type="button"
-                onClick={() => onRemove(certificate.id)}
+                onClick={handleRemove}
                 className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
                 aria-label="Remove certificate"
             >
@@ -49,7 +68,7 @@ export default function CertificateItem({
                     id={`certificate-${index}-title`}
                     placeholder="Enter certificate title (e.g., AWS Certified Solutions Architect)"
                     value={certificate.title}
-                    onChange={(e) => onUpdate(certificate.id, { title: e.target.value })}
+                    onChange={handleTitleChange}
                     className="transition-all focus:ring-2 focus:ring-primary/20"
                 />
             </div>
@@ -58,10 +77,12 @@ export default function CertificateItem({
                 <Label htmlFor={`certificate-${index}-description`} className="text-sm font-medium block mb-2">
                     Description<span className="text-red-500 ml-1">*</span>
                 </Label>
-                <MarkdownEditor
-                    initialValue={certificate.description || ''}
-                    onChange={(value) => onUpdate(certificate.id, { description: value })}
-                />
+                <Suspense fallback={<div className="h-32 bg-gray-50 animate-pulse rounded"></div>}>
+                    <MarkdownEditor
+                        initialValue={certificate.description || ''}
+                        onChange={handleDescriptionChange}
+                    />
+                </Suspense>
                 <p className="text-xs text-gray-500 mt-1">
                     Briefly describe what this certificate represents and the skills it validates.
                 </p>
@@ -179,7 +200,7 @@ export default function CertificateItem({
                     id={`certificate-${index}-link`}
                     placeholder="https://example.com/certificate"
                     value={certificate.link || ""}
-                    onChange={(e) => onUpdate(certificate.id, { link: e.target.value })}
+                    onChange={handleLinkChange}
                     className="transition-all focus:ring-2 focus:ring-primary/20"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -188,4 +209,7 @@ export default function CertificateItem({
             </div>
         </div>
     );
-}
+});
+
+CertificateItem.displayName = "CertificateItem";
+export default CertificateItem;

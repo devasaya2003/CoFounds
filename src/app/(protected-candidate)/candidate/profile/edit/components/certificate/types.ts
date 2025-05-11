@@ -1,22 +1,20 @@
 import { UserProfile } from '../../api';
 
+export interface DateObject {
+    year: string;
+    month: string;
+    day: string;
+}
+
 export interface Certificate {
     id: string;
     title: string;
     description: string | null;
-    startDate: {
-        year: string;
-        month: string;
-        day: string;
-    };
-    endDate: {
-        year: string;
-        month: string;
-        day: string;
-    } | null;
-    link?: string;
+    startDate: DateObject;
+    endDate: DateObject | null;
+    link: string;
     userId?: string;
-    noExpiryDate?: boolean;
+    noExpiryDate: boolean;
 }
 
 export interface CertificateUpdatePayload {

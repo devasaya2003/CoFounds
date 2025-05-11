@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react';
-import { Plus, Info } from 'lucide-react';
+import { useState, useEffect, useImperativeHandle, forwardRef, useCallback, useTransition, useRef } from 'react';
+import { Plus, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAppSelector } from '@/redux/hooks';
-import CertificateItem from './certificate/CertificateItem';
+import dynamic from 'next/dynamic';
 import { formatDateForApi, generateTempId } from './certificate/utils';
 import {
     Certificate,
@@ -15,17 +15,34 @@ import {
     MAX_CERTIFICATES
 } from './certificate/types';
 
+// Dynamically import heavy components
+const CertificateItem = dynamic(() => import('./certificate/CertificateItem'), {
+    ssr: false,
+    loading: () => <div className="p-6 border border-gray-200 rounded-lg bg-gray-50 animate-pulse h-40"></div>
+});
+
+const EmptyState = dynamic(() => import('./certificate/EmptyState'), {
+    ssr: false
+});
+
 const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
     ({ profile, onChange, onSaveData }, ref) => {
         const [certificates, setCertificates] = useState<Certificate[]>([]);
         const [originalCertificates, setOriginalCertificates] = useState<Certificate[]>([]);
         const [deletedCertificates, setDeletedCertificates] = useState<string[]>([]);
+        const [isPending, startTransition] = useTransition();
+        const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+
+        // Create a ref map to store references to each certificate item
+        const certificateRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+        // Create a ref for the container to use for scrolling
+        const containerRef = useRef<HTMLDivElement>(null);
 
         const { user } = useAppSelector((state) => state.auth);
         const currentYear = new Date().getFullYear();
 
         useEffect(() => {
-            if (profile && profile.certificates) {
+            if (profile?.certificates) {
                 const formattedCerts = profile.certificates.map(cert => {
                     const startDate = cert.startedAt ? {
                         year: new Date(cert.startedAt).getFullYear().toString(),
@@ -60,85 +77,76 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                         noExpiryDate: hasNoExpiryDate
                     };
                 });
+
                 setCertificates(formattedCerts);
-                setOriginalCertificates(JSON.parse(JSON.stringify(formattedCerts)));
+                setOriginalCertificates(formattedCerts.map(cert => ({ ...cert })));
             }
         }, [profile, currentYear]);
 
-        const hasFormChanges = useCallback(() => {
-            if (deletedCertificates.length > 0) return true;
-
-            if (certificates.length !== originalCertificates.length) return true;
-
-            const newCertificates = certificates.filter(cert => !cert.id || cert.id.startsWith('temp-'));
-            if (newCertificates.length > 0) return true;
-
-            for (const origCert of originalCertificates) {
-                const currentCert = certificates.find(c => c.id === origCert.id);
-                if (!currentCert) return true;
-
-                if (
-                    currentCert.title !== origCert.title ||
-                    currentCert.description !== origCert.description ||
-                    currentCert.link !== origCert.link ||
-                    JSON.stringify(currentCert.startDate) !== JSON.stringify(origCert.startDate) ||
-                    JSON.stringify(currentCert.endDate) !== JSON.stringify(origCert.endDate)
-                ) {
-                    return true;
-                }
-            }
-
-            return false;
-        }, [certificates, originalCertificates, deletedCertificates]);
-
-        useEffect(() => {
-            const hasChanges = hasFormChanges();
-            onChange(hasChanges);
-        }, [certificates, deletedCertificates, hasFormChanges, onChange]);
-
-        const handleAddCertificate = () => {
+        const handleAddCertificate = useCallback(() => {
             if (certificates.length >= MAX_CERTIFICATES) {
                 return;
             }
 
-            const newCertificate: Certificate = {
-                id: generateTempId(),
-                title: '',
-                description: null,
-                startDate: {
-                    year: currentYear.toString(),
-                    month: '01',
-                    day: '01',
-                },
-                endDate: {
-                    year: currentYear.toString(),
-                    month: '01',
-                    day: '01',
-                },
-                link: '',
-                noExpiryDate: false
-            };
+            // Use startTransition to mark this update as non-urgent
+            startTransition(() => {
+                const newId = generateTempId();
+                const newCertificate: Certificate = {
+                    id: newId,
+                    title: '',
+                    description: null,
+                    startDate: {
+                        year: currentYear.toString(),
+                        month: '01',
+                        day: '01',
+                    },
+                    endDate: {
+                        year: currentYear.toString(),
+                        month: '01',
+                        day: '01',
+                    },
+                    link: '',
+                    noExpiryDate: false
+                };
 
-            setCertificates([...certificates, newCertificate]);
-        };
+                setCertificates(prevCerts => [...prevCerts, newCertificate]);
+                setLastAddedId(newId); // Store the ID of the newly added certificate
+            });
+        }, [certificates.length, currentYear]);
 
-        const handleRemoveCertificate = (id: string) => {
-            if (id.startsWith('temp-')) {
-                setCertificates(certificates.filter(cert => cert.id !== id));
-            } else {
-                setCertificates(certificates.filter(cert => cert.id !== id));
-                setDeletedCertificates([...deletedCertificates, id]);
+        // Effect to scroll to the newly added certificate
+        useEffect(() => {
+            if (lastAddedId && !isPending) {
+                const certificateElement = certificateRefs.current.get(lastAddedId);
+                if (certificateElement) {
+                    // Small delay to ensure DOM is updated and any animations have completed
+                    setTimeout(() => {
+                        certificateElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }, 100);
+                    setLastAddedId(null); // Reset after scrolling
+                }
             }
-        };
+        }, [lastAddedId, isPending]);
 
-        const handleUpdateCertificate = (id: string, updates: Partial<Certificate>) => {
-            setCertificates(certificates.map(cert =>
-                cert.id === id ? { ...cert, ...updates } : cert
-            ));
-        };
+        const handleRemoveCertificate = useCallback((id: string) => {
+            setCertificates(prevCerts => prevCerts.filter(cert => cert.id !== id));
+
+            if (!id.startsWith('temp-')) {
+                setDeletedCertificates(prev => [...prev, id]);
+            }
+        }, []);
+
+        const handleUpdateCertificate = useCallback((id: string, updates: Partial<Certificate>) => {
+            setCertificates(prevCerts =>
+                prevCerts.map(cert => cert.id === id ? { ...cert, ...updates } : cert)
+            );
+        }, []);
 
         const resetForm = useCallback(() => {
-            setCertificates(JSON.parse(JSON.stringify(originalCertificates)));
+            setCertificates(originalCertificates.map(cert => ({ ...cert })));
             setDeletedCertificates([]);
         }, [originalCertificates]);
 
@@ -193,71 +201,99 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
             saveForm
         }));
 
-        const EmptyState = () => (
-            <div className="text-center py-10 bg-gray-50 rounded-md border border-dashed border-gray-300">
-                <h3 className="font-medium text-lg mb-2">No certificates added yet</h3>
-                <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                    Showcase your qualifications and credentials to stand out to potential employers.
-                </p>
-                <Button
-                    onClick={handleAddCertificate}
-                    variant="outline"
-                    className="flex items-center mx-auto"
-                >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Your First Certificate
-                </Button>
-            </div>
-        );
+        // Function to set ref for certificate items
+        const setCertificateRef = useCallback((id: string, element: HTMLDivElement | null) => {
+            if (element) {
+                certificateRefs.current.set(id, element);
+            } else {
+                certificateRefs.current.delete(id);
+            }
+        }, []);
+
+        const remainingCertificates = MAX_CERTIFICATES - certificates.length;
 
         return (
             <div className="space-y-6">
                 <div className="flex justify-between items-start mb-6">
-                    <div>
+                    <div className='w-full'>
                         <h2 className="text-2xl font-semibold">Your Certificates</h2>
                         <p className="text-gray-600">
                             Add and manage your professional certifications and credentials.
                         </p>
+                        <div className="mt-2 text-sm text-gray-500 flex items-center bg-blue-50 p-3 rounded-md">
+                            <Info className="h-5 mr-2 text-blue-500" />
+                            <p>
+                                <strong>Coming soon:</strong> File uploads for certificate attachments will be available in the next update.
+                            </p>
+                        </div>
                     </div>
-                    {certificates.length > 0 && certificates.length < MAX_CERTIFICATES && (
+                    {certificates.length > 0 && remainingCertificates > 0 && (
                         <Button
                             onClick={handleAddCertificate}
                             variant="outline"
                             className="flex items-center"
                             size="sm"
+                            disabled={isPending}
                         >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add Certificate ({MAX_CERTIFICATES - certificates.length} left)
+                            {isPending ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                    Adding...
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    Add Certificate ({remainingCertificates} left)
+                                </>
+                            )}
                         </Button>
                     )}
                 </div>
 
                 <Card>
                     <CardContent className="pt-6">
-                        <div className="space-y-6">
+                        <div className="space-y-6" ref={containerRef}>
                             {certificates.length === 0 ? (
-                                <EmptyState />
+                                <EmptyState onAddCertificate={handleAddCertificate} />
                             ) : (
                                 <div className="space-y-6">
                                     {certificates.map((certificate, index) => (
-                                        <CertificateItem
+                                        <div
                                             key={certificate.id}
-                                            certificate={certificate}
-                                            index={index}
-                                            onUpdate={handleUpdateCertificate}
-                                            onRemove={handleRemoveCertificate}
-                                        />
+                                            ref={(el) => setCertificateRef(certificate.id, el)}
+                                            className={`transition-opacity duration-300 ${lastAddedId === certificate.id && isPending
+                                                    ? 'opacity-70'
+                                                    : 'opacity-100'
+                                                }`}
+                                        >
+                                            <CertificateItem
+                                                certificate={certificate}
+                                                index={index}
+                                                onUpdate={handleUpdateCertificate}
+                                                onRemove={handleRemoveCertificate}
+                                            />
+                                        </div>
                                     ))}
 
                                     <div className="flex justify-center mt-6">
-                                        {certificates.length < MAX_CERTIFICATES ? (
+                                        {remainingCertificates > 0 ? (
                                             <Button
                                                 onClick={handleAddCertificate}
                                                 variant="outline"
                                                 className="flex items-center"
+                                                disabled={isPending}
                                             >
-                                                <Plus className="h-4 w-4 mr-1" />
-                                                Add Another Certificate ({MAX_CERTIFICATES - certificates.length} remaining)
+                                                {isPending ? (
+                                                    <>
+                                                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                                        Adding...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Plus className="h-4 w-4 mr-1" />
+                                                        Add Another Certificate ({remainingCertificates} remaining)
+                                                    </>
+                                                )}
                                             </Button>
                                         ) : (
                                             <div className="flex items-center bg-amber-50 text-amber-700 px-4 py-2 rounded-md">
@@ -270,16 +306,17 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                                     </div>
                                 </div>
                             )}
+
+                            {/* Loading indicator when adding a new certificate */}
+                            {isPending && (
+                                <div className="fixed bottom-6 right-6 bg-primary text-white px-4 py-2 rounded-full shadow-lg flex items-center z-50">
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Adding certificate...
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
-
-                <div className="mt-2 text-sm text-gray-500 flex items-center bg-blue-50 p-3 rounded-md">
-                    <Info className="h-5 w-5 mr-2 text-blue-500" />
-                    <p>
-                        <strong>Coming soon:</strong> File uploads for certificate attachments will be available in the next update.
-                    </p>
-                </div>
             </div>
         );
     }
