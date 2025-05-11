@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { FormDataState } from "../../components/types";
 import { UserProfile } from "../../api";
 import { useAppSelector } from "@/redux/hooks";
+import { ProofOfWorkUpdatePayload } from "../../components/proof-of-work/types";
 
 export function useFormData() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -49,6 +50,24 @@ export function useFormData() {
     }
   }, [activeForm]);
 
+  // Handler for proof of work changes
+  const handleProofOfWorkChange = useCallback((hasChanges: boolean) => {
+    setHasUnsavedChanges(hasChanges);
+    if (hasChanges) {
+      setActiveForm("proof-of-work");
+    } else if (activeForm === "proof-of-work") {
+      setActiveForm(null);
+    }
+  }, [activeForm]);
+
+  // Handler for proof of work data
+  const handleProofOfWorkData = useCallback((data: { proofOfWorkUpdateData: ProofOfWorkUpdatePayload }) => {
+    setFormData({
+      type: 'proof-of-work',
+      data: data.proofOfWorkUpdateData
+    });
+  }, []);
+
   // Reset form data
   const resetFormData = useCallback(() => {
     setFormData(null);
@@ -67,6 +86,8 @@ export function useFormData() {
     handlePersonalInfoData,
     handleSkillsChange,
     handleCertificateChange,
+    handleProofOfWorkChange,
+    handleProofOfWorkData,
     resetFormData
   };
 }

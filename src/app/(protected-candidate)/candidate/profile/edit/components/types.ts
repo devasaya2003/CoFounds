@@ -1,4 +1,6 @@
 import { UserProfile } from "../api";
+import { CertificateUpdatePayload } from "./certificate/types";
+import { ProofOfWorkUpdatePayload } from "./proof-of-work/types";
 
 export interface StatusMessage {
   type: 'success' | 'error' | 'info' | 'warning';
@@ -19,34 +21,21 @@ export type SkillsFormData = {
 };
 
 export type CertificateFormData = {
-  certificatesUpdateData: {
-    user_id: string;
-    new_certificates: Array<{
-      title: string;
-      description: string | null;
-      started_at: string | null;
-      end_at: string | null;
-      link: string | null;
-    }>;
-    updated_certificates: Array<{
-      id: string;
-      title: string;
-      description: string | null;
-      started_at: string | null;
-      end_at: string | null;
-      link: string | null;
-    }>;
-    deleted_certificates: string[];
-  };
+  certificatesUpdateData: CertificateUpdatePayload;
+};
+
+export type ProofOfWorkFormData = {
+  proofOfWorkUpdateData: ProofOfWorkUpdatePayload;
 };
 
 export type FormDataState =
   | { type: 'personal-info'; data: Partial<UserProfile> }
   | { type: 'skills'; data: SkillsFormData }
-  | { type: 'certificates'; data: CertificateFormData };
+  | { type: 'certificates'; data: CertificateFormData }
+  | { type: 'proof-of-work'; data: ProofOfWorkUpdatePayload };
 //   | { type: 'education'; data: any }
-//   | { type: 'projects'; data: any }
 //   | { type: 'experience'; data: any };
+//   | { type: 'projects'; data: any }
 
 export const VALID_TABS = [
   'personal-info', 
@@ -54,5 +43,5 @@ export const VALID_TABS = [
   'education', 
   'projects', 
   'certificates', 
-  'experience'
+  'proof-of-work'
 ];

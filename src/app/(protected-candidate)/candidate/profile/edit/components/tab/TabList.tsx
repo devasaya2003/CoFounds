@@ -38,13 +38,14 @@ export default function TabList({
       >
         Education
       </TabsTrigger>
-      
+
       <TabsTrigger 
-        value="projects"
-        disabled={hasUnsavedChanges && activeTab !== "projects"}
+        value="proof-of-work"
+        disabled={hasUnsavedChanges && activeTab !== "proof-of-work"}
       >
-        Projects
+        Proof Of Work
       </TabsTrigger>
+      
       
       <TabsTrigger 
         value="certificates" 
@@ -58,13 +59,13 @@ export default function TabList({
           </span>
         )}
       </TabsTrigger>
-      
+
       <TabsTrigger 
-        value="experience"
-        disabled={hasUnsavedChanges && activeTab !== "experience"}
+        value="projects"
+        disabled={hasUnsavedChanges && activeTab !== "projects"}
       >
-        Experience
-      </TabsTrigger>
+        Projects
+      </TabsTrigger>      
     </TabsList>
   );
 }

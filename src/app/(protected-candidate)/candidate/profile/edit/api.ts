@@ -278,6 +278,93 @@ export async function updateExperience(experience: UserExperience[]): Promise<Us
   }
 }
 
+export async function updateProofOfWork(experienceData: {
+  user_id: string;
+  new_experiences: Array<{
+    title: string;
+    company: string | null;
+    description: string | null;
+    started_at: string | null;
+    end_at: string | null;
+    is_community_work: boolean;
+  }>;
+  updated_experiences: Array<{
+    id: string;
+    title: string;
+    company: string | null;
+    description: string | null;
+    started_at: string | null;
+    end_at: string | null;
+    is_community_work: boolean;
+  }>;
+  deleted_experiences: string[];
+}): Promise<{
+  updated: number;
+  created: number;
+  deleted: number;
+  total: number;
+}> {
+  try {
+    console.log('==================== PROOF OF WORK FORM DATA ====================');
+    console.log('User ID:', experienceData.user_id);
+    
+    console.log('\n===== NEW EXPERIENCES =====');
+    experienceData.new_experiences.forEach((exp, index) => {
+      console.log(`Experience #${index + 1}:`);
+      console.log('- Title:', exp.title);
+      console.log('- Company:', exp.company);
+      console.log('- Description:', exp.description);
+      console.log('- Started at:', exp.started_at);
+      console.log('- End at:', exp.end_at ? exp.end_at : 'Currently working');
+      console.log('- Is Community Work:', exp.is_community_work);
+      console.log('------------------------');
+    });
+    
+    console.log('\n===== UPDATED EXPERIENCES =====');
+    experienceData.updated_experiences.forEach((exp, index) => {
+      console.log(`Experience #${index + 1}:`);
+      console.log('- ID:', exp.id);
+      console.log('- Title:', exp.title);
+      console.log('- Company:', exp.company);
+      console.log('- Description:', exp.description);
+      console.log('- Started at:', exp.started_at);
+      console.log('- End at:', exp.end_at ? exp.end_at : 'Currently working');
+      console.log('- Is Community Work:', exp.is_community_work);
+      console.log('------------------------');
+    });
+    
+    console.log('\n===== DELETED EXPERIENCES =====');
+    console.log(experienceData.deleted_experiences);
+    console.log('================================================================');
+
+    // Use the actual API call
+    // const response = await fetchWithAuth_PUT<ApiResponse<{
+    //   updated: number;
+    //   created: number;
+    //   deleted: number;
+    //   total: number;
+    // }>>(
+    //   API_ENDPOINTS.EXPERIENCE,
+    //   experienceData
+    // );
+
+    // if (!response.success || !response.data) {
+    //   throw new Error(response.error || 'Failed to update proof of work');
+    // }
+
+    // console.log('Proof of work update completed:', response.data);
+    return {
+      updated: 1,
+      created: 2,
+      deleted: 3,
+      total: 4,
+    };
+  } catch (error) {
+    console.error('Error updating proof of work:', error);
+    throw error;
+  }
+}
+
 export async function updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
   try {
     console.log('Using general update with data:', profileData);

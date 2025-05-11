@@ -2,9 +2,11 @@ import { TabsContent } from "@/components/ui/tabs";
 import PersonalInfoForm from "../PersonalInfoForm";
 import SkillsForm from "../SkillsForm";
 import CertificateForm from "../CertificateForm";
+import ProofOfWorkForm from "../ProofOfWorkForm";
 import { FormManagementReturn } from "../../hooks/form";
 import { UserProfile } from "../../api";
 import { CertificateFormData, SkillsUpdatePayload } from "../types";
+import { ProofOfWorkUpdatePayload } from "../proof-of-work/types";
 
 interface TabContentProps {
   formManagement: FormManagementReturn;
@@ -12,6 +14,8 @@ interface TabContentProps {
   renderJsonData: (data: unknown) => React.ReactElement;
   handleSkillsData: (data: SkillsUpdatePayload) => void;
   handleCertificateData: (data: CertificateFormData) => void;
+  handleProofOfWorkChange: (hasChanges: boolean) => void;
+  handleProofOfWorkData: (data: { proofOfWorkUpdateData: ProofOfWorkUpdatePayload }) => void;
 }
 
 export default function TabContent({
@@ -25,10 +29,13 @@ export default function TabContent({
     personalFormRef,
     skillsFormRef,
     certificateFormRef,
+    proofOfWorkFormRef,
     handlePersonalInfoChange,
     handlePersonalInfoData,
     handleSkillsChange,
-    handleCertificateChange
+    handleCertificateChange,
+    handleProofOfWorkChange,
+    handleProofOfWorkData
   } = formManagement;
 
   return (
@@ -78,12 +85,13 @@ export default function TabContent({
         />
       </TabsContent>
 
-      <TabsContent value="experience">
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Experience Data</h2>
-          <p className="text-gray-500 mb-4">Raw JSON data from the API - will be replaced with forms later</p>
-          {renderJsonData(profileData.experience)}
-        </div>
+      <TabsContent value="proof-of-work">
+        <ProofOfWorkForm
+          ref={proofOfWorkFormRef}
+          profile={profileData}
+          onChange={handleProofOfWorkChange}
+          onSaveData={handleProofOfWorkData}
+        />
       </TabsContent>
     </>
   );

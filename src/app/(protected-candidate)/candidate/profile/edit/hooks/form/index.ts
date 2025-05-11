@@ -27,8 +27,8 @@ export function useFormManagement(
     const { statusMessage, setStatusMessage } = useStatusMessage();
     const { hasUnsavedChanges, setHasUnsavedChanges, formData, setFormData, activeForm, userId,
         handlePersonalInfoChange, handlePersonalInfoData, handleSkillsChange,
-        handleCertificateChange, resetFormData } = useFormData();
-    const { personalFormRef, skillsFormRef, certificateFormRef } = useFormRefs();
+        handleCertificateChange, handleProofOfWorkChange, handleProofOfWorkData, resetFormData } = useFormData();
+    const { personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef } = useFormRefs();
     const { activeTab, setActiveTab, handleTabChange } = useTabState(defaultTab, hasUnsavedChanges);
     const { isSubmitting, showConfirmDialog, setShowConfirmDialog,
         handleSaveClick, handleCancelChanges, handleConfirmSave } = useFormSubmission(
@@ -57,6 +57,7 @@ export function useFormManagement(
         personalFormRef,
         skillsFormRef,
         certificateFormRef,
+        proofOfWorkFormRef,
 
         // Status and dialogs
         statusMessage,
@@ -75,6 +76,8 @@ export function useFormManagement(
         handlePersonalInfoData,
         handleSkillsChange,
         handleCertificateChange,
+        handleProofOfWorkChange,
+        handleProofOfWorkData,
 
         // User info
         userId,

@@ -5,7 +5,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { StatusAlert } from "../StatusAlert";
 import { CompletionGuide } from "../CompletionGuide";
 import { useFormManagement } from "../../hooks/form";
-import { CertificateFormData, SkillsUpdatePayload } from "../types";
+import { CertificateFormData, SkillsUpdatePayload, ProofOfWorkFormData } from "../types";
 import { UserProfile } from "../../api";
 import TabList from "./TabList";
 import TabContent from "./TabContent";
@@ -66,6 +66,14 @@ export default function TabHandler({
     });
   }, [setFormData]);
 
+  // Handler for proof of work data
+  const handleProofOfWorkData = useCallback((data: ProofOfWorkFormData) => {
+    setFormData({
+      type: 'proof-of-work',
+      data: data.proofOfWorkUpdateData
+    });
+  }, [setFormData]);
+
   return (
     <div className="relative">
       <StatusAlert 
@@ -94,6 +102,8 @@ export default function TabHandler({
           renderJsonData={renderJsonData}
           handleSkillsData={handleSkillsData}
           handleCertificateData={handleCertificateData}
+          handleProofOfWorkChange={formManagement.handleProofOfWorkChange}
+          handleProofOfWorkData={handleProofOfWorkData}
         />
       </Tabs>
 
