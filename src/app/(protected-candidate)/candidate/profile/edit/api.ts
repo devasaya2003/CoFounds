@@ -210,7 +210,51 @@ export async function updateCertificates(certificateData: {
   total: number;
 }> {
   try {
-    // Send the data to your API endpoint
+    // Extensive logging for debugging
+    console.log('==================== CERTIFICATE FORM DATA ====================');
+    console.log('User ID:', certificateData.user_id);
+    
+    console.log('\n===== NEW CERTIFICATES =====');
+    certificateData.new_certificates.forEach((cert, index) => {
+      console.log(`Certificate #${index + 1}:`);
+      console.log('- Title:', cert.title);
+      console.log('- Description:', cert.description);
+      console.log('- Started at:', cert.started_at);
+      console.log('- End at:', cert.end_at ? cert.end_at : 'No expiry date');
+      console.log('- Link:', cert.link);
+      console.log('------------------------');
+    });
+    
+    console.log('\n===== UPDATED CERTIFICATES =====');
+    certificateData.updated_certificates.forEach((cert, index) => {
+      console.log(`Certificate #${index + 1}:`);
+      console.log('- ID:', cert.id);
+      console.log('- Title:', cert.title);
+      console.log('- Description:', cert.description);
+      console.log('- Started at:', cert.started_at);
+      console.log('- End at:', cert.end_at ? cert.end_at : 'No expiry date');
+      console.log('- Link:', cert.link);
+      console.log('------------------------');
+    });
+    
+    console.log('\n===== DELETED CERTIFICATES =====');
+    console.log(certificateData.deleted_certificates);
+    console.log('================================================================');
+
+    // Mock API response for testing
+    // Comment this section when the actual API is ready
+    const mockResponse = {
+      updated: certificateData.updated_certificates.length,
+      created: certificateData.new_certificates.length,
+      deleted: certificateData.deleted_certificates.length,
+      total: certificateData.updated_certificates.length + certificateData.new_certificates.length
+    };
+    
+    console.log('Mock response:', mockResponse);
+    return mockResponse;
+
+    /* 
+    // Uncomment this section when the actual API is ready
     const response = await fetchWithAuth_PUT<ApiResponse<{
       updated: number;
       created: number;
@@ -227,6 +271,7 @@ export async function updateCertificates(certificateData: {
 
     console.log('Certificates update completed:', response.data);
     return response.data;
+    */
   } catch (error) {
     console.error('Error updating certificates:', error);
     throw error;

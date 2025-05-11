@@ -88,7 +88,6 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                 return;
             }
 
-            // Use startTransition to mark this update as non-urgent
             startTransition(() => {
                 const newId = generateTempId();
                 const newCertificate: Certificate = {
@@ -110,9 +109,13 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                 };
 
                 setCertificates(prevCerts => [...prevCerts, newCertificate]);
-                setLastAddedId(newId); // Store the ID of the newly added certificate
+                setLastAddedId(newId);
+                
+                if (onChange) {
+                    onChange(true);
+                }
             });
-        }, [certificates.length, currentYear]);
+        }, [certificates.length, currentYear, onChange]);
 
         // Effect to scroll to the newly added certificate
         useEffect(() => {
@@ -137,18 +140,30 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
             if (!id.startsWith('temp-')) {
                 setDeletedCertificates(prev => [...prev, id]);
             }
-        }, []);
+            
+            if (onChange) {
+                onChange(true);
+            }
+        }, [onChange]);
 
         const handleUpdateCertificate = useCallback((id: string, updates: Partial<Certificate>) => {
             setCertificates(prevCerts =>
                 prevCerts.map(cert => cert.id === id ? { ...cert, ...updates } : cert)
             );
-        }, []);
+            
+            if (onChange) {
+                onChange(true);
+            }
+        }, [onChange]);
 
         const resetForm = useCallback(() => {
             setCertificates(originalCertificates.map(cert => ({ ...cert })));
             setDeletedCertificates([]);
-        }, [originalCertificates]);
+            
+            if (onChange) {
+                onChange(false);
+            }
+        }, [originalCertificates, onChange]);
 
         const saveForm = useCallback(() => {
             const newCertificates = certificates
