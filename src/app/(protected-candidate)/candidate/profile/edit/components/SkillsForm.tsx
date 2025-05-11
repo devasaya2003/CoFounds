@@ -7,14 +7,8 @@ import { UserProfile } from '../api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
+import { SkillLevel, SkillsUpdatePayload } from './types';
 
-type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
-
-interface SkillsUpdatePayload {
-    updated_skillset: Array<{ skill_id: string; skill_level: SkillLevel }>;
-    new_skillset: Array<{ skill_id: string; skill_level: SkillLevel }>;
-    deleted_skillset: string[];
-}
 
 export interface SkillsFormRef {
     resetForm: () => void;
@@ -124,6 +118,7 @@ const SkillsForm = forwardRef<SkillsFormRef, SkillsFormProps>(
 
         const prepareDataForSave = useCallback(() => {
             const data: SkillsUpdatePayload = {
+                user_id: profile.id,
                 updated_skillset: skills
                     .filter(skill => skill.status === 'updated')
                     .map(skill => ({
@@ -142,7 +137,7 @@ const SkillsForm = forwardRef<SkillsFormRef, SkillsFormProps>(
             };
 
             onSaveData(data);
-        }, [skills, deletedSkills, onSaveData]);
+        }, [skills, deletedSkills, onSaveData, profile.id]);
 
         useImperativeHandle(ref, () => ({
             resetForm,

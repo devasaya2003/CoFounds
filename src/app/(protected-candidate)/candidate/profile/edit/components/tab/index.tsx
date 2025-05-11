@@ -5,7 +5,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { StatusAlert } from "../StatusAlert";
 import { CompletionGuide } from "../CompletionGuide";
 import { useFormManagement } from "../../hooks/form";
-import { SkillsUpdatePayload } from "../types";
+import { CertificateFormData, SkillsUpdatePayload } from "../types";
 import { UserProfile } from "../../api";
 import TabList from "./TabList";
 import TabContent from "./TabContent";
@@ -59,7 +59,7 @@ export default function TabHandler({
   }, [formManagement.userId, setFormData]);
   
   // Handler for certificate data
-  const handleCertificateData = useCallback((data: any) => {
+  const handleCertificateData = useCallback((data: CertificateFormData) => {
     setFormData({
       type: 'certificates',
       data

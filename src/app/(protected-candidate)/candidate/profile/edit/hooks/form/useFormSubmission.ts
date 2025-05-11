@@ -1,13 +1,16 @@
 import { useState, useCallback } from "react";
 import { FormDataState, StatusMessage } from "../../components/types";
 import { updatePersonalInfo, updateSkills, updateCertificates, UserProfile } from "../../api";
+import { PersonalInfoFormRef } from "../../components/PersonalInfoForm";
+import { SkillsFormRef } from "../../components/SkillsForm";
+import { CertificateFormRef } from "../../components/CertificateForm";
 
 export function useFormSubmission(
   formData: FormDataState | null,
   resetFormData: () => void,
-  personalFormRef: React.RefObject<any>,
-  skillsFormRef: React.RefObject<any>,
-  certificateFormRef: React.RefObject<any>,
+  personalFormRef: React.RefObject<PersonalInfoFormRef>,
+  skillsFormRef: React.RefObject<SkillsFormRef>,
+  certificateFormRef: React.RefObject<CertificateFormRef>,
   activeTab: string,
   refetchProfile: () => Promise<UserProfile | null>,
   setStatusMessage: (message: StatusMessage | null) => void
@@ -15,7 +18,6 @@ export function useFormSubmission(
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
 
-  // Handle save button click
   const handleSaveClick = useCallback(() => {
     if (activeTab === "personal-info" && personalFormRef.current) {
       personalFormRef.current.saveForm();
@@ -30,7 +32,6 @@ export function useFormSubmission(
     }
   }, [activeTab, formData, personalFormRef, skillsFormRef, certificateFormRef]);
 
-  // Handle cancel changes
   const handleCancelChanges = useCallback(() => {
     if (activeTab === "personal-info" && personalFormRef.current) {
       personalFormRef.current.resetForm();
@@ -47,7 +48,6 @@ export function useFormSubmission(
     });
   }, [activeTab, personalFormRef, skillsFormRef, certificateFormRef, resetFormData, setStatusMessage]);
 
-  // Handle form submission success
   const handleSubmitSuccess = useCallback(() => {
     resetFormData();
     setShowConfirmDialog(false);
@@ -58,17 +58,16 @@ export function useFormSubmission(
     setIsSubmitting(false);
   }, [resetFormData, setStatusMessage]);
 
-  // Confirm and save changes
   const handleConfirmSave = useCallback(async () => {
     setIsSubmitting(true);
-    
+
     try {
       if (!formData) {
         throw new Error("No form data to save");
       }
-      
+
       let updatedProfile;
-      
+
       switch (formData.type) {
         case 'personal-info':
           await updatePersonalInfo(formData.data);
@@ -83,9 +82,9 @@ export function useFormSubmission(
           updatedProfile = await refetchProfile();
           break;
         default:
-          console.warn('Unknown form type:', formData.type);
+          console.warn('Unknown form:', formData);
       }
-      
+
       if (updatedProfile) {
         handleSubmitSuccess();
       }

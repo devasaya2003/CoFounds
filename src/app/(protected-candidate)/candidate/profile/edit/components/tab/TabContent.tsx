@@ -4,14 +4,14 @@ import SkillsForm from "../SkillsForm";
 import CertificateForm from "../CertificateForm";
 import { FormManagementReturn } from "../../hooks/form";
 import { UserProfile } from "../../api";
-import { SkillsUpdatePayload } from "../types";
+import { CertificateFormData, SkillsUpdatePayload } from "../types";
 
 interface TabContentProps {
   formManagement: FormManagementReturn;
   profileData: UserProfile;
   renderJsonData: (data: unknown) => React.ReactElement;
   handleSkillsData: (data: SkillsUpdatePayload) => void;
-  handleCertificateData: (data: any) => void;
+  handleCertificateData: (data: CertificateFormData) => void;
 }
 
 export default function TabContent({

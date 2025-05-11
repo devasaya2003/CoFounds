@@ -185,15 +185,48 @@ export async function updateProjects(projects: UserProjects[]): Promise<UserProj
   }
 }
 
-export async function updateCertificates(certificates: UserCertificates[]): Promise<UserCertificates[]> {
+export async function updateCertificates(certificateData: {
+  user_id: string;
+  new_certificates: Array<{
+    title: string;
+    description: string | null;
+    started_at: string | null;
+    end_at: string | null;
+    link: string | null;
+  }>;
+  updated_certificates: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    started_at: string | null;
+    end_at: string | null;
+    link: string | null;
+  }>;
+  deleted_certificates: string[];
+}): Promise<{
+  updated: number;
+  created: number;
+  deleted: number;
+  total: number;
+}> {
   try {
-    console.log('Updating certificates with data:', certificates);
+    // Send the data to your API endpoint
+    const response = await fetchWithAuth_PUT<ApiResponse<{
+      updated: number;
+      created: number;
+      deleted: number;
+      total: number;
+    }>>(
+      API_ENDPOINTS.CERTIFICATES,
+      certificateData
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update certificates');
+    }
 
-    console.log('Certificates update completed:', certificates);
-
-    return certificates;
+    console.log('Certificates update completed:', response.data);
+    return response.data;
   } catch (error) {
     console.error('Error updating certificates:', error);
     throw error;
