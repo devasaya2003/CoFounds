@@ -15,7 +15,6 @@ import {
     MAX_CERTIFICATES
 } from './certificate/types';
 
-// Dynamically import heavy components
 const CertificateItem = dynamic(() => import('./certificate/CertificateItem'), {
     ssr: false,
     loading: () => <div className="p-6 border border-gray-200 rounded-lg bg-gray-50 animate-pulse h-40"></div>
@@ -32,10 +31,9 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
         const [deletedCertificates, setDeletedCertificates] = useState<string[]>([]);
         const [isPending, startTransition] = useTransition(); 
         const [lastAddedId, setLastAddedId] = useState<string | null>(null);
-        
-        // Create a ref map to store references to each certificate item
-        const certificateRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-        // Create a ref for the container to use for scrolling
+        const [isInitializing, setIsInitializing] = useState(true);
+                
+        const certificateRefs = useRef<Map<string, HTMLDivElement>>(new Map());        
         const containerRef = useRef<HTMLDivElement>(null);
 
         const { user } = useAppSelector((state) => state.auth);
@@ -80,8 +78,14 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
 
                 setCertificates(formattedCerts);
                 setOriginalCertificates(formattedCerts.map(cert => ({ ...cert })));
+                                
+                if (isInitializing) {
+                    setIsInitializing(false);
+                }
+            } else {                
+                setIsInitializing(false);
             }
-        }, [profile, currentYear]);
+        }, [profile, currentYear, isInitializing]);
 
         const handleAddCertificate = useCallback(() => {
             if (certificates.length >= MAX_CERTIFICATES) {
@@ -110,26 +114,23 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
 
                 setCertificates(prevCerts => [...prevCerts, newCertificate]);
                 setLastAddedId(newId);
-                
-                if (onChange) {
+                                
+                if (onChange && !isInitializing) {
                     onChange(true);
                 }
             });
-        }, [certificates.length, currentYear, onChange]);
-
-        // Effect to scroll to the newly added certificate
+        }, [certificates.length, currentYear, onChange, isInitializing]);
+        
         useEffect(() => {
             if (lastAddedId && !isPending) {
                 const certificateElement = certificateRefs.current.get(lastAddedId);
-                if (certificateElement) {
-                    // Small delay to ensure DOM is updated and any animations have completed
+                if (certificateElement) {                    
                     setTimeout(() => {
                         certificateElement.scrollIntoView({ 
                             behavior: 'smooth', 
                             block: 'center' 
                         });
-                    }, 100);
-                    setLastAddedId(null); // Reset after scrolling
+                    }, 100);                    setLastAddedId(null); 
                 }
             }
         }, [lastAddedId, isPending]);
@@ -141,20 +142,52 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                 setDeletedCertificates(prev => [...prev, id]);
             }
             
-            if (onChange) {
+            if (onChange && !isInitializing) {
                 onChange(true);
             }
-        }, [onChange]);
+        }, [onChange, isInitializing]);
+
+        useEffect(() => {
+            if (!isInitializing && onChange) {                
+                const hasDeletedCertificates = deletedCertificates.length > 0;
+                                
+                const hasNewCertificates = certificates.some(cert => cert.id.startsWith('temp-'));
+                                
+                const hasModifiedCertificates = certificates.some(cert => {                    
+                    if (cert.id.startsWith('temp-')) return false;
+                                        
+                    const originalCert = originalCertificates.find(oc => oc.id === cert.id);
+                    if (!originalCert) return false;
+                                        
+                    return (
+                        cert.title !== originalCert.title ||
+                        cert.description !== originalCert.description ||
+                        cert.link !== originalCert.link ||
+                        cert.noExpiryDate !== originalCert.noExpiryDate ||
+                        JSON.stringify(cert.startDate) !== JSON.stringify(originalCert.startDate) ||
+                        JSON.stringify(cert.endDate) !== JSON.stringify(originalCert.endDate)
+                    );
+                });
+                
+                const hasChanges = hasDeletedCertificates || hasNewCertificates || hasModifiedCertificates;
+                                
+                if (!hasChanges) {                    
+                    onChange(false);
+                } else {                    
+                    onChange(true);
+                }
+            }
+        }, [isInitializing, onChange, certificates, originalCertificates, deletedCertificates]);
 
         const handleUpdateCertificate = useCallback((id: string, updates: Partial<Certificate>) => {
             setCertificates(prevCerts =>
                 prevCerts.map(cert => cert.id === id ? { ...cert, ...updates } : cert)
             );
             
-            if (onChange) {
+            if (onChange && !isInitializing) {
                 onChange(true);
             }
-        }, [onChange]);
+        }, [onChange, isInitializing]);
 
         const resetForm = useCallback(() => {
             setCertificates(originalCertificates.map(cert => ({ ...cert })));
@@ -215,8 +248,7 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
             resetForm,
             saveForm
         }));
-
-        // Function to set ref for certificate items
+        
         const setCertificateRef = useCallback((id: string, element: HTMLDivElement | null) => {
             if (element) {
                 certificateRefs.current.set(id, element);
