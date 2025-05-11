@@ -31,7 +31,7 @@ export function createLayout({
     completeUserProfile,
     missingFields
 }: LayoutFactoryProps) {
-    console.log(`🏭 Layout factory creating component for state: ${LayoutState[state]}`);
+    
 
     switch (state) {
         case LayoutState.LOADING:
@@ -50,11 +50,6 @@ export function createLayout({
             );
 
         case LayoutState.PROFILE_INCOMPLETE:
-            console.log('⚠️ Rendering profile incomplete state', {
-                hasUser: !!completeUserProfile,
-                missingFieldsCount: missingFields.length
-            });
-
             return (
                 <AccountStatusScreen
                     user={completeUserProfile}

@@ -63,44 +63,32 @@ export function AccountStatusScreen({
             </div>
           </div>
 
-          {/* Status cards */}
-          <div className="grid gap-6 mb-6">
-            {/* Profile completion status */}
-            <div className={`p-4 rounded-lg border ${isCompleteProfile ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
+          {/* Combined status card */}
+          <div className="mb-6">
+            <div className={`p-4 rounded-lg border ${isCompleteProfile ? 'border-blue-200 bg-blue-50' : 'border-amber-200 bg-amber-50'}`}>
               <div className="flex items-center mb-2">
                 <div className="mr-2">
                   {isCompleteProfile ? (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <Shield className="h-5 w-5 text-blue-500" />
                   ) : (
-                    <XCircle className="h-5 w-5 text-amber-500" />
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
                   )}
                 </div>
-                <h3 className={`font-semibold ${isCompleteProfile ? 'text-green-700' : 'text-amber-700'}`}>
-                  Profile Completion
+                <h3 className={`font-semibold ${isCompleteProfile ? 'text-blue-700' : 'text-amber-700'}`}>
+                  {isCompleteProfile ? 'Verification Status' : 'Profile Incomplete'}
                 </h3>
               </div>
-              <p className={`text-sm ${isCompleteProfile ? 'text-green-700' : 'text-amber-700'}`}>
-                {isCompleteProfile
-                  ? "Your profile is complete and ready for verification."
-                  : "Your profile is incomplete. Please add the missing information to proceed."}
-              </p>
-            </div>
-
-            {/* Verification status */}
-            <div className="p-4 rounded-lg border border-blue-200 bg-blue-50">
-              <div className="flex items-center mb-2">
-                <div className="mr-2">
-                  <Shield className="h-5 w-5 text-blue-500" />
-                </div>
-                <h3 className="font-semibold text-blue-700">
-                  Verification Status
-                </h3>
+              
+              <div className={`text-sm ${isCompleteProfile ? 'text-blue-700' : 'text-amber-700'}`}>
+                {isCompleteProfile ? (
+                  <p>Our team is reviewing your profile. This process usually takes 1-2 business days.</p>
+                ) : (
+                  <>
+                    <p className="mb-2">Your profile is incomplete. Please complete all required fields to begin the verification process.</p>
+                    <p>Once your profile is complete, our team will review your information.</p>
+                  </>
+                )}
               </div>
-              <p className="text-sm text-blue-700">
-                {isCompleteProfile
-                  ? "Our team is reviewing your profile. This process usually takes 1-2 business days."
-                  : "Complete your profile to begin the verification process."}
-              </p>
             </div>
           </div>
 
@@ -158,17 +146,7 @@ export function AccountStatusScreen({
               </div>
             </div>
           ) : (
-            /* Primary action for incomplete profiles */
-            <div className="mb-6">
-              <div className="flex justify-center mt-6">
-                <Link
-                  href="/candidate/profile/edit"
-                  className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors text-center font-medium flex items-center"
-                >
-                  Complete Your Profile <ChevronRight className="h-4 w-4 ml-2" />
-                </Link>
-              </div>
-            </div>
+            <div className="mb-3"></div>
           )}
 
           <div className="border-t pt-4">
