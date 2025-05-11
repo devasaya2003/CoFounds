@@ -62,24 +62,53 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
 
   const hasCompleteProfile = (): boolean => {
     if (!completeUserProfile) {
+      console.log("📋 Profile check: No complete user profile data");
       return false;
     }
-
+    
+    // Check basic info fields
     const hasBasicInfo = !!(
       completeUserProfile.userName &&
       completeUserProfile.firstName &&
       completeUserProfile.lastName &&
       completeUserProfile.dob
     );
-
+    
+    // Check skills
     const hasSkills = !!(
       completeUserProfile.skillset &&
       Array.isArray(completeUserProfile.skillset) &&
       completeUserProfile.skillset.length > 0
     );
-
-    const isComplete = hasBasicInfo && hasSkills;
-
+    
+    // Check education
+    const hasEducation = !!(
+      completeUserProfile.education &&
+      Array.isArray(completeUserProfile.education) &&
+      completeUserProfile.education.length > 0
+    );
+    
+    // Check experience
+    const hasExperience = !!(
+      completeUserProfile.experience &&
+      Array.isArray(completeUserProfile.experience) &&
+      completeUserProfile.experience.length > 0
+    );
+    
+    // Log detailed profile information for debugging
+    console.log("📋 Profile completeness check:", { 
+      hasBasicInfo,
+      hasSkills,
+      hasEducation,
+      hasExperience,
+      userName: completeUserProfile.userName || "missing",
+      skillsetLength: completeUserProfile.skillset?.length || 0,
+      educationLength: completeUserProfile.education?.length || 0,
+      experienceLength: completeUserProfile.experience?.length || 0
+    });
+    
+    // All required components must be present
+    const isComplete = hasBasicInfo && hasSkills && hasEducation && hasExperience;
     return isComplete;
   };
 
@@ -116,10 +145,10 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
       missingFields.push({ name: 'Skills', tab: 'skills', required: true });
 
     if (!completeUserProfile?.education || completeUserProfile.education.length === 0)
-      missingFields.push({ name: 'Education', tab: 'education', required: false });
+      missingFields.push({ name: 'Education', tab: 'education', required: true });
 
     if (!completeUserProfile?.experience || completeUserProfile.experience.length === 0)
-      missingFields.push({ name: 'Experience', tab: 'experience', required: false });
+      missingFields.push({ name: 'Experience', tab: 'experience', required: true });
 
     return missingFields;
   };
