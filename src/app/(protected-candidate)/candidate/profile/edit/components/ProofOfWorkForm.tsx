@@ -28,11 +28,11 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
         const [workExperiences, setWorkExperiences] = useState<ProofOfWork[]>([]);
         const [originalWorkExperiences, setOriginalWorkExperiences] = useState<ProofOfWork[]>([]);
         const [deletedWorkExperiences, setDeletedWorkExperiences] = useState<string[]>([]);
-        const [isPending, startTransition] = useTransition(); 
+        const [isPending, startTransition] = useTransition();
         const [lastAddedId, setLastAddedId] = useState<string | null>(null);
         const [isInitializing, setIsInitializing] = useState(true);
-                
-        const workExperienceRefs = useRef<Map<string, HTMLDivElement>>(new Map());        
+
+        const workExperienceRefs = useRef<Map<string, HTMLDivElement>>(new Map());
         const containerRef = useRef<HTMLDivElement>(null);
 
         const { user } = useAppSelector((state) => state.auth);
@@ -59,7 +59,6 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                         day: new Date(exp.endAt).getDate().toString().padStart(2, '0')
                     } : null;
 
-                    // Check if this is community work based on company name
                     const isCommunityWork = exp.companyName === 'COF_PROOF_COMMUNITY';
 
                     return {
@@ -77,29 +76,27 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
 
                 setWorkExperiences(formattedExperiences);
                 setOriginalWorkExperiences(formattedExperiences.map(exp => ({ ...exp })));
-                                
+
                 if (isInitializing) {
                     setIsInitializing(false);
                 }
-            } else {                
+            } else {
                 setIsInitializing(false);
             }
         }, [profile, currentYear, isInitializing]);
 
-        // Effect to run after initialization to explicitly set no changes
         useEffect(() => {
             if (!isInitializing && onChange) {
-                // Check if there are actual changes
                 const hasDeletedExperiences = deletedWorkExperiences.length > 0;
-                
+
                 const hasNewExperiences = workExperiences.some(exp => exp.id.startsWith('temp-'));
-                
+
                 const hasModifiedExperiences = workExperiences.some(exp => {
                     if (exp.id.startsWith('temp-')) return false;
-                    
+
                     const originalExp = originalWorkExperiences.find(oe => oe.id === exp.id);
                     if (!originalExp) return false;
-                    
+
                     return (
                         exp.title !== originalExp.title ||
                         exp.company !== originalExp.company ||
@@ -110,10 +107,14 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                         JSON.stringify(exp.endDate) !== JSON.stringify(originalExp.endDate)
                     );
                 });
-                
+
                 const hasChanges = hasDeletedExperiences || hasNewExperiences || hasModifiedExperiences;
-                
-                onChange(hasChanges);
+
+                if (!hasChanges) {
+                    onChange(false);
+                } else {
+                    onChange(true);
+                }
             }
         }, [isInitializing, onChange, workExperiences, originalWorkExperiences, deletedWorkExperiences]);
 
@@ -141,24 +142,24 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
 
                 setWorkExperiences(prevExps => [...prevExps, newWorkExperience]);
                 setLastAddedId(newId);
-                                
+
                 if (onChange && !isInitializing) {
                     onChange(true);
                 }
             });
         }, [currentYear, onChange, isInitializing]);
-        
+
         useEffect(() => {
             if (lastAddedId && !isPending) {
                 const experienceElement = workExperienceRefs.current.get(lastAddedId);
-                if (experienceElement) {                    
+                if (experienceElement) {
                     setTimeout(() => {
-                        experienceElement.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'center' 
+                        experienceElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
                         });
-                    }, 100);                    
-                    setLastAddedId(null); 
+                    }, 100);
+                    setLastAddedId(null);
                 }
             }
         }, [lastAddedId, isPending]);
@@ -169,7 +170,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
             if (!id.startsWith('temp-')) {
                 setDeletedWorkExperiences(prev => [...prev, id]);
             }
-            
+
             if (onChange && !isInitializing) {
                 onChange(true);
             }
@@ -179,7 +180,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
             setWorkExperiences(prevExps =>
                 prevExps.map(exp => exp.id === id ? { ...exp, ...updates } : exp)
             );
-            
+
             if (onChange && !isInitializing) {
                 onChange(true);
             }
@@ -188,7 +189,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
         const resetForm = useCallback(() => {
             setWorkExperiences(originalWorkExperiences.map(exp => ({ ...exp })));
             setDeletedWorkExperiences([]);
-            
+
             if (onChange) {
                 onChange(false);
             }
@@ -202,7 +203,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                     company: exp.isCommunityWork ? 'COF_PROOF_COMMUNITY' : exp.company,
                     description: exp.description || null,
                     started_at: formatDateForApi(exp.startDate),
-                    end_at: exp.currentlyWorking ? null : formatDateForApi(exp.endDate !== null ? exp.endDate : undefined),
+                    end_at: exp.currentlyWorking ? null : (exp.endDate ? formatDateForApi(exp.endDate) : null),
                     is_community_work: exp.isCommunityWork
                 }));
 
@@ -229,7 +230,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                     company: exp.isCommunityWork ? 'COF_PROOF_COMMUNITY' : exp.company,
                     description: exp.description || null,
                     started_at: formatDateForApi(exp.startDate),
-                    end_at: exp.endDate ? null : formatDateForApi(exp.endDate !== null ? exp.endDate : undefined),
+                    end_at: exp.currentlyWorking ? null : (exp.endDate ? formatDateForApi(exp.endDate) : null),
                     is_community_work: exp.isCommunityWork
                 }));
 
@@ -240,14 +241,11 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                 deleted_experiences: deletedWorkExperiences
             };
 
-            // When saving, update the original state
             onSaveData({ proofOfWorkUpdateData: payload });
-            
-            // After saving, update the original experiences to match the current state
+
             setOriginalWorkExperiences(workExperiences.map(exp => ({ ...exp })));
             setDeletedWorkExperiences([]);
-            
-            // Notify parent component that there are no more changes
+
             if (onChange) {
                 onChange(false);
             }
@@ -257,7 +255,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
             resetForm,
             saveForm
         }));
-        
+
         const setWorkExperienceRef = useCallback((id: string, element: HTMLDivElement | null) => {
             if (element) {
                 workExperienceRefs.current.set(id, element);
@@ -306,14 +304,13 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                             ) : (
                                 <div className="space-y-6">
                                     {workExperiences.map((experience, index) => (
-                                        <div 
+                                        <div
                                             key={experience.id}
                                             ref={(el) => setWorkExperienceRef(experience.id, el)}
-                                            className={`transition-opacity duration-300 ${
-                                                lastAddedId === experience.id && isPending 
-                                                    ? 'opacity-70' 
+                                            className={`transition-opacity duration-300 ${lastAddedId === experience.id && isPending
+                                                    ? 'opacity-70'
                                                     : 'opacity-100'
-                                            }`}
+                                                }`}
                                         >
                                             <ProofOfWorkItem
                                                 proofOfWork={experience}
@@ -346,7 +343,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                                     </div>
                                 </div>
                             )}
-                            
+
                             {/* Loading indicator when adding a new experience */}
                             {isPending && (
                                 <div className="fixed bottom-6 right-6 bg-primary text-white px-4 py-2 rounded-full shadow-lg flex items-center z-50">

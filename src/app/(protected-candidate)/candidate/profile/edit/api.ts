@@ -263,21 +263,6 @@ export async function updateCertificates(certificateData: {
   }
 }
 
-export async function updateExperience(experience: UserExperience[]): Promise<UserExperience[]> {
-  try {
-    console.log('Updating experience with data:', experience);
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    console.log('Experience update completed:', experience);
-
-    return experience;
-  } catch (error) {
-    console.error('Error updating experience:', error);
-    throw error;
-  }
-}
-
 export async function updateProofOfWork(experienceData: {
   user_id: string;
   new_experiences: Array<{
@@ -337,28 +322,22 @@ export async function updateProofOfWork(experienceData: {
     console.log(experienceData.deleted_experiences);
     console.log('================================================================');
 
-    // Use the actual API call
-    // const response = await fetchWithAuth_PUT<ApiResponse<{
-    //   updated: number;
-    //   created: number;
-    //   deleted: number;
-    //   total: number;
-    // }>>(
-    //   API_ENDPOINTS.EXPERIENCE,
-    //   experienceData
-    // );
+    const response = await fetchWithAuth_PUT<ApiResponse<{
+      updated: number;
+      created: number;
+      deleted: number;
+      total: number;
+    }>>(
+      API_ENDPOINTS.EXPERIENCE,
+      experienceData
+    );
 
-    // if (!response.success || !response.data) {
-    //   throw new Error(response.error || 'Failed to update proof of work');
-    // }
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update proof of work');
+    }
 
-    // console.log('Proof of work update completed:', response.data);
-    return {
-      updated: 1,
-      created: 2,
-      deleted: 3,
-      total: 4,
-    };
+    console.log('Proof of work update completed:', response.data);
+    return response.data;
   } catch (error) {
     console.error('Error updating proof of work:', error);
     throw error;
