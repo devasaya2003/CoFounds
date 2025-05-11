@@ -12,8 +12,6 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
 
-  
-
   const {
     user: authUser,
     isAuthenticated,
@@ -36,13 +34,14 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
   }, [dispatch, sessionRestored, authLoading, isAuthenticated]);
 
   useEffect(() => {
-
     const fetchUserProfile = async () => {
-      if (!isAuthenticated ||
+      if (
+        !isAuthenticated ||
         !authUser?.userName ||
         isLoadingUserDetails ||
         userDetailsFetched ||
-        !sessionRestored) {
+        !sessionRestored
+      ) {
         return;
       }
 
@@ -50,16 +49,15 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
 
       try {
         const profileData = await getUserProfile(authUser.userName);
-        
+
         setCompleteUserProfile(profileData);
       } catch (error) {
-        console.error("❌ Error fetching profile:", error);
+        console.error('❌ Error fetching profile:', error);
         setCompleteUserProfile({} as UserProfile);
       }
     };
 
     fetchUserProfile();
-
   }, [isAuthenticated, authUser?.userName, isLoadingUserDetails, userDetailsFetched, sessionRestored]);
 
   const hasCompleteProfile = (): boolean => {
@@ -103,49 +101,47 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     const missingFields = [];
 
     if (!completeUserProfile?.userName)
-      missingFields.push({ name: "Username", tab: "personal-info", required: true });
+      missingFields.push({ name: 'Username', tab: 'personal-info', required: true });
 
     if (!completeUserProfile?.firstName)
-      missingFields.push({ name: "First Name", tab: "personal-info", required: true });
+      missingFields.push({ name: 'First Name', tab: 'personal-info', required: true });
 
     if (!completeUserProfile?.lastName)
-      missingFields.push({ name: "Last Name", tab: "personal-info", required: true });
+      missingFields.push({ name: 'Last Name', tab: 'personal-info', required: true });
 
     if (!completeUserProfile?.dob)
-      missingFields.push({ name: "Date of Birth", tab: "personal-info", required: true });
+      missingFields.push({ name: 'Date of Birth', tab: 'personal-info', required: true });
 
     if (!completeUserProfile?.skillset || completeUserProfile.skillset.length === 0)
-      missingFields.push({ name: "Skills", tab: "skills", required: true });
+      missingFields.push({ name: 'Skills', tab: 'skills', required: true });
 
     if (!completeUserProfile?.education || completeUserProfile.education.length === 0)
-      missingFields.push({ name: "Education", tab: "education", required: false });
+      missingFields.push({ name: 'Education', tab: 'education', required: false });
 
     if (!completeUserProfile?.experience || completeUserProfile.experience.length === 0)
-      missingFields.push({ name: "Experience", tab: "experience", required: false });
+      missingFields.push({ name: 'Experience', tab: 'experience', required: false });
 
     return missingFields;
   };
 
   const determineLayoutState = (): LayoutState => {
-
     if (authLoading || isLoadingUserDetails || !sessionRestored) {
-      
       return LayoutState.LOADING;
     }
 
-    if (isAuthenticated && authUser?.userName &&
-      (!userDetailsFetched || !completeUserProfile)) {
-      
+    if (
+      isAuthenticated &&
+      authUser?.userName &&
+      (!userDetailsFetched || !completeUserProfile)
+    ) {
       return LayoutState.LOADING;
     }
 
     if (sessionRestored && !authLoading && !isAuthenticated) {
-      
       return LayoutState.UNAUTHENTICATED;
     }
 
     if (isAuthenticated && isPathMatching('/candidate/profile/edit')) {
-      
       return LayoutState.NORMAL;
     }
 
@@ -153,12 +149,9 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     const isVerified = isUserVerified();
 
     if (isAuthenticated && !profileComplete) {
-
       if (isPathMatching('/candidate/app')) {
-        
         return LayoutState.PROFILE_INCOMPLETE;
       } else {
-        
         return LayoutState.NORMAL;
       }
     }
@@ -172,6 +165,11 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
 
   const layoutState = determineLayoutState();
 
+  if (layoutState === LayoutState.UNAUTHENTICATED) {
+    router.replace('/auth/sign-in');
+    return null;
+  }
+
   return createLayout({
     children,
     state: layoutState,
@@ -179,7 +177,6 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     completeUserProfile,
     showProfileBanner,
     setShowProfileBanner,
-    missingFields: getMissingFields(),
-    router
+    missingFields: getMissingFields()
   });
 }

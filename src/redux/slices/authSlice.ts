@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { getUserFromApiStatus } from "@/utils/authHelpers";
 import { RootState } from "../store";
 
-interface UserProfile {
+export interface AuthUser {
   id: string;
   email: string;
   role: string;
@@ -34,7 +34,7 @@ interface AuthState {
   isAuthenticated: boolean;
   userRole: string | null;
   token: string | null;
-  user: UserProfile | null;
+  user: AuthUser | null;
   layoutInitialized: boolean;
 }
 
@@ -219,7 +219,7 @@ export const fetchUserDetails = createAsyncThunk(
   }
 );
 
-export const getFullName = (user: UserProfile | null): string => {
+export const getFullName = (user: AuthUser | null): string => {
   if (!user) return "";
   
   

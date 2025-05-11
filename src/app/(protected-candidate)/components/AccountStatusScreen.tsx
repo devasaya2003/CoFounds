@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ChevronRight, Shield, CheckCircle, XCircle } from 'lucide-react';
 import { UserProfile } from '../candidate/profile/edit/api';
+import { AuthUser } from '@/redux/slices/authSlice';
 
 interface MissingField {
   name: string;
@@ -11,13 +12,9 @@ interface MissingField {
   required: boolean;
 }
 
-interface AuthUser {
-  userName?: string;
-}
-
 interface AccountStatusScreenProps { 
   user: UserProfile | null;
-  authUser: AuthUser;
+  authUser: AuthUser | null;
   isCompleteProfile: boolean;
   missingFields?: MissingField[];
 }
