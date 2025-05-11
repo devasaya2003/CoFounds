@@ -113,13 +113,6 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                 
                 const hasChanges = hasDeletedExperiences || hasNewExperiences || hasModifiedExperiences;
                 
-                console.log('[ProofOfWorkForm] Checking for changes after initialization:', {
-                    hasDeletedExperiences,
-                    hasNewExperiences,
-                    hasModifiedExperiences,
-                    hasChanges
-                });
-                
                 onChange(hasChanges);
             }
         }, [isInitializing, onChange, workExperiences, originalWorkExperiences, deletedWorkExperiences]);
@@ -209,7 +202,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                     company: exp.isCommunityWork ? 'COF_PROOF_COMMUNITY' : exp.company,
                     description: exp.description || null,
                     started_at: formatDateForApi(exp.startDate),
-                    end_at: exp.endDate ? null : formatDateForApi(exp.endDate !== null ? exp.endDate : undefined),
+                    end_at: exp.currentlyWorking ? null : formatDateForApi(exp.endDate !== null ? exp.endDate : undefined),
                     is_community_work: exp.isCommunityWork
                 }));
 
