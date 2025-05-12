@@ -7,6 +7,7 @@ import { CompletionGuide } from "../CompletionGuide";
 import { useFormManagement } from "../../hooks/form";
 import { CertificateFormData, SkillsUpdatePayload, ProofOfWorkFormData } from "../types";
 import { UserProfile } from "../../api";
+import { EducationUpdatePayload } from "../education/types";
 import TabList from "./TabList";
 import TabContent from "./TabContent";
 import FormActions from "./FormActions";
@@ -74,6 +75,14 @@ export default function TabHandler({
     });
   }, [setFormData]);
 
+  // Add handler for education data
+  const handleEducationData = useCallback((data: { educationUpdateData: EducationUpdatePayload }) => {
+    setFormData({
+      type: 'education',
+      data: data.educationUpdateData
+    });
+  }, [setFormData]);
+
   return (
     <div className="relative">
       <StatusAlert 
@@ -104,6 +113,8 @@ export default function TabHandler({
           handleCertificateData={handleCertificateData}
           handleProofOfWorkChange={formManagement.handleProofOfWorkChange}
           handleProofOfWorkData={handleProofOfWorkData}
+          handleEducationChange={formManagement.handleEducationChange}
+          handleEducationData={handleEducationData}
         />
       </Tabs>
 

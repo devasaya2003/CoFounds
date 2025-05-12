@@ -3,6 +3,7 @@ import { FormDataState } from "../../components/types";
 import { UserProfile } from "../../api";
 import { useAppSelector } from "@/redux/hooks";
 import { ProofOfWorkUpdatePayload } from "../../components/proof-of-work/types";
+import { EducationUpdatePayload } from "../../components/education/types";
 
 export function useFormData() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -68,6 +69,24 @@ export function useFormData() {
     });
   }, []);
 
+  // Handler for education changes
+  const handleEducationChange = useCallback((hasChanges: boolean) => {
+    setHasUnsavedChanges(hasChanges);
+    if (hasChanges) {
+      setActiveForm("education");
+    } else if (activeForm === "education") {
+      setActiveForm(null);
+    }
+  }, [activeForm]);
+
+  // Handler for education data
+  const handleEducationData = useCallback((data: { educationUpdateData: EducationUpdatePayload }) => {
+    setFormData({
+      type: 'education',
+      data: data.educationUpdateData
+    });
+  }, []);
+
   // Reset form data
   const resetFormData = useCallback(() => {
     setFormData(null);
@@ -88,6 +107,8 @@ export function useFormData() {
     handleCertificateChange,
     handleProofOfWorkChange,
     handleProofOfWorkData,
+    handleEducationChange,
+    handleEducationData,
     resetFormData
   };
 }

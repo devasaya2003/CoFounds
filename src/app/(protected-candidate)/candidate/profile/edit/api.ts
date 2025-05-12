@@ -155,15 +155,72 @@ export async function updateSkills(skillsData: {
   }
 }
 
-export async function updateEducation(education: UserEducation[]): Promise<UserEducation[]> {
+// Add this to api.ts or wherever your API functions are defined
+export async function updateEducation(educationData: {
+  user_id: string;
+  new_education: Array<{
+    institution: string;
+    degree_id: string;
+    started_at: string | null;
+    end_at: string | null;
+  }>;
+  updated_education: Array<{
+    id: string;
+    institution: string;
+    degree_id: string;
+    started_at: string | null;
+    end_at: string | null;
+  }>;
+  deleted_education: string[];
+}): Promise<{
+  updated: number;
+  created: number;
+  deleted: number;
+  total: number;
+}> {
   try {
-    console.log('Updating education with data:', education);
+    console.log('==================== EDUCATION FORM DATA ====================');
+    console.log('User ID:', educationData.user_id);
+    
+    console.log('\n===== NEW EDUCATION =====');
+    educationData.new_education.forEach((edu, index) => {
+      console.log(`Education #${index + 1}:`);
+      console.log('- Institution:', edu.institution);
+      console.log('- Degree ID:', edu.degree_id);
+      console.log('- Started at:', edu.started_at);
+      console.log('- End at:', edu.end_at ? edu.end_at : 'Currently studying');
+    });
+    
+    console.log('\n===== UPDATED EDUCATION =====');
+    educationData.updated_education.forEach((edu, index) => {
+      console.log(`Education #${index + 1}:`);
+      console.log('- ID:', edu.id);
+      console.log('- Institution:', edu.institution);
+      console.log('- Degree ID:', edu.degree_id);
+      console.log('- Started at:', edu.started_at);
+      console.log('- End at:', edu.end_at ? edu.end_at : 'Currently studying');
+    });
+    
+    console.log('\n===== DELETED EDUCATION =====');
+    console.log(educationData.deleted_education);
+    console.log('================================================================');
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const response = await fetchWithAuth_PUT<ApiResponse<{
+      updated: number;
+      created: number;
+      deleted: number;
+      total: number;
+    }>>(
+      API_ENDPOINTS.EDUCATION,
+      educationData
+    );
 
-    console.log('Education update completed:', education);
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update education');
+    }
 
-    return education;
+    console.log('Education update completed:', response.data);
+    return response.data;
   } catch (error) {
     console.error('Error updating education:', error);
     throw error;

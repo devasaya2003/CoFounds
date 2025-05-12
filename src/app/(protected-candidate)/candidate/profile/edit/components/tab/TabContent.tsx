@@ -3,10 +3,12 @@ import PersonalInfoForm from "../PersonalInfoForm";
 import SkillsForm from "../SkillsForm";
 import CertificateForm from "../CertificateForm";
 import ProofOfWorkForm from "../ProofOfWorkForm";
+import EducationForm from "../EducationForm";
 import { FormManagementReturn } from "../../hooks/form";
 import { UserProfile } from "../../api";
 import { CertificateFormData, SkillsUpdatePayload } from "../types";
 import { ProofOfWorkUpdatePayload } from "../proof-of-work/types";
+import { EducationUpdatePayload } from "../education/types";
 
 interface TabContentProps {
   formManagement: FormManagementReturn;
@@ -16,6 +18,8 @@ interface TabContentProps {
   handleCertificateData: (data: CertificateFormData) => void;
   handleProofOfWorkChange: (hasChanges: boolean) => void;
   handleProofOfWorkData: (data: { proofOfWorkUpdateData: ProofOfWorkUpdatePayload }) => void;
+  handleEducationChange: (hasChanges: boolean) => void;
+  handleEducationData: (data: { educationUpdateData: EducationUpdatePayload }) => void;
 }
 
 export default function TabContent({
@@ -23,19 +27,26 @@ export default function TabContent({
   profileData,
   renderJsonData,
   handleSkillsData,
-  handleCertificateData
+  handleCertificateData,
+  handleProofOfWorkChange,
+  handleProofOfWorkData,
+  handleEducationChange,
+  handleEducationData
 }: TabContentProps) {
   const {
     personalFormRef,
     skillsFormRef,
     certificateFormRef,
     proofOfWorkFormRef,
+    educationFormRef,
     handlePersonalInfoChange,
     handlePersonalInfoData,
     handleSkillsChange,
     handleCertificateChange,
-    handleProofOfWorkChange,
-    handleProofOfWorkData
+    handleProofOfWorkChange: formProofOfWorkChange,
+    handleProofOfWorkData: formProofOfWorkData,
+    handleEducationChange: formEducationChange,
+    handleEducationData: formEducationData
   } = formManagement;
 
   return (
@@ -61,11 +72,12 @@ export default function TabContent({
       </TabsContent>
 
       <TabsContent value="education">
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Education Data</h2>
-          <p className="text-gray-500 mb-4">Raw JSON data from the API - will be replaced with forms later</p>
-          {renderJsonData(profileData.education)}
-        </div>
+        <EducationForm
+          ref={educationFormRef}
+          profile={profileData}
+          onChange={formEducationChange}
+          onSaveData={formEducationData}
+        />
       </TabsContent>
 
       <TabsContent value="projects">
@@ -89,8 +101,8 @@ export default function TabContent({
         <ProofOfWorkForm
           ref={proofOfWorkFormRef}
           profile={profileData}
-          onChange={handleProofOfWorkChange}
-          onSaveData={handleProofOfWorkData}
+          onChange={formProofOfWorkChange}
+          onSaveData={formProofOfWorkData}
         />
       </TabsContent>
     </>

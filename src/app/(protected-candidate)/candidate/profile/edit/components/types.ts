@@ -1,5 +1,6 @@
 import { UserProfile } from "../api";
 import { CertificateUpdatePayload } from "./certificate/types";
+import { EducationUpdatePayload } from "./education/types";
 import { ProofOfWorkUpdatePayload } from "./proof-of-work/types";
 
 export interface StatusMessage {
@@ -32,9 +33,8 @@ export type FormDataState =
   | { type: 'personal-info'; data: Partial<UserProfile> }
   | { type: 'skills'; data: SkillsFormData }
   | { type: 'certificates'; data: CertificateFormData }
-  | { type: 'proof-of-work'; data: ProofOfWorkUpdatePayload };
-//   | { type: 'education'; data: any }
-//   | { type: 'experience'; data: any };
+  | { type: 'proof-of-work'; data: ProofOfWorkUpdatePayload }
+  | { type: 'education'; data: EducationUpdatePayload };
 //   | { type: 'projects'; data: any }
 
 export const VALID_TABS = [

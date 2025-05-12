@@ -9,6 +9,7 @@ import { PersonalInfoFormRef } from '../../components/PersonalInfoForm';
 import { SkillsFormRef } from '../../components/SkillsForm';
 import { CertificateFormRef } from '../../components/CertificateForm';
 import { ProofOfWorkFormRef } from '../../components/ProofOfWorkForm';
+import { EducationFormRef } from '../../components/education/types'; // Add this import
 
 export function useFormManagement(
     defaultTab: string,
@@ -39,6 +40,8 @@ export function useFormManagement(
         handleCertificateChange,
         handleProofOfWorkChange,
         handleProofOfWorkData,
+        handleEducationChange, 
+        handleEducationData, 
         resetFormData
     } = useFormData();
 
@@ -46,7 +49,8 @@ export function useFormManagement(
         personalFormRef,
         skillsFormRef,
         certificateFormRef,
-        proofOfWorkFormRef
+        proofOfWorkFormRef,
+        educationFormRef 
     } = useFormRefs();
 
     const {
@@ -68,10 +72,11 @@ export function useFormManagement(
             personalFormRef as React.RefObject<PersonalInfoFormRef>,
             skillsFormRef as React.RefObject<SkillsFormRef>,
             certificateFormRef as React.RefObject<CertificateFormRef>,
-            proofOfWorkFormRef as React.RefObject<ProofOfWorkFormRef>, 
+            proofOfWorkFormRef as React.RefObject<ProofOfWorkFormRef>,
+            educationFormRef as React.RefObject<EducationFormRef>, 
             activeTab,
             refetchProfile,
-            setStatusMessage
+            setStatusMessage 
         );
 
     return {
@@ -90,6 +95,7 @@ export function useFormManagement(
         skillsFormRef,
         certificateFormRef,
         proofOfWorkFormRef,
+        educationFormRef, // Add this
 
         // Status and dialogs
         statusMessage,
@@ -110,6 +116,8 @@ export function useFormManagement(
         handleCertificateChange,
         handleProofOfWorkChange,
         handleProofOfWorkData,
+        handleEducationChange, // Add this
+        handleEducationData, // Add this
 
         // User info
         userId,
