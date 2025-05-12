@@ -37,7 +37,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     const fetchUserProfile = async () => {
       if (
         !isAuthenticated ||
-        !authUser?.userName ||
+        !authUser?.id ||
         isLoadingUserDetails ||
         userDetailsFetched ||
         !sessionRestored
@@ -48,7 +48,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
       setUserDetailsFetched(true);
 
       try {
-        const profileData = await getUserProfile(authUser.userName);
+        const profileData = await getUserProfile(authUser.id);
 
         setCompleteUserProfile(profileData);
       } catch (error) {
@@ -58,7 +58,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     };
 
     fetchUserProfile();
-  }, [isAuthenticated, authUser?.userName, isLoadingUserDetails, userDetailsFetched, sessionRestored]);
+  }, [isAuthenticated, authUser?.id, isLoadingUserDetails, userDetailsFetched, sessionRestored]);
 
   const hasCompleteProfile = (): boolean => {
     if (!completeUserProfile) {

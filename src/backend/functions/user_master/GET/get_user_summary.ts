@@ -1,10 +1,10 @@
 import prisma from "../../../../../prisma/client";
 
-export async function getUserSummary(userName: string) {
+export async function getUserSummary(id: string) {
     try {
         const userSummary = await prisma.userMaster.findUnique({
             where: {
-                userName: userName,
+                id: id,
             },
             select: {
                 id: true,

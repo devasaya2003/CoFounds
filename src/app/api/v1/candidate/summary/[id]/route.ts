@@ -3,19 +3,19 @@ import { getUserSummary } from '@/backend/functions/user_master/GET/get_user_sum
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ user_name: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userName = (await params).user_name;
+    const id = (await params).id;
     
-    if (!userName) {
+    if (!id) {
       return NextResponse.json({
         success: false,
-        error: "Username is required"
+        error: "ID is required"
       }, { status: 400 });
     }
     
-    const summaryResult = await getUserSummary(userName);
+    const summaryResult = await getUserSummary(id);
     
     if (!summaryResult.success) {
       return NextResponse.json({

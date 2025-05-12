@@ -15,7 +15,7 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAppSelector((state) => state.auth);
-  const userName = user?.userName || "";
+  const id = user?.id || "";
   const defaultTab = "personal-info";
   const searchParams = useSearchParams();
   const isNewUser = searchParams.get('newUser') === 'true';
@@ -23,7 +23,7 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     // Only fetch if not already fetched
-    if (!initialFetchPerformed.current && userName) {
+    if (!initialFetchPerformed.current && id) {
       let isMounted = true;
 
       async function fetchProfile() {
@@ -31,7 +31,7 @@ export default function EditProfilePage() {
           console.log("FETCHING PROFILE.......")
           setLoading(true);
 
-          const data = await getUserProfile(userName);
+          const data = await getUserProfile(id);
 
           if (isMounted) {
             setProfileData(data);
@@ -53,16 +53,16 @@ export default function EditProfilePage() {
         isMounted = false;
       };
     }
-  }, [userName]);
+  }, [id]);
 
   const refetchProfile = async () => {
     try {
       setLoading(true);
       console.log("FORCE REFETCHING PROFILE DATA...");
 
-      clearUserProfileCache(userName);
+      clearUserProfileCache(id);
 
-      const data = await getUserProfile(userName, true);
+      const data = await getUserProfile(id, true);
 
       setProfileData(data);
       

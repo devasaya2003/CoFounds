@@ -59,20 +59,20 @@ export interface SkillsUpdateResult {
   total: number;
 }
 
-export async function getUserProfile(username: string, forceRefresh = false): Promise<UserProfile> {
-  const cacheKey = `profile_${username}`;
+export async function getUserProfile(id: string, forceRefresh = false): Promise<UserProfile> {
+  const cacheKey = `profile_${id}`;
   const now = Date.now();
 
   if (!forceRefresh &&
       profileCache[cacheKey] &&
       now - profileCache[cacheKey].timestamp < CACHE_TTL) {
-    console.log(`Using cached profile for ${username}`);
+    console.log(`Using cached profile for ${id}`);
     return profileCache[cacheKey].data;
   }
 
-  console.log(`Fetching fresh profile data for ${username}`);
+  console.log(`Fetching fresh profile data for ${id}`);
   try {
-    const response = await fetch(`/api/v1/candidate/summary/${username}`);
+    const response = await fetch(`/api/v1/candidate/summary/${id}`);
     if (!response.ok) {
       throw new Error('Failed to fetch user profile');
     }
@@ -96,10 +96,10 @@ export async function getUserProfile(username: string, forceRefresh = false): Pr
 }
 
 // Add this function to explicitly clear cache for a user
-export function clearUserProfileCache(username: string) {
-  const cacheKey = `profile_${username}`;
+export function clearUserProfileCache(id: string) {
+  const cacheKey = `profile_${id}`;
   if (profileCache[cacheKey]) {
-    console.log(`Clearing cache for ${username}`);
+    console.log(`Clearing cache for ${id}`);
     delete profileCache[cacheKey];
     return true;
   }
