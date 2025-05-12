@@ -6,6 +6,7 @@ import ProfileHeader from './components/ProfileHeader';
 import AboutSection from './components/AboutSection';
 import SkillsSection from './components/SkillsSection';
 import ExperienceSection from './components/ExperienceSection';
+import CertificatesSection from './components/CertificatesSection';
 import ProjectsSection from './components/ProjectsSection';
 import EducationSection from './components/EducationSection';
 import BuildPortfolioButton from './components/BuildPortfolioButton';
@@ -78,7 +79,6 @@ function formatDate(date: string | Date | null, context: 'experience' | 'educati
   }
   return new Date(date).getFullYear().toString();
 }
-
 
 async function getPortfolio(username: string): Promise<PortfolioResponse> {
   try {
@@ -160,7 +160,7 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow absolute top-0 left-0 right-0 z-20">
+      <nav className="bg-white shadow sticky top-0 left-0 right-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>
@@ -168,10 +168,28 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
               {portfolio.firstName} {portfolio.lastName}
             </span>
           </div>
-          <div className="flex space-x-6">
-            <Link href="#about" className="text-gray-600 hover:text-gray-900">About</Link>
-            <Link href="#experience" className="text-gray-600 hover:text-gray-900">Experience</Link>
-            <Link href="#projects" className="text-gray-600 hover:text-gray-900">Projects</Link>
+          <div className="flex space-x-6 overflow-x-auto">
+            <Link href="#about" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">About</Link>
+            
+            {portfolio.skillset && portfolio.skillset.length > 0 && (
+              <Link href="#skills" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Skills</Link>
+            )}
+            
+            {portfolio.experience && portfolio.experience.length > 0 && (
+              <Link href="#proof-of-work" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Proof of Work</Link>
+            )}
+            
+            {portfolio.certificates && portfolio.certificates.length > 0 && (
+              <Link href="#certificates" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Certificates</Link>
+            )}
+            
+            {portfolio.projects && portfolio.projects.length > 0 && (
+              <Link href="#projects" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Projects</Link>
+            )}
+            
+            {portfolio.education && portfolio.education.length > 0 && (
+              <Link href="#education" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Education</Link>
+            )}
           </div>
         </div>
       </nav>
@@ -189,28 +207,31 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
       />
 
       <main className="max-w-5xl mx-auto px-4 py-12 mt-24">
-        {/* About section */}
+        {/* 1. About section */}
         <AboutSection description={portfolio.description} />
 
-        {/* Skills section */}
+        {/* 2. Skills section */}
         <SkillsSection skills={portfolio.skillset} />
 
-        {/* Experience Section */}
+        {/* 3. Experience Section (Proof of Work) */}
         <ExperienceSection experiences={portfolio.experience} formatDate={(date) => formatDate(date, 'experience')} />
 
-        {/* Education Section */}
-        <EducationSection education={portfolio.education} formatDate={(date) => formatDate(date, 'education')} />
+        {/* 4. Certificates Section */}
+        <CertificatesSection certificates={portfolio.certificates} formatDate={(date) => formatDate(date, 'experience')} />
 
-        {/* Projects Section */}
+        {/* 5. Projects Section */}
         <ProjectsSection projects={portfolio.projects} formatDate={(date) => formatDate(date, 'project')} />
 
-        {/* Build your own portfolio button */}
-        <BuildPortfolioButton />
+        {/* 6. Education Section */}
+        <EducationSection education={portfolio.education} formatDate={(date) => formatDate(date, 'education')} />
       </main>
 
       <footer className="bg-white border-t py-6">
-        <div className="max-w-5xl mx-auto px-4 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} {portfolio.firstName} {portfolio.lastName}. All rights reserved.
+        <div className="max-w-5xl mx-auto px-4 flex justify-between items-center">
+          <div className="text-sm text-gray-500">
+            © {new Date().getFullYear()} {portfolio.firstName} {portfolio.lastName}. All rights reserved.
+          </div>
+          <BuildPortfolioButton />
         </div>
       </footer>
     </div>

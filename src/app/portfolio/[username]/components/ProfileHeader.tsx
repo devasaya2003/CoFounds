@@ -15,7 +15,7 @@ export default function ProfileHeader({ firstName, lastName, title, companyName,
       <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 md:left-4 md:translate-x-0 
                      w-40 h-40 rounded-full border-4 border-white 
                      bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 
-                     shadow-lg z-10">
+                     shadow-lg z-10">                      
       </div>
       
       {/* Text content - positioned below the banner */}

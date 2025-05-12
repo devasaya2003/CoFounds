@@ -13,7 +13,7 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
   if (!skills || skills.length === 0) return null;
   
   return (
-    <section className="mb-12">
+    <section id="skills" className="mb-12">
       <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Skills</h2>
       <div className="flex flex-wrap gap-2">
         {skills.map((skillItem, index) => (
