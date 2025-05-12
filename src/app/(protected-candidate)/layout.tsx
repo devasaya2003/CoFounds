@@ -135,7 +135,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
       missingFields.push({ name: 'Education', tab: 'education', required: true });
 
     if (!completeUserProfile?.experience || completeUserProfile.experience.length === 0)
-      missingFields.push({ name: 'Proof Of Work', tab: 'experience', required: true });
+      missingFields.push({ name: 'Proof Of Work', tab: 'proof-of-work', required: true });
 
     return missingFields;
   };
