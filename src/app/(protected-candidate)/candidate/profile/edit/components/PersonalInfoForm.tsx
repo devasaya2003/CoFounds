@@ -1,12 +1,21 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useImperativeHandle, forwardRef } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import FormInput from '@/components/FormElements/FormInput';
 import RichTextEditor from '@/components/RichTextEditor/RichTextEditor';
 import DateSelector from '@/components/DateSelector/DateSelector';
 import { Label } from '@/components/ui/label';
 import { UserProfile } from '../api';
+import { debounce } from 'lodash';
+import { fetchWithAuth_GET } from '@/utils/api';
+import { VALIDATE_USERNAME } from '@/utils/regex_utils/regex_validations';
+
+interface UsernameCheckResponse {
+  valid: boolean;
+  available: boolean;
+  message: string;
+}
 
 // Define the ref interface
 export interface PersonalInfoFormRef {
@@ -25,31 +34,108 @@ const PersonalInfoForm = forwardRef<PersonalInfoFormRef, PersonalInfoFormProps>(
         const [firstName, setFirstName] = useState(profile.firstName || '');
         const [lastName, setLastName] = useState(profile.lastName || '');
         const [description, setDescription] = useState(profile.description || '');
+        const [userName, setUserName] = useState(profile.userName || '');
+        
+        // Username validation states
+        const [isChecking, setIsChecking] = useState(false);
+        const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+        const [validationMessage, setValidationMessage] = useState('');
 
         const dobDate = useMemo(() => profile.dob ? new Date(profile.dob) : null, [profile.dob]);
         const [dobYear, setDobYear] = useState(dobDate ? dobDate.getFullYear().toString() : '');
         const [dobMonth, setDobMonth] = useState(dobDate ? (dobDate.getMonth() + 1).toString().padStart(2, '0') : '');
         const [dobDay, setDobDay] = useState(dobDate ? dobDate.getDate().toString().padStart(2, '0') : '');
 
+        const isUsernameEditable = !profile.userName;
+
         useEffect(() => {
             const hasChanges =
                 firstName !== (profile.firstName || '') ||
                 lastName !== (profile.lastName || '') ||
                 description !== (profile.description || '') ||
+                (isUsernameEditable && userName !== (profile.userName || '')) ||
                 dobYear !== (dobDate ? dobDate.getFullYear().toString() : '') ||
                 dobMonth !== (dobDate ? (dobDate.getMonth() + 1).toString().padStart(2, '0') : '') ||
                 dobDay !== (dobDate ? dobDate.getDate().toString().padStart(2, '0') : '');
 
             onChange(hasChanges);
-        }, [firstName, lastName, description, dobYear, dobMonth, dobDay, profile, dobDate, onChange]);
+        }, [firstName, lastName, description, userName, dobYear, dobMonth, dobDay, profile, dobDate, onChange, isUsernameEditable]);
+
+        const checkUsernameImmediate = useCallback(async (username: string) => {
+            if (!username || username.length < 3 || username.length > 8) {
+                setIsAvailable(null);
+                setValidationMessage('Username must be between 3-8 characters');
+                setIsChecking(false);
+                return;
+            }
+
+            if (username.toLowerCase() === 'www') {
+                setIsAvailable(false);
+                setValidationMessage('"www" cannot be used as a username');
+                setIsChecking(false);
+                return;
+            }
+
+            if (!VALIDATE_USERNAME(username)) {
+                setIsAvailable(false);
+                setValidationMessage('Username must be 3-8 characters, lowercase letters and numbers only, with hyphens or underscores only in the middle');
+                setIsChecking(false);
+                return;
+            }
+
+            setIsChecking(true);
+
+            try {
+                const data = await fetchWithAuth_GET<UsernameCheckResponse>(`/api/v1/candidate/check-user/${username}`);
+
+                setIsAvailable(data.available);
+                setValidationMessage(data.message);
+            } catch (error) {
+                console.error('Error checking username:', error);
+                setIsAvailable(false);
+                setValidationMessage('Failed to check username availability.');
+            } finally {
+                setIsChecking(false);
+            }
+        }, []);
+
+        const checkUsername = useMemo(
+            () => debounce(checkUsernameImmediate, 500),
+            [checkUsernameImmediate]
+        );
+
+        const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            setUserName(value);
+
+            if (value.length >= 3) {
+                setIsChecking(true);
+                checkUsername(value);
+            } else {
+                setIsAvailable(null);
+                setValidationMessage('');
+            }
+        };
+
+        useEffect(() => {
+            return () => {
+                checkUsername.cancel();
+            };
+        }, [checkUsername]);
 
         const prepareDataForSave = useCallback(() => {
             const data: Partial<UserProfile> = {
                 id: profile.id,
+                userName,
                 firstName,
                 lastName,
                 description
             };
+
+            // Only include username if it's editable and has been modified
+            if (isUsernameEditable && userName && userName !== profile.userName && isAvailable) {
+                data.userName = userName;
+            }
 
             if (dobYear && dobMonth && dobDay) {
                 const dobString = `${dobYear}-${dobMonth}-${dobDay}T00:00:00.000Z`;
@@ -57,16 +143,19 @@ const PersonalInfoForm = forwardRef<PersonalInfoFormRef, PersonalInfoFormProps>(
             }
 
             onSaveData(data);
-        }, [dobDay, dobMonth, dobYear, description, firstName, lastName, onSaveData, profile.id]);
+        }, [dobDay, dobMonth, dobYear, description, firstName, lastName, userName, isUsernameEditable, isAvailable, onSaveData, profile.id, profile.userName]);
 
         const resetForm = useCallback(() => {
             setFirstName(profile.firstName || '');
             setLastName(profile.lastName || '');
             setDescription(profile.description || '');
+            setUserName(profile.userName || '');
             setDobYear(dobDate ? dobDate.getFullYear().toString() : '');
             setDobMonth(dobDate ? (dobDate.getMonth() + 1).toString().padStart(2, '0') : '');
             setDobDay(dobDate ? dobDate.getDate().toString().padStart(2, '0') : '');
-        }, [dobDate, profile.firstName, profile.lastName, profile.description]);
+            setIsAvailable(null);
+            setValidationMessage('');
+        }, [dobDate, profile.firstName, profile.lastName, profile.description, profile.userName]);
 
         // Expose methods via the ref
         useImperativeHandle(ref, () => ({
@@ -109,20 +198,41 @@ const PersonalInfoForm = forwardRef<PersonalInfoFormRef, PersonalInfoFormProps>(
                         </div>
                     </div>
 
-                    <div className="relative group">
+                    <div className={`relative ${!isUsernameEditable ? 'group' : ''}`}>
                         <FormInput
                             id="userName"
                             label="Username"
                             type="text"
-                            value={profile.userName || ''}
-                            disabled={true}
+                            value={userName}
+                            onChange={isUsernameEditable ? handleUsernameChange : undefined}
+                            disabled={!isUsernameEditable}
                         />
-                        <div className="absolute inset-0 cursor-not-allowed">
-                            <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 -mt-12 left-0 bg-gray-800 text-white text-sm px-3 py-2 rounded shadow-lg">
-                                We currently do not support changing the user name.
-                                <div className="absolute w-3 h-3 bg-gray-800 transform rotate-45 left-4 -bottom-1"></div>
+                        {!isUsernameEditable && (
+                            <div className="absolute inset-0 cursor-not-allowed">
+                                <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 -mt-12 left-0 bg-gray-800 text-white text-sm px-3 py-2 rounded shadow-lg">
+                                    Username cannot be changed once set.
+                                    <div className="absolute w-3 h-3 bg-gray-800 transform rotate-45 left-4 -bottom-1"></div>
+                                </div>
                             </div>
-                        </div>
+                        )}
+                        
+                        {/* Username validation status */}
+                        {isUsernameEditable && userName && userName.length >= 3 && (
+                            <div className="mt-2">
+                                {isChecking ? (
+                                    <div className="flex items-center text-amber-600">
+                                        <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                                        <span>Validating your username...</span>
+                                    </div>
+                                ) : (
+                                    validationMessage && (
+                                        <div className={`text-sm ${isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                                            {validationMessage}
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 

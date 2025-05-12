@@ -112,6 +112,7 @@ export async function updatePersonalInfo(personalData: Partial<UserProfile>): Pr
 
     const profilePayload = {
       user_id: personalData.id,
+      user_name: personalData.userName,
       first_name: personalData.firstName,
       last_name: personalData.lastName,
       dob: formattedDate,
