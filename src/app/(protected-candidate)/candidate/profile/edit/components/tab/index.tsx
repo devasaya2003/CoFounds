@@ -8,6 +8,7 @@ import { useFormManagement } from "../../hooks/form";
 import { CertificateFormData, SkillsUpdatePayload, ProofOfWorkFormData } from "../types";
 import { UserProfile } from "../../api";
 import { EducationUpdatePayload } from "../education/types";
+import { ProjectUpdatePayload } from "../project/types";
 import TabList from "./TabList";
 import TabContent from "./TabContent";
 import FormActions from "./FormActions";
@@ -83,6 +84,14 @@ export default function TabHandler({
     });
   }, [setFormData]);
 
+  // Add handler for project data
+  const handleProjectData = useCallback((data: { projectsUpdateData: ProjectUpdatePayload }) => {
+    setFormData({
+      type: 'projects',
+      data: data.projectsUpdateData
+    });
+  }, [setFormData]);
+
   return (
     <div className="relative">
       <StatusAlert 
@@ -115,6 +124,8 @@ export default function TabHandler({
           handleProofOfWorkData={handleProofOfWorkData}
           handleEducationChange={formManagement.handleEducationChange}
           handleEducationData={handleEducationData}
+          handleProjectChange={formManagement.handleProjectChange}
+          handleProjectData={handleProjectData}
         />
       </Tabs>
 

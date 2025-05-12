@@ -4,6 +4,7 @@ import { UserProfile } from "../../api";
 import { useAppSelector } from "@/redux/hooks";
 import { ProofOfWorkUpdatePayload } from "../../components/proof-of-work/types";
 import { EducationUpdatePayload } from "../../components/education/types";
+import { ProjectUpdatePayload } from "../../components/project/types";
 
 export function useFormData() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -87,6 +88,24 @@ export function useFormData() {
     });
   }, []);
 
+  // Handler for project changes
+  const handleProjectChange = useCallback((hasChanges: boolean) => {
+    setHasUnsavedChanges(hasChanges);
+    if (hasChanges) {
+      setActiveForm("projects");
+    } else if (activeForm === "projects") {
+      setActiveForm(null);
+    }
+  }, [activeForm]);
+
+  // Handler for project data
+  const handleProjectData = useCallback((data: { projectsUpdateData: ProjectUpdatePayload }) => {
+    setFormData({
+      type: 'projects',
+      data: data.projectsUpdateData
+    });
+  }, []);
+
   // Reset form data
   const resetFormData = useCallback(() => {
     setFormData(null);
@@ -109,6 +128,8 @@ export function useFormData() {
     handleProofOfWorkData,
     handleEducationChange,
     handleEducationData,
+    handleProjectChange,
+    handleProjectData,
     resetFormData
   };
 }

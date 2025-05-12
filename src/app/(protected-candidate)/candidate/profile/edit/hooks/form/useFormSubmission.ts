@@ -5,7 +5,8 @@ import {
   updateSkills, 
   updateCertificates, 
   updateProofOfWork, 
-  updateEducation, 
+  updateEducation,
+  updateProjects, // Add this import
   UserProfile 
 } from "../../api";
 import { PersonalInfoFormRef } from "../../components/PersonalInfoForm";
@@ -13,6 +14,7 @@ import { SkillsFormRef } from "../../components/SkillsForm";
 import { CertificateFormRef } from "../../components/CertificateForm";
 import { ProofOfWorkFormRef } from "../../components/proof-of-work/types";
 import { EducationFormRef } from "../../components/education/types";
+import { ProjectFormRef } from "../../components/ProjectForm"; // Add this import
 
 export function useFormSubmission(
   formData: FormDataState | null,
@@ -22,6 +24,7 @@ export function useFormSubmission(
   certificateFormRef: React.RefObject<CertificateFormRef>,
   proofOfWorkFormRef: React.RefObject<ProofOfWorkFormRef>,
   educationFormRef: React.RefObject<EducationFormRef>,
+  projectFormRef: React.RefObject<ProjectFormRef>, // Add this parameter
   activeTab: string,
   refetchProfile: () => Promise<UserProfile | null>,
   setStatusMessage: (message: StatusMessage | null) => void
@@ -40,12 +43,14 @@ export function useFormSubmission(
       proofOfWorkFormRef.current.saveForm();
     } else if (activeTab === "education" && educationFormRef.current) {
       educationFormRef.current.saveForm();
+    } else if (activeTab === "projects" && projectFormRef.current) { // Add this condition
+      projectFormRef.current.saveForm();
     }
 
     if (formData) {
       setShowConfirmDialog(true);
     }
-  }, [activeTab, formData, personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef, educationFormRef]);
+  }, [activeTab, formData, personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef, educationFormRef, projectFormRef]);
 
   const handleCancelChanges = useCallback(() => {
     if (activeTab === "personal-info" && personalFormRef.current) {
@@ -58,6 +63,8 @@ export function useFormSubmission(
       proofOfWorkFormRef.current.resetForm();
     } else if (activeTab === "education" && educationFormRef.current) {
       educationFormRef.current.resetForm();
+    } else if (activeTab === "projects" && projectFormRef.current) { // Add this condition
+      projectFormRef.current.resetForm();
     }
 
     resetFormData();
@@ -65,7 +72,7 @@ export function useFormSubmission(
       type: "info",
       message: "Changes discarded."
     });
-  }, [activeTab, personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef, educationFormRef, resetFormData, setStatusMessage]);
+  }, [activeTab, personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef, educationFormRef, projectFormRef, resetFormData, setStatusMessage]);
 
   const handleSubmitSuccess = useCallback(() => {
     resetFormData();
@@ -123,6 +130,13 @@ export function useFormSubmission(
             educationFormRef.current.resetForm();
           }
           break;
+        case 'projects': // Add this case
+          await updateProjects(formData.data);
+          updatedProfile = await refetchProfile();
+          if (projectFormRef.current) {
+            projectFormRef.current.resetForm();
+          }
+          break;
         default:
           console.warn('Unknown form:', formData);
       }
@@ -140,7 +154,7 @@ export function useFormSubmission(
       setIsSubmitting(false);
       setShowConfirmDialog(false);
     }
-  }, [formData, handleSubmitSuccess, refetchProfile, setStatusMessage, personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef, educationFormRef]);
+  }, [formData, handleSubmitSuccess, refetchProfile, setStatusMessage, personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef, educationFormRef, projectFormRef]);
 
   return {
     isSubmitting,

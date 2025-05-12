@@ -9,6 +9,8 @@ import { UserProfile } from "../../api";
 import { CertificateFormData, SkillsUpdatePayload } from "../types";
 import { ProofOfWorkUpdatePayload } from "../proof-of-work/types";
 import { EducationUpdatePayload } from "../education/types";
+import ProjectForm from "../ProjectForm";
+import { ProjectUpdatePayload } from "../project/types";
 
 interface TabContentProps {
   formManagement: FormManagementReturn;
@@ -20,6 +22,8 @@ interface TabContentProps {
   handleProofOfWorkData: (data: { proofOfWorkUpdateData: ProofOfWorkUpdatePayload }) => void;
   handleEducationChange: (hasChanges: boolean) => void;
   handleEducationData: (data: { educationUpdateData: EducationUpdatePayload }) => void;
+  handleProjectChange: (hasChanges: boolean) => void;
+  handleProjectData: (data: { projectsUpdateData: ProjectUpdatePayload }) => void;
 }
 
 export default function TabContent({
@@ -31,7 +35,9 @@ export default function TabContent({
   handleProofOfWorkChange,
   handleProofOfWorkData,
   handleEducationChange,
-  handleEducationData
+  handleEducationData,
+  handleProjectChange,
+  handleProjectData
 }: TabContentProps) {
   const {
     personalFormRef,
@@ -39,6 +45,7 @@ export default function TabContent({
     certificateFormRef,
     proofOfWorkFormRef,
     educationFormRef,
+    projectFormRef,
     handlePersonalInfoChange,
     handlePersonalInfoData,
     handleSkillsChange,
@@ -81,11 +88,12 @@ export default function TabContent({
       </TabsContent>
 
       <TabsContent value="projects">
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Projects Data</h2>
-          <p className="text-gray-500 mb-4">Raw JSON data from the API - will be replaced with forms later</p>
-          {renderJsonData(profileData.projects)}
-        </div>
+        <ProjectForm
+          ref={projectFormRef}
+          profile={profileData}
+          onChange={handleProjectChange}
+          onSaveData={handleProjectData}
+        />
       </TabsContent>
 
       <TabsContent value="certificates" className="py-6 space-y-6">

@@ -1,5 +1,6 @@
 import { fetchWithAuth_GET, fetchWithAuth_POST, fetchWithAuth_PUT } from '@/utils/api';
 import { UserMaster, UserSkillset, UserProjects, UserCertificates, UserEducation, UserExperience, SkillMaster, DegreeMaster } from '@prisma/client';
+import { ProjectUpdatePayload } from './components/project/types';
 
 interface PendingRequest {
   promise: Promise<UserProfile>;
@@ -227,15 +228,58 @@ export async function updateEducation(educationData: {
   }
 }
 
-export async function updateProjects(projects: UserProjects[]): Promise<UserProjects[]> {
+// Add to your API file
+export async function updateProjects(projectsData: ProjectUpdatePayload): Promise<{
+  updated: number;
+  created: number;
+  deleted: number;
+  total: number;
+}> {
   try {
-    console.log('Updating projects with data:', projects);
+    console.log('==================== PROJECTS FORM DATA ====================');
+    console.log('User ID:', projectsData.user_id);
+    
+    console.log('\n===== NEW PROJECTS =====');
+    projectsData.new_projects.forEach((proj, index) => {
+      console.log(`Project #${index + 1}:`);
+      console.log('- Title:', proj.title);
+      console.log('- Description:', proj.description);
+      console.log('- Link:', proj.link);
+      console.log('- Started at:', proj.started_at);
+      console.log('- End at:', proj.end_at ? proj.end_at : 'Currently building');
+    });
+    
+    console.log('\n===== UPDATED PROJECTS =====');
+    projectsData.updated_projects.forEach((proj, index) => {
+      console.log(`Project #${index + 1}:`);
+      console.log('- ID:', proj.id);
+      console.log('- Title:', proj.title);
+      console.log('- Description:', proj.description);
+      console.log('- Link:', proj.link);
+      console.log('- Started at:', proj.started_at);
+      console.log('- End at:', proj.end_at ? proj.end_at : 'Currently building');
+    });
+    
+    console.log('\n===== DELETED PROJECTS =====');
+    console.log(projectsData.deleted_projects);
+    console.log('================================================================');
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const response = await fetchWithAuth_PUT<ApiResponse<{
+      updated: number;
+      created: number;
+      deleted: number;
+      total: number;
+    }>>(
+      API_ENDPOINTS.PROJECTS,
+      projectsData
+    );
 
-    console.log('Projects update completed:', projects);
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update projects');
+    }
 
-    return projects;
+    console.log('Projects update completed:', response.data);
+    return response.data;
   } catch (error) {
     console.error('Error updating projects:', error);
     throw error;

@@ -9,7 +9,8 @@ import { PersonalInfoFormRef } from '../../components/PersonalInfoForm';
 import { SkillsFormRef } from '../../components/SkillsForm';
 import { CertificateFormRef } from '../../components/CertificateForm';
 import { ProofOfWorkFormRef } from '../../components/ProofOfWorkForm';
-import { EducationFormRef } from '../../components/education/types'; // Add this import
+import { EducationFormRef } from '../../components/education/types';
+import { ProjectFormRef } from '../../components/ProjectForm';
 
 export function useFormManagement(
     defaultTab: string,
@@ -42,6 +43,8 @@ export function useFormManagement(
         handleProofOfWorkData,
         handleEducationChange, 
         handleEducationData, 
+        handleProjectChange, // Add this
+        handleProjectData, // Add this
         resetFormData
     } = useFormData();
 
@@ -50,7 +53,8 @@ export function useFormManagement(
         skillsFormRef,
         certificateFormRef,
         proofOfWorkFormRef,
-        educationFormRef 
+        educationFormRef,
+        projectFormRef
     } = useFormRefs();
 
     const {
@@ -74,6 +78,7 @@ export function useFormManagement(
             certificateFormRef as React.RefObject<CertificateFormRef>,
             proofOfWorkFormRef as React.RefObject<ProofOfWorkFormRef>,
             educationFormRef as React.RefObject<EducationFormRef>, 
+            projectFormRef as React.RefObject<ProjectFormRef>, 
             activeTab,
             refetchProfile,
             setStatusMessage 
@@ -95,7 +100,8 @@ export function useFormManagement(
         skillsFormRef,
         certificateFormRef,
         proofOfWorkFormRef,
-        educationFormRef, // Add this
+        educationFormRef,
+        projectFormRef, // Add this
 
         // Status and dialogs
         statusMessage,
@@ -116,8 +122,10 @@ export function useFormManagement(
         handleCertificateChange,
         handleProofOfWorkChange,
         handleProofOfWorkData,
-        handleEducationChange, // Add this
-        handleEducationData, // Add this
+        handleEducationChange,
+        handleEducationData,
+        handleProjectChange, // Add this
+        handleProjectData, // Add this
 
         // User info
         userId,
