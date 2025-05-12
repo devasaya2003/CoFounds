@@ -82,7 +82,7 @@ const EducationForm = forwardRef<EducationFormRef, EducationFormProps>(
                     return {
                         id: edu.id,
                         institution: edu.eduFrom || '',
-                        degree: edu.degreeId || '',
+                        degree: edu.degree.id || '',
                         degreeName: edu.degree?.name || '',
                         startDate,
                         endDate,
