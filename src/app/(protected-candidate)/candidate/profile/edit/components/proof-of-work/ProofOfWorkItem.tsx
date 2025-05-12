@@ -1,10 +1,9 @@
 'use client';
 
-import React, { ChangeEvent, memo, useCallback, Suspense, lazy } from 'react';
-import { X, Info } from 'lucide-react';
+import React, { ChangeEvent, memo, useCallback, Suspense, lazy, useRef, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import DateSelector from '@/components/DateSelector/DateSelector';
 import { ProofOfWork } from './types';
@@ -31,6 +30,9 @@ const ProofOfWorkItem = memo(({
     onUpdate,
     onRemove
 }: ProofOfWorkItemProps) => {
+    // Add debounce ref for description updates
+    const descriptionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     const currentlyWorking = proofOfWork.currentlyWorking;
     const isCommunityWork = proofOfWork.isCommunityWork;
 
@@ -46,8 +48,15 @@ const ProofOfWorkItem = memo(({
         onUpdate(proofOfWork.id, { company: e.target.value });
     }, [proofOfWork.id, onUpdate]);
 
+    // IMPORTANT FIX: Debounce the markdown editor updates
     const handleDescriptionChange = useCallback((value: string) => {
-        onUpdate(proofOfWork.id, { description: value });
+        if (descriptionTimeoutRef.current) {
+            clearTimeout(descriptionTimeoutRef.current);
+        }
+
+        descriptionTimeoutRef.current = setTimeout(() => {
+            onUpdate(proofOfWork.id, { description: value });
+        }, 300); // 300ms debounce time
     }, [proofOfWork.id, onUpdate]);
 
     const handleCommunityWorkChange = useCallback((checked: boolean) => {
@@ -67,6 +76,15 @@ const ProofOfWorkItem = memo(({
             }
         });
     }, [proofOfWork.id, onUpdate]);
+
+    // Clean up any pending timeouts
+    useEffect(() => {
+        return () => {
+            if (descriptionTimeoutRef.current) {
+                clearTimeout(descriptionTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <div className="p-6 border border-gray-200 rounded-lg relative bg-white shadow-sm hover:shadow-md transition-shadow">

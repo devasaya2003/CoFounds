@@ -78,18 +78,30 @@ export function useFormSubmission(
         case 'personal-info':
           await updatePersonalInfo(formData.data);
           updatedProfile = await refetchProfile();
+          if (personalFormRef.current) {
+            personalFormRef.current.resetForm();
+          }
           break;
         case 'skills':
           await updateSkills(formData.data.skillsUpdateData);
           updatedProfile = await refetchProfile();
+          if (skillsFormRef.current) {
+            skillsFormRef.current.resetForm();
+          }
           break;
         case 'certificates':
           await updateCertificates(formData.data.certificatesUpdateData);
           updatedProfile = await refetchProfile();
+          if (certificateFormRef.current) {
+            certificateFormRef.current.resetForm();
+          }
           break;
         case 'proof-of-work':
           await updateProofOfWork(formData.data);
           updatedProfile = await refetchProfile();
+          if (proofOfWorkFormRef.current) {
+            proofOfWorkFormRef.current.resetForm();
+          }
           break;
         default:
           console.warn('Unknown form:', formData);
@@ -108,7 +120,7 @@ export function useFormSubmission(
       setIsSubmitting(false);
       setShowConfirmDialog(false);
     }
-  }, [formData, handleSubmitSuccess, refetchProfile, setStatusMessage]);
+  }, [formData, handleSubmitSuccess, refetchProfile, setStatusMessage, personalFormRef, skillsFormRef, certificateFormRef, proofOfWorkFormRef]);
 
   return {
     isSubmitting,

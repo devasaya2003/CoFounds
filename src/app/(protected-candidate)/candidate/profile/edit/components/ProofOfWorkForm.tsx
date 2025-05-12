@@ -74,8 +74,22 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                     };
                 });
 
+                const deepCopy = formattedExperiences.map(exp => ({
+                    ...exp,
+                    startDate: exp.startDate ? { ...exp.startDate } : {
+                        year: currentYear.toString(),
+                        month: '01',
+                        day: '01'
+                    },
+                    endDate: exp.currentlyWorking ? null : (exp.endDate ? { ...exp.endDate } : {
+                        year: currentYear.toString(),
+                        month: '01',
+                        day: '01'
+                    })
+                }));
+
                 setWorkExperiences(formattedExperiences);
-                setOriginalWorkExperiences(formattedExperiences.map(exp => ({ ...exp })));
+                setOriginalWorkExperiences(deepCopy);
 
                 if (isInitializing) {
                     setIsInitializing(false);
@@ -84,39 +98,6 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                 setIsInitializing(false);
             }
         }, [profile, currentYear, isInitializing]);
-
-        useEffect(() => {
-            if (!isInitializing && onChange) {
-                const hasDeletedExperiences = deletedWorkExperiences.length > 0;
-
-                const hasNewExperiences = workExperiences.some(exp => exp.id.startsWith('temp-'));
-
-                const hasModifiedExperiences = workExperiences.some(exp => {
-                    if (exp.id.startsWith('temp-')) return false;
-
-                    const originalExp = originalWorkExperiences.find(oe => oe.id === exp.id);
-                    if (!originalExp) return false;
-
-                    return (
-                        exp.title !== originalExp.title ||
-                        exp.company !== originalExp.company ||
-                        exp.description !== originalExp.description ||
-                        exp.isCommunityWork !== originalExp.isCommunityWork ||
-                        exp.currentlyWorking !== originalExp.currentlyWorking ||
-                        JSON.stringify(exp.startDate) !== JSON.stringify(originalExp.startDate) ||
-                        JSON.stringify(exp.endDate) !== JSON.stringify(originalExp.endDate)
-                    );
-                });
-
-                const hasChanges = hasDeletedExperiences || hasNewExperiences || hasModifiedExperiences;
-
-                if (!hasChanges) {
-                    onChange(false);
-                } else {
-                    onChange(true);
-                }
-            }
-        }, [isInitializing, onChange, workExperiences, originalWorkExperiences, deletedWorkExperiences]);
 
         const handleAddWorkExperience = useCallback(() => {
             startTransition(() => {
@@ -186,14 +167,61 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
             }
         }, [onChange, isInitializing]);
 
+        useEffect(() => {
+            if (!isInitializing && onChange) {
+                const hasDeletedExperiences = deletedWorkExperiences.length > 0;
+
+                const hasNewExperiences = workExperiences.some(exp => exp.id.startsWith('temp-'));
+
+                const hasModifiedExperiences = workExperiences.some(exp => {
+                    if (exp.id.startsWith('temp-')) return false;
+
+                    const originalExp = originalWorkExperiences.find(oe => oe.id === exp.id);
+                    if (!originalExp) return false;
+
+                    return (
+                        exp.title !== originalExp.title ||
+                        exp.company !== originalExp.company ||
+                        exp.description !== originalExp.description ||
+                        exp.isCommunityWork !== originalExp.isCommunityWork ||
+                        exp.currentlyWorking !== originalExp.currentlyWorking ||
+                        JSON.stringify(exp.startDate) !== JSON.stringify(originalExp.startDate) ||
+                        JSON.stringify(exp.endDate) !== JSON.stringify(originalExp.endDate)
+                    );
+                });
+
+                const hasChanges = hasDeletedExperiences || hasNewExperiences || hasModifiedExperiences;
+
+                if (!hasChanges) {
+                    onChange(false);
+                } else {
+                    onChange(true);
+                }
+            }
+        }, [isInitializing, onChange, workExperiences, originalWorkExperiences, deletedWorkExperiences]);
+
         const resetForm = useCallback(() => {
-            setWorkExperiences(originalWorkExperiences.map(exp => ({ ...exp })));
+            setWorkExperiences(originalWorkExperiences.map(exp => {
+                return {
+                    ...exp,
+                    startDate: exp.startDate ? { ...exp.startDate } : {
+                        year: currentYear.toString(),
+                        month: '01',
+                        day: '01'
+                    },
+                    endDate: exp.currentlyWorking ? null : (exp.endDate ? { ...exp.endDate } : {
+                        year: currentYear.toString(),
+                        month: '01',
+                        day: '01'
+                    })
+                };
+            }));
             setDeletedWorkExperiences([]);
 
             if (onChange) {
                 onChange(false);
             }
-        }, [originalWorkExperiences, onChange]);
+        }, [originalWorkExperiences, onChange, currentYear]);
 
         const saveForm = useCallback(() => {
             const newExperiences = workExperiences
@@ -242,14 +270,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
             };
 
             onSaveData({ proofOfWorkUpdateData: payload });
-
-            setOriginalWorkExperiences(workExperiences.map(exp => ({ ...exp })));
-            setDeletedWorkExperiences([]);
-
-            if (onChange) {
-                onChange(false);
-            }
-        }, [workExperiences, originalWorkExperiences, deletedWorkExperiences, onSaveData, user?.id, onChange]);
+        }, [workExperiences, originalWorkExperiences, deletedWorkExperiences, onSaveData, user?.id]);
 
         useImperativeHandle(ref, () => ({
             resetForm,
@@ -308,8 +329,8 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                                             key={experience.id}
                                             ref={(el) => setWorkExperienceRef(experience.id, el)}
                                             className={`transition-opacity duration-300 ${lastAddedId === experience.id && isPending
-                                                    ? 'opacity-70'
-                                                    : 'opacity-100'
+                                                ? 'opacity-70'
+                                                : 'opacity-100'
                                                 }`}
                                         >
                                             <ProofOfWorkItem
@@ -344,7 +365,6 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                                 </div>
                             )}
 
-                            {/* Loading indicator when adding a new experience */}
                             {isPending && (
                                 <div className="fixed bottom-6 right-6 bg-primary text-white px-4 py-2 rounded-full shadow-lg flex items-center z-50">
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
