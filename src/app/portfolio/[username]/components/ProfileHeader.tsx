@@ -24,7 +24,9 @@ export default function ProfileHeader({ firstName, lastName, title, companyName,
           {firstName || ''} {lastName || ''}
         </h1>
         <p className="text-lg text-gray-600 mb-1 text-center md:text-left">
-          {title} {companyName && `at ${companyName}`}
+          {companyName === "COF_PROOF_COMMUNITY"
+            ? `Working on ${title}`
+            : `${title}${companyName ? ` at ${companyName}` : ""}`}
         </p>
         
         <div className="flex flex-wrap items-center justify-center md:justify-start text-sm text-gray-600 gap-x-6 gap-y-2">
