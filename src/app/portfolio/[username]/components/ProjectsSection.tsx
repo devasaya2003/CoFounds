@@ -1,5 +1,4 @@
-import { Code, ExternalLink, Github } from 'lucide-react';
-import AuroraEffect from '@/components/ui/AuroraEffect';
+import { Code, ExternalLink } from 'lucide-react';
 
 interface Project {
   title: string;

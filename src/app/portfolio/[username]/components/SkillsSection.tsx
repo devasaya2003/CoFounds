@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Code } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 import {
   RadarChart,
   PolarGrid,
@@ -104,7 +104,7 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
   return (
     <section id="skills" className="mb-12">
       <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
-        <Code size={18} className="text-indigo-600" />
+        <Lightbulb size={18} className="text-indigo-600" />
         Skills
       </h2>
 
