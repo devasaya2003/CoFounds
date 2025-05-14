@@ -26,12 +26,6 @@ export const getByJobRecruiterId = async (data: GetByJobRecruiterId) => {
             endAt: true,
             createdAt: true,
             updatedAt: true,
-            applications: {
-                select: {
-                    id: true,
-                    status: true
-                }
-            },
             _count: {
                 select: {
                     applications: true
@@ -42,10 +36,36 @@ export const getByJobRecruiterId = async (data: GetByJobRecruiterId) => {
 
     if (!result) return null;
 
-    // Transform the result to have totalApplications instead of _count
+    const statusCounts = await prisma.applicationCandidateMap.groupBy({
+        by: ['status'],
+        where: {
+            jobId: data.job_id,
+            isActive: true
+        },
+        _count: {
+            status: true
+        }
+    });
+
+    // Create applicationCount object with the new structure
+    const applicationCount = {
+        total: result._count.applications,
+        applied: 0,
+        under_review: 0,
+        inprogress: 0,
+        rejected: 0,
+        closed: 0
+    };
+
+    // Fill in the actual counts
+    statusCounts.forEach(item => {
+        applicationCount[item.status] = item._count.status;
+    });
+
+    // Remove _count from the result and add applicationCount
     const { _count, ...rest } = result;
     return {
         ...rest,
-        totalApplications: _count.applications
+        applicationCount
     };
 };
