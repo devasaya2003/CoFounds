@@ -7,6 +7,7 @@ import { restoreUserSession } from '@/redux/slices/authSlice';
 import { fetchRecruiterProfile } from '@/redux/slices/recruiterSlice';
 import TopBar from '@/components/dashboard/TopBar';
 import Sidebar from '@/components/dashboard/Sidebar';
+import { UserCircle, Building, LogOut } from 'lucide-react';
 
 export default function RecruiterLayout({
   children,
@@ -23,14 +24,13 @@ export default function RecruiterLayout({
   );
 
   // Recruiter state
-  const { userId, isLoading: profileLoading } = useAppSelector(
+  const { userId, firstName, lastName, companyName, isLoading: profileLoading } = useAppSelector(
     (state) => state.recruiter
   );
 
   // Track initialization
   const [authInitialized, setAuthInitialized] = useState(false);
   const [profileInitialized, setProfileInitialized] = useState(false);
-  const [showDebug, setShowDebug] = useState(false);
 
   // Determine active view from pathname
   const getActiveViewFromPath = (path: string) => {
@@ -72,6 +72,35 @@ export default function RecruiterLayout({
 
     loadProfile();
   }, [dispatch, isAuthenticated, user, profileInitialized, profileLoading]);
+
+  // Sidebar configuration
+  const sidebarMenuItems = [
+    { id: "all-jobs", label: "All Jobs" },
+    { id: "jobs-created", label: "Jobs Created By You" },
+    { id: "create-job", label: "Create New Job" },
+    { id: "kanban", label: "Kanban Board" },
+  ];
+
+  // TopBar configuration
+  const profileOptions = [
+    { 
+      id: "your-profile", 
+      label: "Your Profile",
+      icon: <UserCircle className="mr-2 h-4 w-4" />
+    },
+    { 
+      id: "company-profile", 
+      label: "Company Profile",
+      icon: <Building className="mr-2 h-4 w-4" />
+    },
+    { 
+      id: "logout", 
+      label: "Sign Out",
+      icon: <LogOut className="mr-2 h-4 w-4" />,
+      divider: true,
+      href: "/auth/logout"
+    },
+  ];
 
   // Handle navigation
   const handleSidebarNavigation = (view: string) => {
@@ -118,10 +147,20 @@ export default function RecruiterLayout({
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar activeView={activeView} onViewChange={handleSidebarNavigation} />
+      <Sidebar 
+        activeView={activeView} 
+        onViewChange={handleSidebarNavigation} 
+        menuItems={sidebarMenuItems}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar activeView={activeView} onViewChange={handleTopBarNavigation} />
+        <TopBar 
+          activeView={activeView} 
+          onViewChange={handleTopBarNavigation} 
+          dashboardTitle={`${companyName || 'Company'} Recruiter Dashboard`}
+          userName={`${firstName || ''} ${lastName || ''}`.trim() || 'User'}
+          profileOptions={profileOptions}
+        />
         <main className="flex-1 overflow-y-auto p-6">
           {profileLoading ? (
             <div className="flex flex-col items-center justify-center h-[80vh]">

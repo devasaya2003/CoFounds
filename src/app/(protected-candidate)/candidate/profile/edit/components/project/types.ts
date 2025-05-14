@@ -48,4 +48,4 @@ export interface ProjectUpdatePayload {
     deleted_projects: string[];
 }
 
-export const MAX_PROJECTS = 5;
+export const MAX_PROJECTS = 10;

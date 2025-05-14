@@ -1,13 +1,9 @@
 'use client';
 
 import { useState } from "react";
-import { usePathname, useRouter } from 'next/navigation';
 import Link from "next/link";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 import SearchBar from "@/components/dashboard/SearchBar";
 import Pagination from "@/components/dashboard/Pagination";
-import { useAppDispatch } from "@/redux/hooks";
 
 // Define the dummy jobs data
 const dummyJobs = [
@@ -106,37 +102,6 @@ const dummyJobs = [
 export default function CandidateDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const { 
-    user, 
-    layoutInitialized 
-  } = useSelector((state: RootState) => state.auth);
-  
-  if (!layoutInitialized) {
-    return null;
-  }
-
-  const getActiveViewFromPath = (path: string) => {
-    if (path.includes('/applications')) return 'applications';
-    if (path.includes('/profile')) return 'profile';
-    return 'jobs';
-  };
-
-  const activeView = getActiveViewFromPath(pathname);
-  
-  const handleSidebarNavigation = (view: string) => {    
-    if (view !== activeView) {
-      if (view === 'jobs') {
-        router.push('/candidate/app');
-      } else if (view === 'applications') {
-        router.push('/candidate/app/applications');
-      } else if (view === 'profile') {
-        router.push('/candidate/app/profile');
-      }
-    }
-  };
   
   // Search and pagination handlers
   const handleSearch = (term: string) => {
@@ -163,121 +128,63 @@ export default function CandidateDashboard() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-64 bg-gray-100 min-h-screen p-4 border-r">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Dashboard</h2>
-          <nav>
-            <ul>
-              <li className="mb-2">
-                <button 
-                  onClick={() => handleSidebarNavigation('jobs')}
-                  className={`w-full text-left px-4 py-2 rounded-md ${activeView === 'jobs' ? 'bg-indigo-100 text-indigo-800 font-medium' : 'text-gray-700 hover:bg-gray-200'}`}
-                >
-                  Jobs
-                </button>
-              </li>
-              <li className="mb-2">
-                <button 
-                  onClick={() => handleSidebarNavigation('applications')}
-                  className={`w-full text-left px-4 py-2 rounded-md ${activeView === 'applications' ? 'bg-indigo-100 text-indigo-800 font-medium' : 'text-gray-700 hover:bg-gray-200'}`}
-                >
-                  Your Applications
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => handleSidebarNavigation('profile')}
-                  className={`w-full text-left px-4 py-2 rounded-md ${activeView === 'profile' ? 'bg-indigo-100 text-indigo-800 font-medium' : 'text-gray-700 hover:bg-gray-200'}`}
-                >
-                  Profile
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
-        <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-gray-800">
-            {activeView === 'jobs' && 'Available Jobs'}
-            {activeView === 'applications' && 'Your Applications'}
-            {activeView === 'profile' && 'Your Profile'}
-          </h1>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600">{user?.userName || 'Candidate'}</span>
-            <button 
-              onClick={() => router.push('/auth/sign-out')}
-              className="text-red-600 hover:text-red-800"
-            >
-              Sign Out
-            </button>
-          </div>
-        </header>
-        
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <SearchBar onSearch={handleSearch} />
-          
-          {currentJobs.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                {currentJobs.map(job => (
-                  <div key={job.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">{job.title}</h3>
-                      <p className="text-indigo-600 font-medium mb-2">{job.companyName}</p>
-                      <p className="text-gray-600 mb-3">{job.location} • {job.employmentType}</p>
-                      <p className="text-gray-700 mb-4">{job.salary}</p>
-                      
-                      <div className="mb-4">
-                        <div className="flex flex-wrap gap-2">
-                          {job.skills.slice(0, 3).map((skill, index) => (
-                            <span key={index} className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full">
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">
-                          Posted: {new Date(job.postedAt).toLocaleDateString()}
+    <>
+      <SearchBar onSearch={handleSearch} />
+      
+      {currentJobs.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+            {currentJobs.map(job => (
+              <div key={job.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{job.title}</h3>
+                  <p className="text-indigo-600 font-medium mb-2">{job.companyName}</p>
+                  <p className="text-gray-600 mb-3">{job.location} • {job.employmentType}</p>
+                  <p className="text-gray-700 mb-4">{job.salary}</p>
+                  
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      {job.skills.slice(0, 3).map((skill, index) => (
+                        <span key={index} className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full">
+                          {skill}
                         </span>
-                        <Link 
-                          href={`/jobs/${job.id}`} 
-                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
-                        >
-                          View Details
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="px-6 py-3 bg-gray-50 border-t flex justify-end">
-                      <button className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors">
-                        Apply Now
-                      </button>
+                      ))}
                     </div>
                   </div>
-                ))}
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">
+                      Posted: {new Date(job.postedAt).toLocaleDateString()}
+                    </span>
+                    <Link 
+                      href={`/jobs/${job.id}`} 
+                      className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+                <div className="px-6 py-3 bg-gray-50 border-t flex justify-end">
+                  <button className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors">
+                    Apply Now
+                  </button>
+                </div>
               </div>
-              
-              <Pagination 
-                currentPage={currentPage} 
-                totalPages={totalPages} 
-                onPageChange={handlePageChange} 
-              />
-            </>
-          ) : (
-            <div className="bg-white rounded-lg shadow-md p-8 text-center mt-6">
-              <p className="text-xl text-gray-600">No jobs match your search</p>
-              <p className="text-gray-500 mt-2">Try adjusting your search criteria</p>
-            </div>
-          )}
-        </main>
-      </div>
-    </div>
+            ))}
+          </div>
+          
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange} 
+          />
+        </>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-8 text-center mt-6">
+          <p className="text-xl text-gray-600">No jobs match your search</p>
+          <p className="text-gray-500 mt-2">Try adjusting your search criteria</p>
+        </div>
+      )}
+    </>
   );
 }

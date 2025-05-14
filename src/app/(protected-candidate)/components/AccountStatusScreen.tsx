@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, ChevronRight, Shield, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Shield, CheckCircle, UserCircle, LogOut } from 'lucide-react';
 import { UserProfile } from '../candidate/profile/edit/api';
 import { AuthUser } from '@/redux/slices/authSlice';
+import TopBar from '@/components/dashboard/TopBar';
 
 interface MissingField {
   name: string;
@@ -27,23 +28,44 @@ export function AccountStatusScreen({
 }: AccountStatusScreenProps) {
   const router = useRouter();
   
+  // Configure TopBar options
+  const profileOptions = [
+    { 
+      id: "profile", 
+      label: "Your Profile",
+      icon: <UserCircle className="mr-2 h-4 w-4" />
+    },
+    { 
+      id: "logout", 
+      label: "Sign Out",
+      icon: <LogOut className="mr-2 h-4 w-4" />,
+      divider: true,
+      href: "/auth/logout"
+    },
+  ];
+  
+  // Handle top bar navigation
+  const handleTopBarNavigation = (view: string) => {
+    if (view === 'profile') {
+      router.push('/candidate/profile/edit');
+    }
+  };
+  
+  // Get the user's name for display
+  const userName = user?.firstName && user?.lastName
+    ? `${user.firstName} ${user.lastName}`.trim()
+    : authUser?.userName || 'User';
+  
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Top Bar */}
-      <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-800">
-          Account Status
-        </h1>
-        <div className="flex items-center space-x-4">
-          <span className="text-gray-600">{authUser?.userName || 'Candidate'}</span>
-          <button
-            onClick={() => router.push('/auth/sign-out')}
-            className="text-red-600 hover:text-red-800"
-          >
-            Sign Out
-          </button>
-        </div>
-      </header>
+      {/* Use the shared TopBar component */}
+      <TopBar 
+        activeView="" 
+        onViewChange={handleTopBarNavigation} 
+        dashboardTitle="Candidate Dashboard | Account Status"
+        userName={userName}
+        profileOptions={profileOptions}
+      />
 
       {/* Content */}
       <div className="flex-1 flex items-center justify-center p-6">

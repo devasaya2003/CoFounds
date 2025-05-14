@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { restoreUserSession } from '@/redux/slices/authSlice';
 import { UserProfile, getUserProfile } from './candidate/profile/edit/api';
-import { createLayout, LayoutState } from './components/LayoutFactory';
+import { CreateLayout, LayoutState } from './components/LayoutFactory';
 
 export default function CandidateLayout({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -26,6 +26,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
 
   const [sessionRestored, setSessionRestored] = useState(false);
 
+  // Session restoration effect
   useEffect(() => {
     if (!sessionRestored && !authLoading) {
       dispatch(restoreUserSession());
@@ -33,6 +34,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     }
   }, [dispatch, sessionRestored, authLoading, isAuthenticated]);
 
+  // Profile fetching effect
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (
@@ -49,7 +51,6 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
 
       try {
         const profileData = await getUserProfile(authUser.id);
-
         setCompleteUserProfile(profileData);
       } catch (error) {
         console.error('❌ Error fetching profile:', error);
@@ -60,6 +61,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     fetchUserProfile();
   }, [isAuthenticated, authUser?.id, isLoadingUserDetails, userDetailsFetched, sessionRestored]);
 
+  // Profile completeness check
   const hasCompleteProfile = (): boolean => {
     if (!completeUserProfile) {
       return false;
@@ -99,6 +101,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     return isComplete;
   };
 
+  // Path matching helper
   const isPathMatching = (pattern: string): boolean => {
     const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
     const normalizedPattern = pattern.endsWith('/') ? pattern.slice(0, -1) : pattern;
@@ -106,11 +109,13 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     return result;
   };
 
+  // User verification check
   const isUserVerified = (): boolean => {
     const result = authUser?.verified === true;
     return result;
   };
 
+  // Get missing profile fields
   const getMissingFields = () => {
     if (!completeUserProfile) return [];
 
@@ -140,6 +145,7 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     return missingFields;
   };
 
+  // Determine layout state
   const determineLayoutState = (): LayoutState => {
     if (authLoading || isLoadingUserDetails || !sessionRestored) {
       return LayoutState.LOADING;
@@ -179,14 +185,17 @@ export default function CandidateLayout({ children }: { children: React.ReactNod
     return LayoutState.NORMAL;
   };
 
+  // Get current layout state
   const layoutState = determineLayoutState();
 
+  // Redirect if unauthenticated
   if (layoutState === LayoutState.UNAUTHENTICATED) {
     router.replace('/auth/sign-in');
     return null;
   }
 
-  return createLayout({
+  // Create and return appropriate layout
+  return CreateLayout({
     children,
     state: layoutState,
     authUser,

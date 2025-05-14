@@ -1,22 +1,23 @@
 import { useRouter } from "next/navigation";
 
+interface MenuItem {
+  id: string;
+  label: string;
+  href?: string; // Optional direct href if needed
+}
+
 interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
+  menuItems: MenuItem[];
+  title?: string; // Optional title for the sidebar
 }
 
-export default function Sidebar({ activeView, onViewChange }: SidebarProps) {
-  const menuItems = [
-    { id: "all-jobs", label: "All Jobs" },
-    { id: "jobs-created", label: "Jobs Created By You" },
-    { id: "create-job", label: "Create New Job" },
-    { id: "kanban", label: "Kanban Board" },
-  ];
-  
+export default function Sidebar({ activeView, onViewChange, menuItems, title = "Cofounds" }: SidebarProps) {
   return (
     <aside className="bg-white w-64 shadow-md hidden md:block">
       <div className="h-16 flex items-center justify-center">
-      <span className="text-xl font-display font-bold text-gradient">Cofounds</span>
+        <span className="text-xl font-display font-bold text-gradient">{title}</span>
       </div>
       <nav className="mt-5">
         <ul>
