@@ -18,6 +18,7 @@ interface ProjectItemProps {
     onRemove: (id: string) => void;
     years: string[];
     months: { value: string; label: string }[];
+    onContentReady?: (id: string) => void; // New prop
 }
 
 const ProjectItem = memo(({
@@ -27,6 +28,7 @@ const ProjectItem = memo(({
     onRemove,
     years,
     months,
+    onContentReady,
 }: ProjectItemProps) => {
     const currentlyBuilding = project.currentlyBuilding;
 
@@ -120,6 +122,7 @@ const ProjectItem = memo(({
                     <MarkdownEditor
                         initialValue={project.description || ''}
                         onChange={handleDescriptionChange}
+                        onContentReady={() => onContentReady?.(project.id)}
                     />
                 </Suspense>
                 <p className="text-xs text-gray-500 mt-1">

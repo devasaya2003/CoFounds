@@ -32,6 +32,8 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
         const [isPending, startTransition] = useTransition(); 
         const [lastAddedId, setLastAddedId] = useState<string | null>(null);
         const [isInitializing, setIsInitializing] = useState(true);
+        const [readyCertificates, setReadyCertificates] = useState<Set<string>>(new Set());
+        const [allContentReady, setAllContentReady] = useState(false);
                 
         const certificateRefs = useRef<Map<string, HTMLDivElement>>(new Map());        
         const containerRef = useRef<HTMLDivElement>(null);
@@ -41,6 +43,9 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
 
         useEffect(() => {
             if (profile?.certificates) {
+                setReadyCertificates(new Set());
+                setAllContentReady(false);
+                
                 const formattedCerts = profile.certificates.map(cert => {
                     const startDate = cert.startedAt ? {
                         year: new Date(cert.startedAt).getFullYear().toString(),
@@ -77,15 +82,39 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                 });
 
                 setCertificates(formattedCerts);
-                setOriginalCertificates(formattedCerts.map(cert => ({ ...cert })));
+                setOriginalCertificates(formattedCerts.map(cert => ({ 
+                    ...cert,
+                    startDate: { ...cert.startDate },
+                    endDate: { ...cert.endDate },
+                    description: cert.description ? String(cert.description) : ''
+                })));
+                
+                if (formattedCerts.length === 0) {
+                    setAllContentReady(true);
+                }
                                 
                 if (isInitializing) {
                     setIsInitializing(false);
                 }
             } else {                
                 setIsInitializing(false);
+                setAllContentReady(true);
             }
         }, [profile, currentYear, isInitializing]);
+
+        const handleContentReady = useCallback((certificateId: string) => {
+            setReadyCertificates(prev => {
+                const newSet = new Set(prev);
+                newSet.add(certificateId);
+                return newSet;
+            });
+        }, []);
+        
+        useEffect(() => {
+            if (certificates.length > 0 && readyCertificates.size === certificates.length) {
+                setAllContentReady(true);
+            }
+        }, [certificates, readyCertificates]);
 
         const handleAddCertificate = useCallback(() => {
             if (certificates.length >= MAX_CERTIFICATES) {
@@ -148,7 +177,7 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
         }, [onChange, isInitializing]);
 
         useEffect(() => {
-            if (!isInitializing && onChange) {                
+            if (!isInitializing && allContentReady && onChange) {                
                 const hasDeletedCertificates = deletedCertificates.length > 0;
                                 
                 const hasNewCertificates = certificates.some(cert => cert.id.startsWith('temp-'));
@@ -158,10 +187,12 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                                         
                     const originalCert = originalCertificates.find(oc => oc.id === cert.id);
                     if (!originalCert) return false;
+                    
+                    const normalizeDescription = (desc: string | null) => desc?.trim() || '';
                                         
                     return (
                         cert.title !== originalCert.title ||
-                        cert.description !== originalCert.description ||
+                        normalizeDescription(cert.description) !== normalizeDescription(originalCert.description) ||
                         cert.link !== originalCert.link ||
                         cert.noExpiryDate !== originalCert.noExpiryDate ||
                         JSON.stringify(cert.startDate) !== JSON.stringify(originalCert.startDate) ||
@@ -177,7 +208,7 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                     onChange(true);
                 }
             }
-        }, [isInitializing, onChange, certificates, originalCertificates, deletedCertificates]);
+        }, [isInitializing, allContentReady, onChange, certificates, originalCertificates, deletedCertificates]);
 
         const handleUpdateCertificate = useCallback((id: string, updates: Partial<Certificate>) => {
             setCertificates(prevCerts =>
@@ -313,6 +344,7 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                                                 index={index}
                                                 onUpdate={handleUpdateCertificate}
                                                 onRemove={handleRemoveCertificate}
+                                                onContentReady={handleContentReady}
                                             />
                                         </div>
                                     ))}
@@ -349,7 +381,6 @@ const CertificateForm = forwardRef<CertificateFormRef, CertificateFormProps>(
                                 </div>
                             )}
                             
-                            {/* Loading indicator when adding a new certificate */}
                             {isPending && (
                                 <div className="fixed bottom-6 right-6 bg-primary text-white px-4 py-2 rounded-full shadow-lg flex items-center z-50">
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

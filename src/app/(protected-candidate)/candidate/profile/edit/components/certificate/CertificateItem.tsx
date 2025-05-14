@@ -23,13 +23,15 @@ interface CertificateItemProps {
     index: number;
     onUpdate: (id: string, updates: Partial<Certificate>) => void;
     onRemove: (id: string) => void;
+    onContentReady?: (id: string) => void; // Add this new prop
 }
 
 const CertificateItem = memo(({
     certificate,
     index,
     onUpdate,
-    onRemove
+    onRemove,
+    onContentReady
 }: CertificateItemProps) => {
     const hasNoExpiryDate = certificate.noExpiryDate === true;
 
@@ -44,6 +46,13 @@ const CertificateItem = memo(({
     const handleDescriptionChange = useCallback((value: string) => {
         onUpdate(certificate.id, { description: value });
     }, [certificate.id, onUpdate]);
+
+    // Add handler for content ready event
+    const handleContentReady = useCallback(() => {
+        if (onContentReady) {
+            onContentReady(certificate.id);
+        }
+    }, [certificate.id, onContentReady]);
 
     const handleLinkChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         onUpdate(certificate.id, { link: e.target.value });
@@ -81,6 +90,7 @@ const CertificateItem = memo(({
                     <MarkdownEditor
                         initialValue={certificate.description || ''}
                         onChange={handleDescriptionChange}
+                        onContentReady={handleContentReady} // Add this prop
                     />
                 </Suspense>
                 <p className="text-xs text-gray-500 mt-1">

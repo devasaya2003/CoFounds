@@ -32,6 +32,8 @@ const ProjectForm = forwardRef<ProjectFormRef, ProjectFormProps>(
         const [isPending, startTransition] = useTransition(); 
         const [lastAddedId, setLastAddedId] = useState<string | null>(null);
         const [isInitializing, setIsInitializing] = useState(true);
+        const [readyProjects, setReadyProjects] = useState<Set<string>>(new Set());
+        const [allContentReady, setAllContentReady] = useState(false);
                 
         const projectRefs = useRef<Map<string, HTMLDivElement>>(new Map());        
         const containerRef = useRef<HTMLDivElement>(null);
@@ -54,6 +56,9 @@ const ProjectForm = forwardRef<ProjectFormRef, ProjectFormProps>(
         // Initialize projects from profile data
         useEffect(() => {
             if (profile?.projects) {
+                setReadyProjects(new Set());
+                setAllContentReady(false);
+
                 const formattedProjects = profile.projects.map(proj => {
                     const startDate = proj.startedAt ? {
                         year: new Date(proj.startedAt).getFullYear().toString(),
@@ -91,15 +96,21 @@ const ProjectForm = forwardRef<ProjectFormRef, ProjectFormProps>(
                 const deepCopy = formattedProjects.map(proj => ({
                     ...proj,
                     startDate: { ...proj.startDate },
-                    endDate: proj.endDate ? { ...proj.endDate } : null
+                    endDate: proj.endDate ? { ...proj.endDate } : null,
+                    description: proj.description ? String(proj.description) : null
                 }));
                 setOriginalProjects(deepCopy);
+
+                if (formattedProjects.length === 0) {
+                    setAllContentReady(true);
+                }
                 
                 if (isInitializing) {
                     setIsInitializing(false);
                 }
             } else {
                 setIsInitializing(false);
+                setAllContentReady(true);
             }
         }, [profile, currentYear, isInitializing]);
 
@@ -178,9 +189,25 @@ const ProjectForm = forwardRef<ProjectFormRef, ProjectFormProps>(
             }
         }, [onChange, isInitializing]);
 
+        // Handle when a project's content is ready
+        const handleContentReady = useCallback((projectId: string) => {
+            setReadyProjects(prev => {
+                const newSet = new Set(prev);
+                newSet.add(projectId);
+                return newSet;
+            });
+        }, []);
+
+        // Check if all projects have their content ready
+        useEffect(() => {
+            if (projects.length > 0 && readyProjects.size === projects.length) {
+                setAllContentReady(true);
+            }
+        }, [projects, readyProjects]);
+
         // Track form changes to notify parent component
         useEffect(() => {
-            if (!isInitializing && onChange) {                
+            if (!isInitializing && allContentReady && onChange) {                
                 const hasDeletedProjects = deletedProjects.length > 0;
                                 
                 const hasNewProjects = projects.some(proj => proj.id.startsWith('temp-'));
@@ -190,10 +217,12 @@ const ProjectForm = forwardRef<ProjectFormRef, ProjectFormProps>(
                                         
                     const originalProj = originalProjects.find(op => op.id === proj.id);
                     if (!originalProj) return false;
+
+                    const normalizeDescription = (desc: string | null) => desc?.trim() || '';
                                         
                     return (
                         proj.title !== originalProj.title ||
-                        proj.description !== originalProj.description ||
+                        normalizeDescription(proj.description) !== normalizeDescription(originalProj.description) ||
                         proj.link !== originalProj.link ||
                         proj.currentlyBuilding !== originalProj.currentlyBuilding ||
                         JSON.stringify(proj.startDate) !== JSON.stringify(originalProj.startDate) ||
@@ -205,7 +234,7 @@ const ProjectForm = forwardRef<ProjectFormRef, ProjectFormProps>(
                                 
                 onChange(hasChanges);
             }
-        }, [isInitializing, onChange, projects, originalProjects, deletedProjects]);
+        }, [isInitializing, onChange, projects, originalProjects, deletedProjects, allContentReady]);
 
         // Reset form to original state
         const resetForm = useCallback(() => {
@@ -344,6 +373,7 @@ const ProjectForm = forwardRef<ProjectFormRef, ProjectFormProps>(
                                                 onRemove={handleRemoveProject}
                                                 years={years}
                                                 months={months}
+                                                onContentReady={handleContentReady}
                                             />
                                         </div>
                                     ))}

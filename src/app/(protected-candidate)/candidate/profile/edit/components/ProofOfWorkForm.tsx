@@ -32,6 +32,9 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
         const [lastAddedId, setLastAddedId] = useState<string | null>(null);
         const [isInitializing, setIsInitializing] = useState(true);
 
+        const [readyExperiences, setReadyExperiences] = useState<Set<string>>(new Set());
+        const [allContentReady, setAllContentReady] = useState(false);
+
         const workExperienceRefs = useRef<Map<string, HTMLDivElement>>(new Map());
         const containerRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +43,9 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
 
         useEffect(() => {
             if (profile?.experience) {
+                setReadyExperiences(new Set());
+                setAllContentReady(false);
+
                 const formattedExperiences = profile.experience.map(exp => {
                     const startDate = exp.startedAt ? {
                         year: new Date(exp.startedAt).getFullYear().toString(),
@@ -85,19 +91,39 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                         year: currentYear.toString(),
                         month: '01',
                         day: '01'
-                    })
+                    }),
+                    description: exp.description ? String(exp.description) : ''
                 }));
 
                 setWorkExperiences(formattedExperiences);
                 setOriginalWorkExperiences(deepCopy);
+
+                if (formattedExperiences.length === 0) {
+                    setAllContentReady(true);
+                }
 
                 if (isInitializing) {
                     setIsInitializing(false);
                 }
             } else {
                 setIsInitializing(false);
+                setAllContentReady(true);
             }
         }, [profile, currentYear, isInitializing]);
+
+        const handleContentReady = useCallback((experienceId: string) => {
+            setReadyExperiences(prev => {
+                const newSet = new Set(prev);
+                newSet.add(experienceId);
+                return newSet;
+            });
+        }, []);
+
+        useEffect(() => {
+            if (workExperiences.length > 0 && readyExperiences.size === workExperiences.length) {
+                setAllContentReady(true);
+            }
+        }, [workExperiences, readyExperiences]);
 
         const handleAddWorkExperience = useCallback(() => {
             startTransition(() => {
@@ -168,7 +194,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
         }, [onChange, isInitializing]);
 
         useEffect(() => {
-            if (!isInitializing && onChange) {
+            if (!isInitializing && allContentReady && onChange) {
                 const hasDeletedExperiences = deletedWorkExperiences.length > 0;
 
                 const hasNewExperiences = workExperiences.some(exp => exp.id.startsWith('temp-'));
@@ -179,10 +205,12 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                     const originalExp = originalWorkExperiences.find(oe => oe.id === exp.id);
                     if (!originalExp) return false;
 
+                    const normalizeDescription = (desc: string | null) => desc?.trim() || '';
+
                     return (
                         exp.title !== originalExp.title ||
                         exp.company !== originalExp.company ||
-                        exp.description !== originalExp.description ||
+                        normalizeDescription(exp.description) !== normalizeDescription(originalExp.description) ||
                         exp.isCommunityWork !== originalExp.isCommunityWork ||
                         exp.currentlyWorking !== originalExp.currentlyWorking ||
                         JSON.stringify(exp.startDate) !== JSON.stringify(originalExp.startDate) ||
@@ -192,13 +220,9 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
 
                 const hasChanges = hasDeletedExperiences || hasNewExperiences || hasModifiedExperiences;
 
-                if (!hasChanges) {
-                    onChange(false);
-                } else {
-                    onChange(true);
-                }
+                onChange(hasChanges);
             }
-        }, [isInitializing, onChange, workExperiences, originalWorkExperiences, deletedWorkExperiences]);
+        }, [isInitializing, allContentReady, onChange, workExperiences, originalWorkExperiences, deletedWorkExperiences]);
 
         const resetForm = useCallback(() => {
             setWorkExperiences(originalWorkExperiences.map(exp => {
@@ -338,6 +362,7 @@ const ProofOfWorkForm = forwardRef<ProofOfWorkFormRef, ProofOfWorkFormProps>(
                                                 index={index}
                                                 onUpdate={handleUpdateWorkExperience}
                                                 onRemove={handleRemoveWorkExperience}
+                                                onContentReady={handleContentReady}
                                             />
                                         </div>
                                     ))}

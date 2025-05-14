@@ -22,13 +22,15 @@ interface ProofOfWorkItemProps {
     index: number;
     onUpdate: (id: string, updates: Partial<ProofOfWork>) => void;
     onRemove: (id: string) => void;
+    onContentReady?: (id: string) => void; // Add this new prop
 }
 
 const ProofOfWorkItem = memo(({
     proofOfWork,
     index,
     onUpdate,
-    onRemove
+    onRemove,
+    onContentReady
 }: ProofOfWorkItemProps) => {
     // Add debounce ref for description updates
     const descriptionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,6 +60,13 @@ const ProofOfWorkItem = memo(({
             onUpdate(proofOfWork.id, { description: value });
         }, 300); // 300ms debounce time
     }, [proofOfWork.id, onUpdate]);
+
+    // Add handler for content ready event from the RichTextEditor
+    const handleContentReady = useCallback(() => {
+        if (onContentReady) {
+            onContentReady(proofOfWork.id);
+        }
+    }, [proofOfWork.id, onContentReady]);
 
     const handleCommunityWorkChange = useCallback((checked: boolean) => {
         onUpdate(proofOfWork.id, { 
@@ -147,6 +156,7 @@ const ProofOfWorkItem = memo(({
                     <MarkdownEditor
                         initialValue={proofOfWork.description || ''}
                         onChange={handleDescriptionChange}
+                        onContentReady={handleContentReady} // Add this prop
                     />
                 </Suspense>
                 <p className="text-xs text-gray-500 mt-1">

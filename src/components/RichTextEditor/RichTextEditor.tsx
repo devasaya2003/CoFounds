@@ -7,14 +7,15 @@ import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Highlight from '@tiptap/extension-highlight';
 import { EditorToolbar } from './EditorToolbar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface RichTextEditorProps {
   initialValue?: string;
   onChange?: (html: string) => void;
   placeholder?: string;
   minHeight?: string;
-  disabled?: boolean; 
+  disabled?: boolean;
+  onContentReady?: () => void; // New callback for content loaded event
 }
 
 export default function RichTextEditor({
@@ -22,8 +23,11 @@ export default function RichTextEditor({
   onChange,
   placeholder = 'Start writing...',
   minHeight = '200px',
-  disabled = false 
+  disabled = false,
+  onContentReady
 }: RichTextEditorProps) {
+  const [isInitialized, setIsInitialized] = useState(false);
+  
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -49,7 +53,10 @@ export default function RichTextEditor({
     ],
     content: initialValue,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
+      // Only trigger onChange after initial content has been loaded
+      if (isInitialized) {
+        onChange?.(editor.getHTML());
+      }
     },
     editorProps: {
       attributes: {
@@ -57,7 +64,7 @@ export default function RichTextEditor({
         style: `min-height: ${minHeight}`,
       },
     },
-    editable: !disabled, 
+    editable: !disabled,
     immediatelyRender: false,
   });
 
@@ -67,6 +74,41 @@ export default function RichTextEditor({
       editor.setEditable(!disabled);
     }
   }, [disabled, editor]);
+
+  // Track when editor has loaded initial content
+  useEffect(() => {
+    if (editor && !isInitialized) {
+      // Use a MutationObserver to track DOM changes in the editor
+      const editorElement = editor.view.dom;
+      
+      const observer = new MutationObserver((mutations) => {
+        // If we detect mutations in the editor and initial content is rendered
+        setIsInitialized(true);
+        onContentReady?.();
+        observer.disconnect();
+      });
+      
+      observer.observe(editorElement, { 
+        childList: true, 
+        subtree: true, 
+        characterData: true 
+      });
+      
+      // Fallback to ensure we don't get stuck
+      const timeoutId = setTimeout(() => {
+        if (!isInitialized) {
+          setIsInitialized(true);
+          onContentReady?.();
+          observer.disconnect();
+        }
+      }, 500);
+      
+      return () => {
+        observer.disconnect();
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [editor, isInitialized, onContentReady]);
 
   if (!editor) {
     return null;
