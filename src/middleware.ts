@@ -49,81 +49,20 @@ function extractDomain(url: string): string {
   }
 }
 
-function isPublicPath(path: string): boolean {
-  return PUBLIC_PATH_PREFIXES.some(prefix => path.startsWith(prefix));
-}
-
-function isAuthPage(path: string): boolean {
-  return AUTH_PAGES.includes(path);
-}
-
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get('host') || '';
-  
-  // Environment-agnostic config
-  const isDevEnvironment = process.env.NODE_ENV === 'development';
-  const rawDomain = process.env.NEXT_PUBLIC_DOMAIN || (isDevEnvironment ? 'localhost' : 'cofounds.in');
-  const mainDomain = extractDomain(rawDomain);
-  const cleanDomain = mainDomain.replace(/^www\./, '');
-  
-  console.log("Middleware executing for:", pathname, "on host:", hostname);
-  console.log("Domain comparison data:", { hostname, mainDomain, cleanDomain });
-  
-  // STEP 1: Check if this is a subdomain request with environment-agnostic logic
-  let subdomain: string | null = null;
-  
-  // First, strip port if present (works for both localhost and production)
-  const hostWithoutPort = hostname.split(':')[0];
-  
-  // Both dev and prod subdomain detection in a unified approach
-  if (hostWithoutPort !== cleanDomain && hostWithoutPort !== `www.${cleanDomain}`) {
-    if (isDevEnvironment && hostWithoutPort.includes('localhost')) {
-      // Local environment subdomain parsing
-      const match = hostWithoutPort.match(/^([^.]+)\.localhost$/);
-      if (match && match[1] !== 'www') {
-        subdomain = match[1];
-      }
-    } else if (hostWithoutPort.endsWith(`.${cleanDomain}`)) {
-      // Production environment subdomain parsing
-      subdomain = hostWithoutPort.replace(`.${cleanDomain}`, '');
-    }
-  }
-  
-  if (subdomain) {
-    console.log(`Handling subdomain request for: ${subdomain}`);
-    
-    const mainDomainWithProtocol = process.env.NEXT_PUBLIC_BASE_URL || 
-      (isDevEnvironment ? 'http://localhost:3000' : `https://${cleanDomain}`);
-    
-    const rewriteUrl = new URL(`/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`, 
-      mainDomainWithProtocol);
-    
-    console.log(`Rewriting ${hostname}${pathname} to ${rewriteUrl.toString()}`);
-    
-    const response = NextResponse.rewrite(rewriteUrl);
-    response.headers.set('x-subdomain-rewrite', rewriteUrl.toString());
-    return response;
-  }
-  
-  // STEP 2: Handle API routes first (protect v1 routes)
+
   if (pathname.startsWith('/api/')) {
-    // If it's a public API path, bypass auth checks
-    if (isPublicPath(pathname)) {
-      console.log("Public API path detected, bypassing auth:", pathname);
-      return NextResponse.next();
-    }
-    
-    // Protect API v1 routes
     if (pathname.startsWith("/api/v1/")) {
       console.log("Checking API authorization for:", pathname);
       const authHeader = req.headers.get("Authorization");
-      
+  
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         console.log("API unauthorized: Missing or invalid auth header");
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      
+  
       try {
         const token = authHeader.split(" ")[1];
         const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -134,49 +73,138 @@ export async function middleware(req: NextRequest) {
         console.log("API unauthorized: Token verification failed");
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
+    } else {
+      return NextResponse.next();
     }
-    
-    // Non-v1 API routes bypass auth
-    console.log("Non-v1 API request detected, bypassing auth logic:", pathname);
-    return NextResponse.next();
   }
-  
-  // STEP 3: Handle main application paths
-  
-  // Allow public paths
-  if (isPublicPath(pathname)) {
-    console.log("Public path detected, bypassing auth:", pathname);
-    return NextResponse.next();
-  }
-  
-  // Check if user is on auth page while logged in
-  if (isAuthPage(pathname)) {
-    const session = req.cookies.get('next-auth.session-token') || 
-                   req.cookies.get('__Secure-next-auth.session-token');
-    
-    if (session) {
-      console.log("User already logged in, redirecting from auth page");
-      return NextResponse.redirect(new URL('/', req.url));
+
+  const isDevEnvironment = process.env.NODE_ENV === 'development';
+  const rawDomain = process.env.NEXT_PUBLIC_DOMAIN || (isDevEnvironment ? 'localhost' : 'cofounds.in');
+  const mainDomain = extractDomain(rawDomain);
+
+  console.log("Middleware executing for:", pathname, "on host:", hostname);
+  console.log("Domain info:", { rawDomain, mainDomain, isDevEnvironment });
+
+  let subdomain: string | null = null;
+
+  if (isDevEnvironment && hostname.includes('localhost')) {
+    const match = hostname.match(/^([^.]+)\.localhost(?::\d+)?$/);
+    if (match && match[1] !== 'www') {
+      subdomain = match[1];
+      console.log("Local subdomain detected:", subdomain);
     }
+  }
+  else {
+    const domainForComparison = mainDomain.replace(/^www\./, '');
+
+    if (hostname !== domainForComparison &&
+      hostname !== `www.${domainForComparison}` &&
+      hostname.endsWith(`.${domainForComparison}`)) {
+
+      subdomain = hostname.split(`.${domainForComparison}`)[0];
+      console.log("Production subdomain detected:", subdomain);
+    }
+  }
+
+  if (subdomain) {
     
+    const protocol = req.nextUrl.protocol; 
+    
+    const mainDomainWithProtocol = process.env.NEXT_PUBLIC_BASE_URL || 
+      (isDevEnvironment ? 'http://localhost:3000' : 'https://cofounds.in');
+    
+    const rewriteUrl = new URL(`/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`, 
+      mainDomainWithProtocol);
+    
+    console.log(`Rewriting ${hostname}${pathname} to ${rewriteUrl.toString()}`);
+    
+    const response = NextResponse.rewrite(rewriteUrl);
+    response.headers.set('x-subdomain-rewrite', rewriteUrl.toString());
+    return response;
+  }
+
+  // Check if user is already logged in and trying to access auth pages
+  if (AUTH_PAGES.some(path => pathname.startsWith(path))) {
+    console.log("Auth page access detected, checking if already logged in");
+    const authToken = req.cookies.get("auth_token")?.value;
+
+    if (authToken) {
+      try {
+        const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+        const { payload } = await jwtVerify(authToken, secret);
+        const typedPayload = payload as TokenPayload;
+        const userRole = typedPayload.role;
+
+        console.log("Logged in user trying to access auth page, redirecting to dashboard");
+        
+        // Redirect to appropriate dashboard based on role
+        if (userRole === "candidate") {
+          return NextResponse.redirect(new URL("/candidate/app", req.url));
+        } else if (userRole === "recruiter") {
+          return NextResponse.redirect(new URL("/recruiter/app", req.url));
+        }
+      } catch (error) {
+        console.log("Invalid token, allowing access to auth page");
+        // Token is invalid, allow access to auth pages
+      }
+    }
+  }
+
+  if (PUBLIC_PATH_PREFIXES.some(prefix => pathname.startsWith(prefix))) {
+    console.log("Public path detected, allowing access without auth check");
     return NextResponse.next();
   }
-  
-  // Check if the user is logged in for protected routes
-  const session = req.cookies.get('next-auth.session-token') || 
-                 req.cookies.get('__Secure-next-auth.session-token');
-  
-  if (!session) {
-    console.log("User not logged in, redirecting to signin");
-    
-    // Create a redirect URL with the callback
-    const redirectUrl = new URL('/auth/sign-in', req.url);
-    redirectUrl.searchParams.set('callbackUrl', encodeURI(req.url));
-    
-    return NextResponse.redirect(redirectUrl);
+
+  if (pathname === "/auth") {
+    console.log("Auth root path, redirecting to sign-in");
+    return NextResponse.redirect(new URL("/auth/sign-in", req.url));
   }
-  
-  // User is logged in for protected route
-  console.log("User authorized for protected route");
+
+  if (pathname.startsWith("/candidate/") || pathname.startsWith("/recruiter/")) {
+    console.log("Protected page access:", pathname);
+    const authToken = req.cookies.get("auth_token")?.value;
+
+    if (!authToken) {
+      console.log("No auth token in cookie, redirecting to login");
+      const loginPath = pathname.startsWith("/recruiter/")
+        ? "/auth/recruiter-sign-in"
+        : "/auth/sign-in";
+      return NextResponse.redirect(new URL(loginPath, req.url));
+    }
+
+    try {
+      const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+      const { payload } = await jwtVerify(authToken, secret);
+      const typedPayload = payload as TokenPayload;
+      const userRole = typedPayload.role;
+
+      console.log("User role:", userRole, "trying to access:", pathname);
+
+      if (pathname.startsWith("/recruiter/") && userRole !== "recruiter") {
+        console.log("Non-recruiter trying to access recruiter area, redirecting");
+        return NextResponse.redirect(
+          new URL(userRole === "candidate" ? "/candidate/app" : "/auth/recruiter-sign-in", req.url)
+        );
+      }
+
+      if (pathname.startsWith("/candidate/") && userRole !== "candidate") {
+        console.log("Non-candidate trying to access candidate area, redirecting");
+        return NextResponse.redirect(
+          new URL(userRole === "recruiter" ? "/recruiter/app" : "/auth/sign-in", req.url)
+        );
+      }
+
+      console.log("Access granted to protected page");
+      return NextResponse.next();
+    } catch (error) {
+      console.log("Invalid token in cookie, redirecting to login");
+      const loginPath = pathname.startsWith("/recruiter/")
+        ? "/auth/recruiter-sign-in"
+        : "/auth/sign-in";
+      return NextResponse.redirect(new URL(loginPath, req.url));
+    }
+  }
+
+  console.log("Permitting access to non-protected path:", pathname);
   return NextResponse.next();
 }
