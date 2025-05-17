@@ -49,45 +49,52 @@ function extractDomain(url: string): string {
   }
 }
 
+function isPublicPath(path: string): boolean {
+  return PUBLIC_PATH_PREFIXES.some(prefix => path.startsWith(prefix));
+}
+
+function isAuthPage(path: string): boolean {
+  return AUTH_PAGES.includes(path);
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get('host') || '';
   
+  // Environment-agnostic config
   const isDevEnvironment = process.env.NODE_ENV === 'development';
   const rawDomain = process.env.NEXT_PUBLIC_DOMAIN || (isDevEnvironment ? 'localhost' : 'cofounds.in');
   const mainDomain = extractDomain(rawDomain);
+  const cleanDomain = mainDomain.replace(/^www\./, '');
   
   console.log("Middleware executing for:", pathname, "on host:", hostname);
-  console.log("Domain info:", { rawDomain, mainDomain, isDevEnvironment });
+  console.log("Domain comparison data:", { hostname, mainDomain, cleanDomain });
   
-  // STEP 1: Check if this is a subdomain request
+  // STEP 1: Check if this is a subdomain request with environment-agnostic logic
   let subdomain: string | null = null;
   
-  if (isDevEnvironment && hostname.includes('localhost')) {
-    const match = hostname.match(/^([^.]+)\.localhost(?::\d+)?$/);
-    if (match && match[1] !== 'www') {
-      subdomain = match[1];
-      console.log("Local subdomain detected:", subdomain);
-    }
-  }
-  else {
-    const domainForComparison = mainDomain.replace(/^www\./, '');
-    
-    if (hostname !== domainForComparison &&
-        hostname !== `www.${domainForComparison}` &&
-        hostname.endsWith(`.${domainForComparison}`)) {
-      
-      subdomain = hostname.split(`.${domainForComparison}`)[0];
-      console.log("Production subdomain detected:", subdomain);
+  // First, strip port if present (works for both localhost and production)
+  const hostWithoutPort = hostname.split(':')[0];
+  
+  // Both dev and prod subdomain detection in a unified approach
+  if (hostWithoutPort !== cleanDomain && hostWithoutPort !== `www.${cleanDomain}`) {
+    if (isDevEnvironment && hostWithoutPort.includes('localhost')) {
+      // Local environment subdomain parsing
+      const match = hostWithoutPort.match(/^([^.]+)\.localhost$/);
+      if (match && match[1] !== 'www') {
+        subdomain = match[1];
+      }
+    } else if (hostWithoutPort.endsWith(`.${cleanDomain}`)) {
+      // Production environment subdomain parsing
+      subdomain = hostWithoutPort.replace(`.${cleanDomain}`, '');
     }
   }
   
-  // STEP 2: If subdomain exists, handle subdomain flow (including any API requests for that subdomain)
   if (subdomain) {
     console.log(`Handling subdomain request for: ${subdomain}`);
     
     const mainDomainWithProtocol = process.env.NEXT_PUBLIC_BASE_URL || 
-      (isDevEnvironment ? 'http://localhost:3000' : 'https://cofounds.in');
+      (isDevEnvironment ? 'http://localhost:3000' : `https://${cleanDomain}`);
     
     const rewriteUrl = new URL(`/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`, 
       mainDomainWithProtocol);
@@ -99,11 +106,15 @@ export async function middleware(req: NextRequest) {
     return response;
   }
   
-  // STEP 3: Handle regular domain flows (including API auth)
-  
-  // API route handling
+  // STEP 2: Handle API routes first (protect v1 routes)
   if (pathname.startsWith('/api/')) {
-    // Check for API v1 routes that need authorization
+    // If it's a public API path, bypass auth checks
+    if (isPublicPath(pathname)) {
+      console.log("Public API path detected, bypassing auth:", pathname);
+      return NextResponse.next();
+    }
+    
+    // Protect API v1 routes
     if (pathname.startsWith("/api/v1/")) {
       console.log("Checking API authorization for:", pathname);
       const authHeader = req.headers.get("Authorization");
@@ -123,13 +134,49 @@ export async function middleware(req: NextRequest) {
         console.log("API unauthorized: Token verification failed");
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-    } else {
-      // For non-v1 API routes, bypass auth logic
-      console.log("Non-v1 API request detected, bypassing auth logic:", pathname);
-      return NextResponse.next();
     }
+    
+    // Non-v1 API routes bypass auth
+    console.log("Non-v1 API request detected, bypassing auth logic:", pathname);
+    return NextResponse.next();
   }
   
-  // The rest of your middleware logic for the main domain...
-  // (Auth pages, public paths, protected paths, etc.)
+  // STEP 3: Handle main application paths
+  
+  // Allow public paths
+  if (isPublicPath(pathname)) {
+    console.log("Public path detected, bypassing auth:", pathname);
+    return NextResponse.next();
+  }
+  
+  // Check if user is on auth page while logged in
+  if (isAuthPage(pathname)) {
+    const session = req.cookies.get('next-auth.session-token') || 
+                   req.cookies.get('__Secure-next-auth.session-token');
+    
+    if (session) {
+      console.log("User already logged in, redirecting from auth page");
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+    
+    return NextResponse.next();
+  }
+  
+  // Check if the user is logged in for protected routes
+  const session = req.cookies.get('next-auth.session-token') || 
+                 req.cookies.get('__Secure-next-auth.session-token');
+  
+  if (!session) {
+    console.log("User not logged in, redirecting to signin");
+    
+    // Create a redirect URL with the callback
+    const redirectUrl = new URL('/auth/sign-in', req.url);
+    redirectUrl.searchParams.set('callbackUrl', encodeURI(req.url));
+    
+    return NextResponse.redirect(redirectUrl);
+  }
+  
+  // User is logged in for protected route
+  console.log("User authorized for protected route");
+  return NextResponse.next();
 }
