@@ -28,26 +28,6 @@ export async function getUserPortfolio(userName: string) {
                     },
                 },
 
-                // Select education with needed fields
-                education: {
-                    select: {
-                        eduFrom: true,
-                        degree: {
-                            select: {
-                                name: true,
-                            }
-                        },
-                        startedAt: true,
-                        endAt: true,
-                    },
-                    where: {
-                        isActive: true,
-                    },
-                    orderBy: {
-                        endAt: 'desc',
-                    },
-                },
-
                 // Select projects with needed fields
                 projects: {
                     select: {
@@ -62,24 +42,6 @@ export async function getUserPortfolio(userName: string) {
                     },
                     orderBy: {
                         endAt: 'desc',
-                    },
-                },
-
-                // Select certificates with needed fields
-                certificates: {
-                    select: {
-                        title: true,
-                        description: true,
-                        filePath: true,
-                        link: true,
-                        startedAt: true,
-                        endAt: true,
-                    },
-                    where: {
-                        isActive: true,
-                    },
-                    orderBy: {
-                        startedAt: 'desc',
                     },
                 },
 

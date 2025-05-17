@@ -35,27 +35,11 @@ interface Portfolio {
     startedAt: string | Date;
     endAt: string | Date | null;
   }>;
-  education: Array<{
-    eduFrom: string;
-    degree: {
-      name: string;
-    };
-    startedAt: string | Date;
-    endAt: string | Date | null;
-  }>;
   projects: Array<{
     title: string;
     description: string | null;
     link: string | null;
     startedAt: string | Date;
-    endAt: string | Date | null;
-  }>;
-  certificates: Array<{
-    title: string;
-    description: string | null;
-    filePath: string | null;
-    link: string | null;
-    startedAt: string | Date | null;
     endAt: string | Date | null;
   }>;
 }
@@ -66,19 +50,6 @@ interface PortfolioResponse {
   error?: string;
 }
 
-function formatDate(date: string | Date | null, context: 'experience' | 'education' | 'project' = 'experience'): string {
-  if (!date) {
-    switch (context) {
-      case 'project':
-        return 'Currently Building';
-      case 'experience':
-      case 'education':
-      default:
-        return 'Present';
-    }
-  }
-  return new Date(date).getFullYear().toString();
-}
 
 async function getPortfolio(username: string): Promise<PortfolioResponse> {
   try {
@@ -95,12 +66,6 @@ async function getPortfolio(username: string): Promise<PortfolioResponse> {
           ...exp,
           startedAt: exp.startedAt || new Date().toISOString(),
           endAt: exp.endAt
-        })),
-        education: result.data.education.map(edu => ({
-          ...edu,
-          startedAt: edu.startedAt || new Date().toISOString(),
-          endAt: edu.endAt,
-          eduFrom: edu.eduFrom || ''
         })),
         projects: result.data.projects.map(proj => ({
           ...proj,
@@ -183,6 +148,9 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
             {portfolio.projects && portfolio.projects.length > 0 && (
               <Link href="#projects" className="text-gray-600 hover:text-gray-900">Projects</Link>
             )}
+            {portfolio.skillset && portfolio.skillset.length > 0 && (
+              <Link href="#skills" className="text-gray-600 hover:text-gray-900">Skills</Link>
+            )}
           </div>
         </div>
       </nav>
@@ -208,14 +176,15 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
         {/* About section */}
         <AboutSection description={portfolio.description} />
 
-        {/* Skills section */}
-        <SkillsSection skills={portfolio.skillset} />
 
         {/* Experience Section */}
         <ExperienceSection experiences={portfolio.experience} />
 
         {/* Projects Section */}
         <ProjectsSection projects={portfolio.projects} />
+        
+        {/* Skills section */}
+        <SkillsSection skills={portfolio.skillset} />
       </main>
 
       <footer className="bg-white border-t py-6">

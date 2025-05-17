@@ -129,6 +129,10 @@ export async function getUserSummary(id: string) {
             return { success: false, error: "User not found" };
         }
 
+        console.log("\n\nUSER SUMMARY\n\n")
+        console.log(userSummary);
+        console.log("\n\nUSER SUMMARY\n\n")
+
         return {
             success: true,
             data: userSummary,
