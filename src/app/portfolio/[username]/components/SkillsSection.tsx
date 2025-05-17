@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Lightbulb } from 'lucide-react';
 import {
   RadarChart,
   PolarGrid,
@@ -12,39 +11,18 @@ import {
   BarChart,
   Bar,
   XAxis,
-  YAxis,
   CartesianGrid,
   Cell
 } from 'recharts';
-
-interface Skill {
-  skill: {
-    name: string;
-  };
-  skillLevel: string | null;
-}
+import { Skill, skillLevelToValue } from '../utils/skill_chips';
 
 interface SkillsSectionProps {
   skills: Skill[];
 }
 
 
-const skillLevelToValue = (level: string | null): number => {
-  switch (level?.toLowerCase()) {
-    case 'advanced':
-      return 90;
-    case 'intermediate':
-      return 60;
-    case 'beginner':
-      return 30;
-    default:
-      return 20;
-  }
-};
-
 export default function SkillsSection({ skills }: SkillsSectionProps) {
   if (!skills || skills.length === 0) return null;
-
 
   const radarData = skills
     .sort((a, b) => skillLevelToValue(b.skillLevel) - skillLevelToValue(a.skillLevel))
@@ -55,7 +33,6 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
       level: skill.skillLevel
     }));
 
-
   const barData = skills
     .sort((a, b) => skillLevelToValue(b.skillLevel) - skillLevelToValue(a.skillLevel))
     .map(skill => ({
@@ -63,7 +40,6 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
       value: skillLevelToValue(skill.skillLevel),
       level: skill.skillLevel
     }));
-
 
   const getSkillColor = (level: string | null) => {
     switch (level?.toLowerCase()) {
@@ -78,37 +54,13 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
     }
   };
 
-
-  const renderSkillChips = () => (
-    <div className="flex flex-wrap gap-2.5 mt-6 md:hidden">
-      {skills.map((skillItem, index) => (
-        <div
-          key={index}
-          className="bg-white border border-gray-200 rounded-md px-3 py-1.5 text-sm shadow-sm
-                    flex items-center flex-wrap gap-x-1.5"
-        >
-          <span className="font-medium">
-            {skillItem.skill?.name}
-          </span>
-
-          {skillItem.skillLevel && (
-            <span className="text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-full capitalize">
-              {skillItem.skillLevel}
-            </span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <section id="skills" className="mb-12">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
-        <Lightbulb size={18} className="text-indigo-600" />
+      <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
         Skills
       </h2>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5">
+      <div className=" rounded-lg border border-gray-200 shadow-sm p-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -160,12 +112,6 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
                   height={60}
                   tickLine={false}
                 />
-                <YAxis
-                  domain={[0, 100]}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={false}
-                />
                 <Tooltip
                   cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
                   content={({ active, payload }) => {
@@ -191,8 +137,6 @@ export default function SkillsSection({ skills }: SkillsSectionProps) {
             </ResponsiveContainer>
           </div>
         </div>
-
-        {renderSkillChips()}
       </div>
     </section>
   );

@@ -7,6 +7,11 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Helvetica'],
+      },
+    },
     container: {
       center: true,
       padding: "2rem",

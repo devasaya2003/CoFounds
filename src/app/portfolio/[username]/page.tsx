@@ -6,11 +6,11 @@ import ProfileHeader from './components/ProfileHeader';
 import AboutSection from './components/AboutSection';
 import SkillsSection from './components/SkillsSection';
 import ExperienceSection from './components/ExperienceSection';
-import CertificatesSection from './components/CertificatesSection';
 import ProjectsSection from './components/ProjectsSection';
-import EducationSection from './components/EducationSection';
 import BuildPortfolioButton from './components/BuildPortfolioButton';
 import { getUserPortfolio } from '@/backend/functions/portfolio/get_user_portfolio';
+import Image from 'next/image';
+import { renderTopSkills } from './utils/skill_chips';
 
 type PortfolioParams = {
   params: Promise<{ username: string }>;
@@ -159,43 +159,36 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow sticky top-0 left-0 right-0 z-20">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+      {/* Navigation - Hidden on mobile, visible on md screens and up */}
+      <nav className="hidden md:block bg-white shadow sticky top-0 left-0 right-0 z-20">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600"></div>
-            <span className="ml-3 font-medium text-gray-800">
+            <Image
+              src="/images/profile-placeholder.png"
+              alt="Profile"
+              width={128}
+              height={128}
+              className="object-cover w-10 h-10 rounded-full"
+              priority
+            />
+            <span className="pl-2 font-medium text-gray-800">
               {portfolio.firstName} {portfolio.lastName}
             </span>
           </div>
-          <div className="flex space-x-6 overflow-x-auto">
-            <Link href="#about" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">About</Link>
-            
-            {portfolio.skillset && portfolio.skillset.length > 0 && (
-              <Link href="#skills" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Skills</Link>
-            )}
-            
+          <div className="flex space-x-6">
+            <Link href="#about" className="text-gray-600 hover:text-gray-900">About</Link>
             {portfolio.experience && portfolio.experience.length > 0 && (
-              <Link href="#proof-of-work" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Proof of Work</Link>
+              <Link href="#experience" className="text-gray-600 hover:text-gray-900">Experience</Link>
             )}
-            
-            {portfolio.certificates && portfolio.certificates.length > 0 && (
-              <Link href="#certificates" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Certificates</Link>
-            )}
-            
             {portfolio.projects && portfolio.projects.length > 0 && (
-              <Link href="#projects" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Projects</Link>
-            )}
-            
-            {portfolio.education && portfolio.education.length > 0 && (
-              <Link href="#education" className="text-gray-600 hover:text-gray-900 whitespace-nowrap">Education</Link>
+              <Link href="#projects" className="text-gray-600 hover:text-gray-900">Projects</Link>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Banner */}
-      <Banner />
+      {/* Banner with username parameter */}
+      <Banner username={username} />
 
       {/* Profile Header (overlaps banner) */}
       <ProfileHeader
@@ -205,25 +198,24 @@ export default async function PortfolioPage({ params }: PortfolioParams) {
         companyName={currentJob.companyName}
         email={portfolio.email}
       />
+      
+      {/* Display top 3 advanced skills */}
+      <div className="max-w-5xl mx-auto px-4">
+        {portfolio.skillset && renderTopSkills(portfolio.skillset, 'advanced', 3)}
+      </div>
 
-      <main className="max-w-5xl mx-auto px-4 py-12 mt-24">
-        {/* 1. About section */}
+      <main className="max-w-5xl mx-auto px-4 mt-8">
+        {/* About section */}
         <AboutSection description={portfolio.description} />
 
-        {/* 2. Skills section */}
+        {/* Skills section */}
         <SkillsSection skills={portfolio.skillset} />
 
-        {/* 3. Experience Section (Proof of Work) */}
-        <ExperienceSection experiences={portfolio.experience} formatDate={(date) => formatDate(date, 'experience')} />
+        {/* Experience Section */}
+        <ExperienceSection experiences={portfolio.experience} />
 
-        {/* 4. Certificates Section */}
-        <CertificatesSection certificates={portfolio.certificates} formatDate={(date) => formatDate(date, 'experience')} />
-
-        {/* 5. Projects Section */}
-        <ProjectsSection projects={portfolio.projects} formatDate={(date) => formatDate(date, 'project')} />
-
-        {/* 6. Education Section */}
-        <EducationSection education={portfolio.education} formatDate={(date) => formatDate(date, 'education')} />
+        {/* Projects Section */}
+        <ProjectsSection projects={portfolio.projects} />
       </main>
 
       <footer className="bg-white border-t py-6">
