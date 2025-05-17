@@ -52,7 +52,53 @@ function extractDomain(url: string): string {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get('host') || '';
-
+  
+  const isDevEnvironment = process.env.NODE_ENV === 'development';
+  const rawDomain = process.env.NEXT_PUBLIC_DOMAIN || (isDevEnvironment ? 'localhost' : 'cofounds.in');
+  const mainDomain = extractDomain(rawDomain);
+  
+  console.log("Middleware executing for:", pathname, "on host:", hostname);
+  console.log("Domain info:", { rawDomain, mainDomain, isDevEnvironment });
+  
+  // STEP 1: Check for subdomains FIRST - this must come before ANY other checks
+  let subdomain: string | null = null;
+  
+  if (isDevEnvironment && hostname.includes('localhost')) {
+    const match = hostname.match(/^([^.]+)\.localhost(?::\d+)?$/);
+    if (match && match[1] !== 'www') {
+      subdomain = match[1];
+      console.log("Local subdomain detected:", subdomain);
+    }
+  } else {
+    const domainForComparison = mainDomain.replace(/^www\./, '');
+    
+    if (hostname !== domainForComparison &&
+        hostname !== `www.${domainForComparison}` &&
+        hostname.endsWith(`.${domainForComparison}`)) {
+      
+      subdomain = hostname.split(`.${domainForComparison}`)[0];
+      console.log("Production subdomain detected:", subdomain);
+    }
+  }
+  
+  // Handle subdomain requests immediately, regardless of path
+  if (subdomain) {
+    console.log(`Subdomain request detected for: ${subdomain}`);
+    
+    const mainDomainWithProtocol = process.env.NEXT_PUBLIC_BASE_URL || 
+      (isDevEnvironment ? 'http://localhost:3000' : `https://${mainDomain.replace(/^www\./, '')}`);
+    
+    const rewriteUrl = new URL(`/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`, 
+      mainDomainWithProtocol);
+    
+    console.log(`Rewriting ${hostname}${pathname} to ${rewriteUrl.toString()}`);
+    
+    const response = NextResponse.rewrite(rewriteUrl);
+    response.headers.set('x-subdomain-rewrite', rewriteUrl.toString());
+    return response;
+  }
+  
+  // STEP 2: Only now handle API routes after subdomain check
   if (pathname.startsWith('/api/')) {
     if (pathname.startsWith("/api/v1/")) {
       console.log("Checking API authorization for:", pathname);
@@ -77,52 +123,8 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
   }
-
-  const isDevEnvironment = process.env.NODE_ENV === 'development';
-  const rawDomain = process.env.NEXT_PUBLIC_DOMAIN || (isDevEnvironment ? 'localhost' : 'cofounds.in');
-  const mainDomain = extractDomain(rawDomain);
-
-  console.log("Middleware executing for:", pathname, "on host:", hostname);
-  console.log("Domain info:", { rawDomain, mainDomain, isDevEnvironment });
-
-  let subdomain: string | null = null;
-
-  if (isDevEnvironment && hostname.includes('localhost')) {
-    const match = hostname.match(/^([^.]+)\.localhost(?::\d+)?$/);
-    if (match && match[1] !== 'www') {
-      subdomain = match[1];
-      console.log("Local subdomain detected:", subdomain);
-    }
-  }
-  else {
-    const domainForComparison = mainDomain.replace(/^www\./, '');
-
-    if (hostname !== domainForComparison &&
-      hostname !== `www.${domainForComparison}` &&
-      hostname.endsWith(`.${domainForComparison}`)) {
-
-      subdomain = hostname.split(`.${domainForComparison}`)[0];
-      console.log("Production subdomain detected:", subdomain);
-    }
-  }
-
-  if (subdomain) {
-    
-    const protocol = req.nextUrl.protocol; 
-    
-    const mainDomainWithProtocol = process.env.NEXT_PUBLIC_BASE_URL || 
-      (isDevEnvironment ? 'http://localhost:3000' : 'https://cofounds.in');
-    
-    const rewriteUrl = new URL(`/portfolio/${subdomain}${pathname === '/' ? '' : pathname}`, 
-      mainDomainWithProtocol);
-    
-    console.log(`Rewriting ${hostname}${pathname} to ${rewriteUrl.toString()}`);
-    
-    const response = NextResponse.rewrite(rewriteUrl);
-    response.headers.set('x-subdomain-rewrite', rewriteUrl.toString());
-    return response;
-  }
-
+  
+  // STEP 3: Rest of your middleware for non-subdomain requests
   // Check if user is already logged in and trying to access auth pages
   if (AUTH_PAGES.some(path => pathname.startsWith(path))) {
     console.log("Auth page access detected, checking if already logged in");
