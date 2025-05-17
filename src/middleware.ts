@@ -21,7 +21,6 @@ const PUBLIC_PATH_PREFIXES = [
   "/portfolio/",
   "/portfolio",
   "/api/portfolio/",
-  "/api/banner-image"
 ];
 
 const AUTH_PAGES = [
