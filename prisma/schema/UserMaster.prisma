@@ -24,6 +24,7 @@ model UserMaster {
   experience         UserExperience[]
   projects           UserProjects[]
   skillset           UserSkillset[]
+  links              UserLinks[]
 
   @@map("user_master")
 }

@@ -1,0 +1,11 @@
+model UserLinks {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  linkUrl   String      @map("link_url")
+  linkTitle String      @map("link_title")
+
+  user      UserMaster  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, linkUrl])
+  @@map("user_links")
+}
