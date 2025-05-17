@@ -54,8 +54,31 @@ export async function middleware(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
 
   if (pathname.startsWith('/api/')) {
-    console.log("API request detected, bypassing subdomain logic:", pathname);
-    return NextResponse.next();
+    // Check for API v1 routes that need authorization
+    if (pathname.startsWith("/api/v1/")) {
+      console.log("Checking API authorization for:", pathname);
+      const authHeader = req.headers.get("Authorization");
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        console.log("API unauthorized: Missing or invalid auth header");
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      try {
+        const token = authHeader.split(" ")[1];
+        const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+        await jwtVerify(token, secret);
+        console.log("API authorized successfully");
+        return NextResponse.next();
+      } catch (error) {
+        console.log("API unauthorized: Token verification failed");
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    } else {
+      // For non-v1 API routes, bypass subdomain logic
+      console.log("API request detected, bypassing subdomain logic:", pathname);
+      return NextResponse.next();
+    }
   }
 
   const isDevEnvironment = process.env.NODE_ENV === 'development';
@@ -138,27 +161,6 @@ export async function middleware(req: NextRequest) {
   if (pathname === "/auth") {
     console.log("Auth root path, redirecting to sign-in");
     return NextResponse.redirect(new URL("/auth/sign-in", req.url));
-  }
-
-  if (pathname.startsWith("/api/v1/")) {
-    console.log("Checking API authorization for:", pathname);
-    const authHeader = req.headers.get("Authorization");
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log("API unauthorized: Missing or invalid auth header");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    try {
-      const token = authHeader.split(" ")[1];
-      const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-      await jwtVerify(token, secret);
-      console.log("API authorized successfully");
-      return NextResponse.next();
-    } catch (error) {
-      console.log("API unauthorized: Token verification failed");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
   }
 
   if (pathname.startsWith("/candidate/") || pathname.startsWith("/recruiter/")) {
