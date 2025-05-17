@@ -72,23 +72,20 @@ export async function getUserProfile(id: string, forceRefresh = false): Promise<
 
   console.log(`Fetching fresh profile data for ${id}`);
   try {
-    const response = await fetch(`/api/v1/candidate/summary/${id}`);
-    if (!response.ok) {
+    const response = await fetchWithAuth_GET<{
+      success: boolean,
+      data: UserProfile
+    }>(`/api/v1/candidate/summary/${id}`);
+    if (!response) {
       throw new Error('Failed to fetch user profile');
     }
 
-    const result = await response.json();
-
-    if (!result.success || !result.data) {
-      throw new Error(result.error || 'Failed to fetch user profile');
-    }
-
     profileCache[cacheKey] = {
-      data: result.data,
+      data: response.data,
       timestamp: now
     };
 
-    return result.data;
+    return response.data;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     throw error;
