@@ -7,6 +7,7 @@ export interface UserProfile {
     last_name?: string;
     dob?: Date | string;
     description?: string;
+    profile_image?: string; // Added profile image field
 }
 
 type ProfileUpdateData = {
@@ -15,6 +16,7 @@ type ProfileUpdateData = {
     lastName?: string;
     dob?: Date;
     description?: string;
+    profileImage?: string;
     updatedBy: string;
     isActive?: boolean;
     verified?: boolean;
@@ -32,6 +34,7 @@ export const createUserProfile = async (data: UserProfile) => {
     if (data.last_name !== undefined) updateData.lastName = data.last_name;
     if (data.dob !== undefined) updateData.dob = data.dob instanceof Date ? data.dob : new Date(data.dob);
     if (data.description !== undefined) updateData.description = data.description;
+    if (data.profile_image !== undefined) updateData.profileImage = data.profile_image; // Handle profile image
 
     if (data.user_name) {
         updateData.isActive = true;
@@ -48,7 +51,8 @@ export const createUserProfile = async (data: UserProfile) => {
             firstName: true,
             lastName: true,
             dob: true,
-            description: true
+            description: true,
+            profileImage: true
         }
     });
 }

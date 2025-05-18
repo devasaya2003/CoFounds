@@ -230,6 +230,15 @@ export const getFullName = (user: AuthUser | null): string => {
   return user.userName || "";
 };
 
+interface UpdateUserDataPayload {
+  firstName?: string | null;
+  lastName?: string | null;
+  userName?: string | null;
+  description?: string | null;
+  dob?: string | null;
+  profileImage?: string | null;
+}
+
 export const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -262,6 +271,14 @@ export const authSlice = createSlice({
     },
     setLayoutInitialized: (state, action: PayloadAction<boolean>) => {
       state.layoutInitialized = action.payload;
+    },
+    updateUserData: (state, action: PayloadAction<UpdateUserDataPayload>) => {
+      if (state.user) {
+        state.user = {
+          ...state.user,
+          ...action.payload
+        };
+      }
     },
   },
   extraReducers: (builder) => {
@@ -347,5 +364,6 @@ export const {
   setToken,
   logout,
   setLayoutInitialized,
+  updateUserData,
 } = authSlice.actions;
 export default authSlice.reducer;

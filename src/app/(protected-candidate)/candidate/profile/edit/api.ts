@@ -1,6 +1,7 @@
 import { fetchWithAuth_GET, fetchWithAuth_POST, fetchWithAuth_PUT } from '@/utils/api';
 import { UserMaster, UserSkillset, UserProjects, UserCertificates, UserEducation, UserExperience, SkillMaster, DegreeMaster } from '@prisma/client';
 import { ProjectUpdatePayload } from './components/project/types';
+import { updatePersonalInfo as updatePersonalInfoFromModule } from './personal-info/personal_info_api';
 
 interface PendingRequest {
   promise: Promise<UserProfile>;
@@ -104,31 +105,8 @@ export function clearUserProfileCache(id: string) {
 }
 
 export async function updatePersonalInfo(personalData: Partial<UserProfile>): Promise<UserProfile> {
-  try {
-    const formattedDate = personalData.dob ? formatDateForAPI(personalData.dob) : null;
-
-    const profilePayload = {
-      user_id: personalData.id,
-      user_name: personalData.userName,
-      first_name: personalData.firstName,
-      last_name: personalData.lastName,
-      dob: formattedDate,
-      description: personalData.description,
-      updated_by: personalData.id,
-    };
-
-    await fetchWithAuth_POST(
-      API_ENDPOINTS.PROFILE,
-      profilePayload
-    );
-
-    return {
-      ...personalData,
-    } as UserProfile;
-  } catch (error) {
-    console.error('Error updating personal info:', error);
-    throw error;
-  }
+  // Delegate to the specialized module
+  return await updatePersonalInfoFromModule(personalData as any);
 }
 
 export async function updateSkills(skillsData: {

@@ -14,9 +14,9 @@ export async function GET(
       );
     }
 
-    const experiences = await getUserDetails(id);
+    const userData = await getUserDetails(id);
 
-    if (!experiences) {
+    if (!userData) {
       return NextResponse.json(
         {
           error: `User with id ${id} not found`,
@@ -25,7 +25,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(experiences, { status: 200 });
+    return NextResponse.json(userData, { status: 200 });
   } catch (error) {
     console.error("Error fetching user by id:", error);
     return NextResponse.json(
