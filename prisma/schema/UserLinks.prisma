@@ -3,6 +3,11 @@ model UserLinks {
   userId    String      @map("user_id") @db.Uuid
   linkUrl   String      @map("link_url")
   linkTitle String      @map("link_title")
+  isActive   Boolean    @default(true) @map("is_active")
+  createdBy  String?    @map("created_by") @db.Uuid
+  updatedBy  String?    @map("updated_by") @db.Uuid
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
 
   user      UserMaster  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
