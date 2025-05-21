@@ -1,5 +1,22 @@
 import prisma from "../../../../../prisma/client";
-import { EducationUpdatePayload } from "@/app/(protected-candidate)/candidate/profile/edit/components/education/types";
+
+export interface EducationUpdatePayload {
+    user_id: string;
+    new_education: {
+        institution: string; // Maps to edu_from
+        degree_id: string;  // Maps to degree_id
+        started_at: string | null;
+        end_at: string | null;
+    }[];
+    updated_education: {
+        id: string;
+        institution: string;
+        degree_id: string;
+        started_at: string | null;
+        end_at: string | null;
+    }[];
+    deleted_education: string[];
+}
 
 export async function updateUserEducation(payload: EducationUpdatePayload) {
     try {

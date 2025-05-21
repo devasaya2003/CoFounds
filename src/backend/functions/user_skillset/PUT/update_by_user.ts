@@ -1,6 +1,14 @@
-import { SkillsUpdatePayload } from "@/app/(protected-candidate)/candidate/profile/edit/components/types";
 import prisma from "../../../../../prisma/client";
 import { UserSkillset } from "@prisma/client";
+
+export type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export interface SkillsUpdatePayload {
+  user_id: string;
+  updated_skillset: Array<{ skill_id: string; skill_level: SkillLevel }>;
+  new_skillset: Array<{ skill_id: string; skill_level: SkillLevel }>;
+  deleted_skillset: string[];
+}
 
 type UserSkillsetWithStatus = UserSkillset & {
     reactivated?: boolean;

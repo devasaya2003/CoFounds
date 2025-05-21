@@ -14,9 +14,9 @@ export async function GET(
       );
     }
 
-    const experiences = await getUserSkills(user_id);
+    const skills = await getUserSkills(user_id);
 
-    if (!experiences) {
+    if (!skills) {
       return NextResponse.json(
         {
           error: `Skills with user id ${user_id} not found`,
@@ -25,7 +25,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(experiences, { status: 200 });
+    return NextResponse.json(skills, { status: 200 });
   } catch (error) {
     console.error("Error fetching skills by user id:", error);
     return NextResponse.json(

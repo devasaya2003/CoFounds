@@ -1,5 +1,24 @@
 import prisma from "../../../../../prisma/client";
-import { ProjectUpdatePayload } from "@/app/(protected-candidate)/candidate/profile/edit/components/project/types";
+
+export interface ProjectUpdatePayload {
+    user_id: string;
+    new_projects: {
+        title: string;
+        description: string | null;
+        link: string | null;
+        started_at: string | null;
+        end_at: string | null;
+    }[];
+    updated_projects: {
+        id: string;
+        title: string;
+        description: string | null;
+        link: string | null;
+        started_at: string | null;
+        end_at: string | null;
+    }[];
+    deleted_projects: string[];
+}
 
 export async function updateUserProjects(payload: ProjectUpdatePayload) {
     try {

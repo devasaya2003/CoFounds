@@ -1,5 +1,26 @@
 import prisma from "../../../../../prisma/client";
-import { ProofOfWorkUpdatePayload } from "@/app/(protected-candidate)/candidate/profile/edit/components/proof-of-work/types";
+
+export interface ProofOfWorkUpdatePayload {
+    user_id: string;
+    new_experiences: Array<{
+      title: string;
+      company: string | null;
+      description: string | null;
+      started_at: string | null;
+      end_at: string | null;
+      is_community_work: boolean;
+    }>;
+    updated_experiences: Array<{
+      id: string;
+      title: string;
+      company: string | null;
+      description: string | null;
+      started_at: string | null;
+      end_at: string | null;
+      is_community_work: boolean;
+    }>;
+    deleted_experiences: string[];
+  }
 
 export async function updateUserExperiences(payload: ProofOfWorkUpdatePayload) {
     try {

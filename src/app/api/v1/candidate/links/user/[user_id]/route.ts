@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserEducationByUserID } from "@/backend/functions/user_education/GET/get_by_user";
+import { getUserLinksByUserID } from "@/backend/functions/user_links/GET/get_by_user";
 
 export async function GET(
   req: NextRequest,
@@ -14,22 +14,22 @@ export async function GET(
       );
     }
 
-    const education = await getUserEducationByUserID(user_id);
+    const links = await getUserLinksByUserID(user_id);
 
-    if (!education) {
+    if (!links) {
       return NextResponse.json(
         {
-          error: `Education with user id ${user_id} not found`,
+          error: `links with user id ${user_id} not found`,
         },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(education, { status: 200 });
+    return NextResponse.json(links, { status: 200 });
   } catch (error) {
-    console.error("Error fetching education by user id:", error);
+    console.error("Error fetching links by user id:", error);
     return NextResponse.json(
-      { error: "Failed to fetch education by user id" },
+      { error: "Failed to fetch links by user id" },
       { status: 500 }
     );
   }

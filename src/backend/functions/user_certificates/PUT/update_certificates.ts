@@ -1,5 +1,24 @@
 import prisma from "../../../../../prisma/client";
-import { CertificateUpdatePayload } from "@/app/(protected-candidate)/candidate/profile/edit/components/certificate/types";
+
+export interface CertificateUpdatePayload {
+    user_id: string;
+    new_certificates: Array<{
+        title: string;
+        description: string | null;
+        started_at: string | null;
+        end_at: string | null;
+        link: string | null;
+    }>;
+    updated_certificates: Array<{
+        id: string;
+        title: string;
+        description: string | null;
+        started_at: string | null;
+        end_at: string | null;
+        link: string | null;
+    }>;
+    deleted_certificates: string[];
+}
 
 export async function updateUserCertificates(payload: CertificateUpdatePayload) {
     try {
