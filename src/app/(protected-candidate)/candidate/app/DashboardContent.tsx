@@ -3,9 +3,33 @@
 import { useAppSelector } from '@/redux/hooks';
 import { CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function DashboardContent() {
   const candidateData = useAppSelector((state) => state.candidate);
+  const [isDataReady, setIsDataReady] = useState(false);
+  
+  // Only show content after data is fully loaded and processed
+  useEffect(() => {
+    // Check if essential data has been loaded
+    if (candidateData.userId) {
+      // Add a small delay to ensure all Redux state updates have been processed
+      const timer = setTimeout(() => {
+        setIsDataReady(true);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [candidateData.userId]);
+
+  // Show a loading state until data is ready
+  if (!isDataReady) {
+    return (
+      <div className="flex justify-center items-center min-h-[300px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200"></div>
+      </div>
+    );
+  }
   
   // Check if profile is complete
   const isProfileComplete = 

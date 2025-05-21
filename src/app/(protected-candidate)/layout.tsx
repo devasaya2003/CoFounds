@@ -6,8 +6,8 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { restoreUserSession } from '@/redux/slices/authSlice';
 import { fetchCandidateSummary } from '@/redux/slices/candidateSlice';
 import TopBar from '@/components/dashboard/TopBar';
-import Sidebar from '@/components/dashboard/Sidebar';
-import { UserCircle, BookOpen, Code, Briefcase, Award, LogOut } from 'lucide-react';
+import SideBarV2 from '@/components/dashboard/SideBarV2';
+import { UserCircle, BookOpen, Code, Briefcase, Award, Link as LinkIcon, User, LogOut, GraduationCap, FileText } from 'lucide-react';
 
 export default function CandidateLayout({
   children,
@@ -35,18 +35,27 @@ export default function CandidateLayout({
   const [authInitialized, setAuthInitialized] = useState(false);
   const [profileInitialized, setProfileInitialized] = useState(false);
 
-  // Determine active view from pathname
-  const getActiveViewFromPath = (path: string) => {
-    if (path.includes('/profile')) return 'profile';
-    if (path.includes('/skills')) return 'skills';
-    if (path.includes('/projects')) return 'projects';
-    if (path.includes('/experience')) return 'experience';
-    if (path.includes('/education')) return 'education';
-    if (path.includes('/certificates')) return 'certificates';
-    return 'dashboard';
+  // Determine active view and subview from pathname
+  const getActiveViewsFromPath = (path: string) => {
+    // Main views
+    if (path.includes('/dashboard')) return { view: 'dashboard', subView: undefined };
+    
+    // Profile and sub-views
+    if (path.includes('/profile')) {
+      if (path.includes('/personal-info')) return { view: 'profile', subView: 'personal-info' };
+      if (path.includes('/links')) return { view: 'profile', subView: 'links' };
+      if (path.includes('/skills')) return { view: 'profile', subView: 'skills' };
+      if (path.includes('/education')) return { view: 'profile', subView: 'education' };
+      if (path.includes('/experience')) return { view: 'profile', subView: 'experience' };
+      if (path.includes('/projects')) return { view: 'profile', subView: 'projects' };
+      if (path.includes('/certificates')) return { view: 'profile', subView: 'certificates' };
+      return { view: 'profile', subView: 'personal-info' }; // Default sub-view
+    }
+    
+    return { view: 'dashboard', subView: undefined }; // Default view
   };
 
-  const activeView = getActiveViewFromPath(pathname);
+  const { view: activeView, subView: activeSubView } = getActiveViewsFromPath(pathname);
 
   // Step 1: Initialize auth when component mounts
   useEffect(() => {
@@ -77,15 +86,27 @@ export default function CandidateLayout({
     loadProfile();
   }, [dispatch, isAuthenticated, user, profileInitialized, profileLoading]);
 
-  // Sidebar configuration
+  // Sidebar configuration with nested items
   const sidebarMenuItems = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "profile", label: "Profile", icon: <UserCircle className="mr-2 h-4 w-4" /> },
-    { id: "skills", label: "Skills", icon: <Code className="mr-2 h-4 w-4" /> },
-    { id: "projects", label: "Projects", icon: <BookOpen className="mr-2 h-4 w-4" /> },
-    { id: "experience", label: "Experience", icon: <Briefcase className="mr-2 h-4 w-4" /> },
-    { id: "education", label: "Education", icon: <Award className="mr-2 h-4 w-4" /> },
-    { id: "certificates", label: "Certificates" },
+    { 
+      id: "dashboard", 
+      label: "Dashboard",
+      icon: <FileText className="h-4 w-4" />
+    },
+    { 
+      id: "profile", 
+      label: "Profile", 
+      icon: <User className="h-4 w-4" />,
+      subItems: [
+        { id: "personal-info", label: "Personal Info", icon: <UserCircle className="h-4 w-4" /> },
+        { id: "links", label: "Links", icon: <LinkIcon className="h-4 w-4" /> },
+        { id: "skills", label: "Skills", icon: <Code className="h-4 w-4" /> },
+        { id: "education", label: "Education", icon: <GraduationCap className="h-4 w-4" /> },
+        { id: "experience", label: "Experience", icon: <Briefcase className="h-4 w-4" /> },
+        { id: "projects", label: "Projects", icon: <BookOpen className="h-4 w-4" /> },
+        { id: "certificates", label: "Certificates", icon: <Award className="h-4 w-4" /> },
+      ]
+    },
   ];
 
   // TopBar configuration
@@ -104,34 +125,23 @@ export default function CandidateLayout({
     },
   ];
 
-  // Handle navigation
-  const handleSidebarNavigation = (view: string) => {
-    // Only navigate if the view is different from current
-    if (view !== activeView) {
-      if (view === 'dashboard') {
-        router.push('/candidate/app');
-      } else if (view === 'profile') {
-        router.push('/candidate/app/profile');
-      } else if (view === 'skills') {
-        router.push('/candidate/app/skills');
-      } else if (view === 'projects') {
-        router.push('/candidate/app/projects');
-      } else if (view === 'experience') {
-        router.push('/candidate/app/experience');
-      } else if (view === 'education') {
-        router.push('/candidate/app/education');
-      } else if (view === 'certificates') {
-        router.push('/candidate/app/certificates');
+  // Handle navigation with subview support
+  const handleSidebarNavigation = (view: string, subView?: string) => {
+    if (view === 'dashboard') {
+      router.push('/candidate/app');
+    } else if (view === 'profile') {
+      if (subView) {
+        router.push(`/candidate/app/profile/${subView}`);
+      } else {
+        router.push('/candidate/app/profile/personal-info'); // Default sub-view
       }
     }
   };
 
   // Handle top bar navigation
   const handleTopBarNavigation = (view: string) => {
-    if (view !== activeView) {
-      if (view === 'profile') {
-        router.push('/candidate/app/profile');
-      }
+    if (view === 'profile') {
+      router.push('/candidate/app/profile/personal-info');
     }
   };
 
@@ -153,8 +163,9 @@ export default function CandidateLayout({
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar 
+      <SideBarV2 
         activeView={activeView} 
+        activeSubView={activeSubView}
         onViewChange={handleSidebarNavigation} 
         menuItems={sidebarMenuItems}
       />
@@ -163,7 +174,7 @@ export default function CandidateLayout({
         <TopBar 
           activeView={activeView} 
           onViewChange={handleTopBarNavigation} 
-          dashboardTitle="Candidate Portal"
+          dashboardTitle="Candidate Dashboard"
           userName={`${firstName || ''} ${lastName || ''}`.trim() || 'Candidate'}
           profileOptions={profileOptions}
         />
