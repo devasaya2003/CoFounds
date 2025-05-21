@@ -6,12 +6,14 @@ import companyReducer from "./slices/companySlice"
 import skillReducer from "./slices/skillSlice";
 import degreeReducer from "./slices/degreeSlice";
 import jobCreationReducer from './slices/jobCreationSlice';
+import candidateReducer from './slices/candidateSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     jobs: jobsReducer,
     recruiter: recruiterReducer,
+    candidate: candidateReducer,
     company: companyReducer,
     skill: skillReducer,
     degree: degreeReducer,

@@ -4,204 +4,180 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { restoreUserSession } from '@/redux/slices/authSlice';
-import { UserProfile, getUserProfile } from './candidate/profile/edit/api';
-import { CreateLayout, LayoutState } from './components/LayoutFactory';
+import { fetchCandidateSummary } from '@/redux/slices/candidateSlice';
+import TopBar from '@/components/dashboard/TopBar';
+import Sidebar from '@/components/dashboard/Sidebar';
+import { UserCircle, BookOpen, Code, Briefcase, Award, LogOut } from 'lucide-react';
 
-export default function CandidateLayout({ children }: { children: React.ReactNode }) {
+export default function CandidateLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
-  const {
-    user: authUser,
-    isAuthenticated,
-    isLoading: authLoading,
-    isLoadingUserDetails,
-    layoutInitialized: authInitialized
-  } = useAppSelector((state) => state.auth);
+  // Auth state
+  const { user, isAuthenticated, isLoading: authLoading } = useAppSelector(
+    (state) => state.auth
+  );
 
-  const [completeUserProfile, setCompleteUserProfile] = useState<UserProfile | null>(null);
-  const [userDetailsFetched, setUserDetailsFetched] = useState(false);
-  const [showProfileBanner, setShowProfileBanner] = useState(true);
+  // Candidate state
+  const { 
+    userId, 
+    firstName, 
+    lastName, 
+    isLoading: profileLoading 
+  } = useAppSelector((state) => state.candidate);
 
-  const [sessionRestored, setSessionRestored] = useState(false);
+  // Track initialization
+  const [authInitialized, setAuthInitialized] = useState(false);
+  const [profileInitialized, setProfileInitialized] = useState(false);
 
-  // Session restoration effect
+  // Determine active view from pathname
+  const getActiveViewFromPath = (path: string) => {
+    if (path.includes('/profile')) return 'profile';
+    if (path.includes('/skills')) return 'skills';
+    if (path.includes('/projects')) return 'projects';
+    if (path.includes('/experience')) return 'experience';
+    if (path.includes('/education')) return 'education';
+    if (path.includes('/certificates')) return 'certificates';
+    return 'dashboard';
+  };
+
+  const activeView = getActiveViewFromPath(pathname);
+
+  // Step 1: Initialize auth when component mounts
   useEffect(() => {
-    if (!sessionRestored && !authLoading) {
+    if (!authInitialized) {
       dispatch(restoreUserSession());
-      setSessionRestored(true);
+      setAuthInitialized(true);
     }
-  }, [dispatch, sessionRestored, authLoading, isAuthenticated]);
+  }, [dispatch, authInitialized]);
 
-  // Profile fetching effect
+  // Step 2: Load profile data once authentication is complete
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const loadProfile = async () => {
       if (
-        !isAuthenticated ||
-        !authUser?.id ||
-        isLoadingUserDetails ||
-        userDetailsFetched ||
-        !sessionRestored
+        isAuthenticated &&
+        user?.id &&
+        !profileInitialized &&
+        !profileLoading
       ) {
-        return;
-      }
-
-      setUserDetailsFetched(true);
-
-      try {
-        const profileData = await getUserProfile(authUser.id);
-        setCompleteUserProfile(profileData);
-      } catch (error) {
-        console.error('❌ Error fetching profile:', error);
-        setCompleteUserProfile({} as UserProfile);
+        try {
+          await dispatch(fetchCandidateSummary(user.id));
+          setProfileInitialized(true);
+        } catch (error) {
+          console.error('Failed to load candidate profile:', error);
+        }
       }
     };
 
-    fetchUserProfile();
-  }, [isAuthenticated, authUser?.id, isLoadingUserDetails, userDetailsFetched, sessionRestored]);
+    loadProfile();
+  }, [dispatch, isAuthenticated, user, profileInitialized, profileLoading]);
 
-  // Profile completeness check
-  const hasCompleteProfile = (): boolean => {
-    if (!completeUserProfile) {
-      return false;
-    }
-    
-    // Check basic info fields
-    const hasBasicInfo = !!(
-      completeUserProfile.userName &&
-      completeUserProfile.firstName &&
-      completeUserProfile.lastName &&
-      completeUserProfile.dob
-    );
-    
-    // Check skills
-    const hasSkills = !!(
-      completeUserProfile.skillset &&
-      Array.isArray(completeUserProfile.skillset) &&
-      completeUserProfile.skillset.length > 0
-    );
-    
-    // Check education
-    const hasEducation = !!(
-      completeUserProfile.education &&
-      Array.isArray(completeUserProfile.education) &&
-      completeUserProfile.education.length > 0
-    );
-    
-    // Check experience
-    const hasExperience = !!(
-      completeUserProfile.experience &&
-      Array.isArray(completeUserProfile.experience) &&
-      completeUserProfile.experience.length > 0
-    );
-    
-    // All required components must be present
-    const isComplete = hasBasicInfo && hasSkills && hasEducation && hasExperience;
-    return isComplete;
-  };
+  // Sidebar configuration
+  const sidebarMenuItems = [
+    { id: "dashboard", label: "Dashboard" },
+    { id: "profile", label: "Profile", icon: <UserCircle className="mr-2 h-4 w-4" /> },
+    { id: "skills", label: "Skills", icon: <Code className="mr-2 h-4 w-4" /> },
+    { id: "projects", label: "Projects", icon: <BookOpen className="mr-2 h-4 w-4" /> },
+    { id: "experience", label: "Experience", icon: <Briefcase className="mr-2 h-4 w-4" /> },
+    { id: "education", label: "Education", icon: <Award className="mr-2 h-4 w-4" /> },
+    { id: "certificates", label: "Certificates" },
+  ];
 
-  // Path matching helper
-  const isPathMatching = (pattern: string): boolean => {
-    const normalizedPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
-    const normalizedPattern = pattern.endsWith('/') ? pattern.slice(0, -1) : pattern;
-    const result = normalizedPath.startsWith(normalizedPattern);
-    return result;
-  };
+  // TopBar configuration
+  const profileOptions = [
+    { 
+      id: "profile", 
+      label: "Your Profile",
+      icon: <UserCircle className="mr-2 h-4 w-4" />
+    },
+    { 
+      id: "logout", 
+      label: "Sign Out",
+      icon: <LogOut className="mr-2 h-4 w-4" />,
+      divider: true,
+      href: "/auth/logout"
+    },
+  ];
 
-  // User verification check
-  const isUserVerified = (): boolean => {
-    const result = authUser?.verified === true;
-    return result;
-  };
-
-  // Get missing profile fields
-  const getMissingFields = () => {
-    if (!completeUserProfile) return [];
-
-    const missingFields = [];
-
-    if (!completeUserProfile?.userName)
-      missingFields.push({ name: 'Username', tab: 'personal-info', required: true });
-
-    if (!completeUserProfile?.firstName)
-      missingFields.push({ name: 'First Name', tab: 'personal-info', required: true });
-
-    if (!completeUserProfile?.lastName)
-      missingFields.push({ name: 'Last Name', tab: 'personal-info', required: true });
-
-    if (!completeUserProfile?.dob)
-      missingFields.push({ name: 'Date of Birth', tab: 'personal-info', required: true });
-
-    if (!completeUserProfile?.skillset || completeUserProfile.skillset.length === 0)
-      missingFields.push({ name: 'Skills', tab: 'skills', required: true });
-
-    if (!completeUserProfile?.education || completeUserProfile.education.length === 0)
-      missingFields.push({ name: 'Education', tab: 'education', required: true });
-
-    if (!completeUserProfile?.experience || completeUserProfile.experience.length === 0)
-      missingFields.push({ name: 'Proof Of Work', tab: 'proof-of-work', required: true });
-
-    return missingFields;
-  };
-
-  // Determine layout state
-  const determineLayoutState = (): LayoutState => {
-    if (authLoading || isLoadingUserDetails || !sessionRestored) {
-      return LayoutState.LOADING;
-    }
-
-    if (
-      isAuthenticated &&
-      authUser?.userName &&
-      (!userDetailsFetched || !completeUserProfile)
-    ) {
-      return LayoutState.LOADING;
-    }
-
-    if (sessionRestored && !authLoading && !isAuthenticated) {
-      return LayoutState.UNAUTHENTICATED;
-    }
-
-    if (isAuthenticated && isPathMatching('/candidate/profile/edit')) {
-      return LayoutState.NORMAL;
-    }
-
-    const profileComplete = hasCompleteProfile();
-    const isVerified = isUserVerified();
-
-    if (isAuthenticated && !profileComplete) {
-      if (isPathMatching('/candidate/app')) {
-        return LayoutState.PROFILE_INCOMPLETE;
-      } else {
-        return LayoutState.NORMAL;
+  // Handle navigation
+  const handleSidebarNavigation = (view: string) => {
+    // Only navigate if the view is different from current
+    if (view !== activeView) {
+      if (view === 'dashboard') {
+        router.push('/candidate/app');
+      } else if (view === 'profile') {
+        router.push('/candidate/app/profile');
+      } else if (view === 'skills') {
+        router.push('/candidate/app/skills');
+      } else if (view === 'projects') {
+        router.push('/candidate/app/projects');
+      } else if (view === 'experience') {
+        router.push('/candidate/app/experience');
+      } else if (view === 'education') {
+        router.push('/candidate/app/education');
+      } else if (view === 'certificates') {
+        router.push('/candidate/app/certificates');
       }
     }
-
-    if (isAuthenticated && !isVerified) {
-      return LayoutState.UNVERIFIED;
-    }
-
-    return LayoutState.NORMAL;
   };
 
-  // Get current layout state
-  const layoutState = determineLayoutState();
+  // Handle top bar navigation
+  const handleTopBarNavigation = (view: string) => {
+    if (view !== activeView) {
+      if (view === 'profile') {
+        router.push('/candidate/app/profile');
+      }
+    }
+  };
 
-  // Redirect if unauthenticated
-  if (layoutState === LayoutState.UNAUTHENTICATED) {
-    router.replace('/auth/sign-in');
+  // Auth loading state
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200 mb-4"></div>
+        <p className="text-lg text-gray-600">Authenticating...</p>
+      </div>
+    );
+  }
+
+  // Auth error state
+  if (authInitialized && !authLoading && !isAuthenticated) {
+    router.push('/auth/candidate-sign-in');
     return null;
   }
 
-  // Create and return appropriate layout
-  return CreateLayout({
-    children,
-    state: layoutState,
-    authUser,
-    completeUserProfile,
-    showProfileBanner,
-    setShowProfileBanner,
-    missingFields: getMissingFields()
-  });
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar 
+        activeView={activeView} 
+        onViewChange={handleSidebarNavigation} 
+        menuItems={sidebarMenuItems}
+      />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar 
+          activeView={activeView} 
+          onViewChange={handleTopBarNavigation} 
+          dashboardTitle="Candidate Portal"
+          userName={`${firstName || ''} ${lastName || ''}`.trim() || 'Candidate'}
+          profileOptions={profileOptions}
+        />
+        <main className="flex-1 overflow-y-auto p-6">
+          {profileLoading ? (
+            <div className="flex flex-col items-center justify-center h-[80vh]">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200 mb-4"></div>
+              <p className="text-lg text-gray-600">Loading profile...</p>
+            </div>
+          ) : (
+            children
+          )}
+        </main>
+      </div>
+    </div>
+  );
 }

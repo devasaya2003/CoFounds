@@ -84,6 +84,7 @@ interface CandidateProfile {
   profileImage: string | null;
   role: string;
   verified: boolean;
+  isActive: boolean; // Add isActive field
   skills: CandidateSkill[];
   projects: CandidateProject[];
   education: CandidateEducation[];
@@ -112,7 +113,7 @@ interface CandidateProfile {
   linksError: string | null;
 }
 
-// Updated API response interface
+// Updated API response interface with verified and isActive fields
 interface CandidateSummaryResponse {
   success: boolean;
   data: {
@@ -123,6 +124,8 @@ interface CandidateSummaryResponse {
     dob: string | null;
     email: string;
     description: string | null;
+    verified: boolean;
+    isActive: boolean;
     createdAt: string;
     updatedAt: string;
     counts: {
@@ -148,6 +151,7 @@ const initialState: CandidateProfile = {
   profileImage: null,
   role: "",
   verified: false,
+  isActive: false, // Add initial value for isActive
   skills: [],
   projects: [],
   education: [],
@@ -184,7 +188,7 @@ export const getCandidateFullName = (candidate: CandidateProfile): string => {
   return candidate.userName || "";
 };
 
-// Renamed function with updated endpoint and response handling
+// Updated function to handle verified and isActive fields
 export const fetchCandidateSummary = createAsyncThunk(
   "candidate/fetchSummary",
   async (userId: string, { rejectWithValue }) => {
@@ -210,7 +214,8 @@ export const fetchCandidateSummary = createAsyncThunk(
           dob: response.data.dob,
           profileImage: null, // Not provided in new API
           role: "candidate", // Assumed based on context
-          verified: true, // Assuming verified
+          verified: response.data.verified, // Use the actual verified value from API
+          isActive: response.data.isActive, // Use the isActive value from API
         },
         counts: {
           skills: response.data.counts.skillset,
@@ -355,6 +360,7 @@ const candidateSlice = createSlice({
         state.profileImage = action.payload.user.profileImage;
         state.role = action.payload.user.role;
         state.verified = action.payload.user.verified;
+        state.isActive = action.payload.user.isActive; // Set isActive in state
         state.skillsCount = action.payload.counts.skills;
         state.projectsCount = action.payload.counts.projects;
         state.educationCount = action.payload.counts.education;
