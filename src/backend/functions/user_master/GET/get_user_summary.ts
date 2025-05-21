@@ -12,6 +12,7 @@ export async function getUserSummary(id: string) {
             lastName: true,
             dob: true,
             email: true,
+            profileImage: true,
             description: true,
             verified: true,
             isActive: true,

@@ -113,7 +113,7 @@ interface CandidateProfile {
   linksError: string | null;
 }
 
-// Updated API response interface with verified and isActive fields
+// Updated API response interface with profileImage field
 interface CandidateSummaryResponse {
   success: boolean;
   data: {
@@ -123,6 +123,7 @@ interface CandidateSummaryResponse {
     lastName: string | null;
     dob: string | null;
     email: string;
+    profileImage: string | null; // Added profileImage field
     description: string | null;
     verified: boolean;
     isActive: boolean;
@@ -188,7 +189,7 @@ export const getCandidateFullName = (candidate: CandidateProfile): string => {
   return candidate.userName || "";
 };
 
-// Updated function to handle verified and isActive fields
+// Updated function to handle profileImage field
 export const fetchCandidateSummary = createAsyncThunk(
   "candidate/fetchSummary",
   async (userId: string, { rejectWithValue }) => {
@@ -212,10 +213,10 @@ export const fetchCandidateSummary = createAsyncThunk(
           phone: null, // Not provided in new API
           description: response.data.description,
           dob: response.data.dob,
-          profileImage: null, // Not provided in new API
+          profileImage: response.data.profileImage, // Use actual profileImage from API
           role: "candidate", // Assumed based on context
-          verified: response.data.verified, // Use the actual verified value from API
-          isActive: response.data.isActive, // Use the isActive value from API
+          verified: response.data.verified,
+          isActive: response.data.isActive,
         },
         counts: {
           skills: response.data.counts.skillset,

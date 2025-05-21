@@ -7,7 +7,7 @@ export interface UserProfile {
     last_name?: string;
     dob?: Date | string;
     description?: string;
-    profile_image?: string; // Added profile image field
+    profile_image?: string;
 }
 
 type ProfileUpdateData = {
