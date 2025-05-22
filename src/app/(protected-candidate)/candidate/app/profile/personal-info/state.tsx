@@ -2,9 +2,37 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { formatDateToYMD, formatYMDtoISODate } from './utils';
 import { uploadFile, deleteFile } from '@/utils/fileUpload';
 import { updateCandidateProfile, fetchCandidateSummary } from '@/redux/slices/candidateSlice';
+
+// Helper function to format date to ISO string with timezone adjustment
+const formatDateToISOString = (date: Date | undefined): string | null => {
+  if (!date) return null;
+  
+  // Create new date to avoid modifying the original
+  const adjustedDate = new Date(date);
+  
+  // Set time to noon to avoid timezone issues
+  adjustedDate.setHours(12, 0, 0, 0);
+  
+  // Format to ISO string and extract just the date portion
+  const isoString = adjustedDate.toISOString();
+  return isoString;
+};
+
+// Helper function to parse date string from API
+const parseDateString = (dateString: string | null): Date | undefined => {
+  if (!dateString) return undefined;
+  try {
+    // Create a new date and set to noon to avoid timezone issues
+    const date = new Date(dateString);
+    date.setHours(12, 0, 0, 0);
+    return isNaN(date.getTime()) ? undefined : date;
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return undefined;
+  }
+};
 
 const isEqual = <T extends Record<string, unknown>>(obj1: T | null, obj2: T | null): boolean => {  
   if (obj1 === obj2) return true;
@@ -38,11 +66,7 @@ export function usePersonalInfoForm() {
     firstName: '',
     lastName: '',
     profileImage: null as string | null,
-    dob: {
-      year: '',
-      month: '',
-      day: ''
-    },
+    dob: undefined as Date | undefined,
     description: '',
   });
     
@@ -53,9 +77,7 @@ export function usePersonalInfoForm() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
     
-  const [year, setYear] = useState<string>('');
-  const [month, setMonth] = useState<string>('');
-  const [day, setDay] = useState<string>('');
+  const [dob, setDob] = useState<Date | undefined>(undefined);
     
   const [description, setDescription] = useState<string>('');
   const [descriptionLoaded, setDescriptionLoaded] = useState(false);
@@ -75,22 +97,20 @@ export function usePersonalInfoForm() {
       setLastName(candidateData.lastName || '');
       setDescription(candidateData.description || '');
       setProfileImage(candidateData.profileImage || null);
+      
+      if (candidateData.dob) {
+        console.log("Setting DOB from candidateData:", candidateData.dob);
+        const parsedDate = parseDateString(candidateData.dob);
+        setDob(parsedDate);
+      }
             
       initialValues.current = {
         firstName: candidateData.firstName || '',
         lastName: candidateData.lastName || '',
         profileImage: candidateData.profileImage || null,
+        dob: candidateData.dob ? parseDateString(candidateData.dob) : undefined,
         description: candidateData.description || '',
-        dob: { year: '', month: '', day: '' }
       };
-            
-      if (candidateData.dob) {
-        const { year, month, day } = formatDateToYMD(candidateData.dob);
-        setYear(year);
-        setMonth(month);
-        setDay(day);
-        initialValues.current.dob = { year, month, day };
-      }
       
       initialDataLoaded.current = true;
     }
@@ -103,12 +123,35 @@ export function usePersonalInfoForm() {
       firstName,
       lastName,
       profileImage,
+      dob,
       description,
-      dob: { year, month, day }
     };
     
-    return !isEqual(currentValues, initialValues.current);
-  }, [firstName, lastName, profileImage, description, year, month, day, selectedFile]);
+    if (
+      (currentValues.dob && !initialValues.current.dob) || 
+      (!currentValues.dob && initialValues.current.dob) ||
+      (currentValues.dob && initialValues.current.dob && 
+        currentValues.dob.getTime() !== initialValues.current.dob.getTime())
+    ) {
+      return true;
+    }
+    
+    const valuesWithoutDate = {
+      firstName: currentValues.firstName,
+      lastName: currentValues.lastName,
+      profileImage: currentValues.profileImage,
+      description: currentValues.description
+    };
+    
+    const initialValuesWithoutDate = {
+      firstName: initialValues.current.firstName,
+      lastName: initialValues.current.lastName,
+      profileImage: initialValues.current.profileImage,
+      description: initialValues.current.description
+    };
+    
+    return !isEqual(valuesWithoutDate, initialValuesWithoutDate);
+  }, [firstName, lastName, profileImage, description, dob, selectedFile]);
   
   useEffect(() => {
     setFormChanged(hasFormChanged);
@@ -131,18 +174,6 @@ export function usePersonalInfoForm() {
     setDescription(html);
   }, []);
   
-  const handleYearChange = useCallback((value: string) => {
-    setYear(value);
-  }, []);
-  
-  const handleMonthChange = useCallback((value: string) => {
-    setMonth(value);
-  }, []);
-  
-  const handleDayChange = useCallback((value: string) => {
-    setDay(value);
-  }, []);
-    
   const handleShowEditor = useCallback(() => {
     setShowEditor(true);
   }, []);
@@ -161,8 +192,12 @@ export function usePersonalInfoForm() {
     setIsSubmitting(true);
     setSaveSuccess(false);
     
-    try {      
-      const dob = formatYMDtoISODate(year, month, day);
+    try {
+      // Log the date being submitted for debugging
+      console.log("Original DOB selected:", dob);
+      
+      const formattedDob = formatDateToISOString(dob);
+      console.log("Formatted DOB for submission:", formattedDob);
             
       let profileImageUrl = profileImage;
       
@@ -170,7 +205,6 @@ export function usePersonalInfoForm() {
         setUploadingImage(true);
         
         try {
-          // First delete the existing profile image if there is one
           if (profileImage) {
             console.log("Deleting previous profile image:", profileImage);
             const deleteSuccess = await deleteFile(profileImage);
@@ -180,7 +214,6 @@ export function usePersonalInfoForm() {
             }
           }
           
-          // Upload the new image
           profileImageUrl = await uploadFile(selectedFile, user.id, 'profile');
         } catch (uploadError) {
           console.error('Error handling profile image:', uploadError);
@@ -189,17 +222,15 @@ export function usePersonalInfoForm() {
         }
       }
       
-      // Continue with profile update
       await dispatch(updateCandidateProfile({
         userId: user.id,
         firstName,
         lastName,
         description,
-        dob,
+        dob: formattedDob,
         profileImage: profileImageUrl,
       })).unwrap();
       
-      // Then refetch the complete profile to ensure everything is in sync
       await dispatch(fetchCandidateSummary(user.id));
       
       setFormChanged(false);
@@ -216,7 +247,7 @@ export function usePersonalInfoForm() {
         lastName,
         profileImage: profileImageUrl,
         description,
-        dob: { year, month, day }
+        dob,
       };
       
       const successTimer = setTimeout(() => {
@@ -238,9 +269,8 @@ export function usePersonalInfoForm() {
     profileImage,
     previewUrl,
     uploadingImage,
-    year,
-    month,
-    day,
+    dob,
+    setDob,
     description,
     descriptionLoaded,
     showEditor,
@@ -255,9 +285,6 @@ export function usePersonalInfoForm() {
       setLastName(val);
     },
     handleFileChange,
-    handleYearChange,
-    handleMonthChange,
-    handleDayChange,
     handleDescriptionChange,
     handleShowEditor,
     handleContentReady,

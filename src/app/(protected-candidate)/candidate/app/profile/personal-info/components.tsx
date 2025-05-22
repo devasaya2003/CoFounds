@@ -9,9 +9,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import DateSelector from '@/components/DateSelector/DateSelector';
 import RichTextEditor from '@/components/RichTextEditor/RichTextEditor';
-import { isExternalUrl, MONTHS, YEARS } from './utils';
+import { isExternalUrl } from './utils';
+import { DatePicker } from '@/components/DatePicker/DatePicker';
 
 // Profile Image Component
 export function ProfileImageUploader({
@@ -97,7 +97,7 @@ export function BasicInfoForm({
   setLastName: (value: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-4">
       {/* Email - Disabled */}
       <div>
         <div className="flex items-center mb-2">
@@ -181,38 +181,20 @@ export function BasicInfoForm({
   );
 }
 
-// Date of Birth Component
-export function BirthDateSelector({
-  year,
-  month,
-  day,
-  onYearChange,
-  onMonthChange,
-  onDayChange
+// New Date of Birth Component using shadcn Calendar
+export function BirthDatePicker({
+  dob,
+  setDob,
 }: {
-  year: string;
-  month: string;
-  day: string;
-  onYearChange: (value: string) => void;
-  onMonthChange: (value: string) => void;
-  onDayChange: (value: string) => void;
+  dob: Date | undefined;
+  setDob: (date: Date | undefined) => void;
 }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Date of Birth
-      </label>
-      <DateSelector
-        years={YEARS}
-        months={MONTHS}
-        selectedYear={year}
-        selectedMonth={month}
-        selectedDay={day}
-        onYearChange={onYearChange}
-        onMonthChange={onMonthChange}
-        onDayChange={onDayChange}
-      />
-    </div>
+    <DatePicker 
+      date={dob} 
+      setDate={setDob} 
+      label="Date of Birth" 
+    />
   );
 }
 
@@ -233,7 +215,7 @@ export function DescriptionEditorSection({
   handleContentReady: () => void;
 }) {
   return (
-    <div>
+    <div className="w-full">
       <label className="block text-sm font-medium text-gray-700 mb-2">
         About You
       </label>

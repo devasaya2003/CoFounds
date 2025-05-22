@@ -178,7 +178,7 @@ export default function CandidateLayout({
           userName={`${firstName || ''} ${lastName || ''}`.trim() || 'Candidate'}
           profileOptions={profileOptions}
         />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto px-4 py-6 md:px-6">
           {profileLoading ? (
             <div className="flex flex-col items-center justify-center h-[80vh]">
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-indigo-500 border-b-indigo-500 border-indigo-200 mb-4"></div>

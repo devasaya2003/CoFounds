@@ -30,19 +30,46 @@ export const MONTHS = [
 ];
 
 // Format date string into date parts (year, month, day)
-export const formatDateToYMD = (dateString: string | null) => {
-  if (!dateString) return { year: '', month: '', day: '' };
-  
-  const date = new Date(dateString);
-  return {
-    year: date.getFullYear().toString(),
-    month: (date.getMonth() + 1).toString().padStart(2, '0'),
-    day: date.getDate().toString().padStart(2, '0')
-  };
+export const formatDateToYMD = (dateString: string) => {
+  try {
+    console.log("Parsing date string:", dateString);
+    
+    // Fix: Use explicit date parsing to avoid timezone issues
+    const parts = dateString.split('T')[0].split('-');
+    if (parts.length !== 3) {
+      throw new Error(`Invalid date format: ${dateString}`);
+    }
+    
+    const year = parts[0];
+    const month = parts[1];
+    const day = parts[2];
+    
+    console.log("Parsed YMD:", { year, month, day });
+    
+    return { year, month, day };
+  } catch (error) {
+    console.error('Error parsing date in formatDateToYMD:', error);
+    return { year: '', month: '', day: '' };
+  }
 };
 
 // Format year, month, and day into ISO date string
 export const formatYMDtoISODate = (year: string, month: string, day: string) => {
-  if (!year || !month || !day) return null;
-  return `${year}-${month}-${day}T00:00:00.000Z`;
+  try {
+    if (!year || !month || !day) {
+      console.log('Missing date component in formatYMDtoISODate:', { year, month, day });
+      return null;
+    }
+    
+    console.log("Creating ISO date from:", { year, month, day });
+    
+    // Create a string date in ISO format to avoid timezone issues
+    const isoDate = `${year}-${month}-${day}T00:00:00.000Z`;
+    console.log("Created ISO date:", isoDate);
+    
+    return isoDate;
+  } catch (error) {
+    console.error('Error creating ISO date in formatYMDtoISODate:', error);
+    return null;
+  }
 };

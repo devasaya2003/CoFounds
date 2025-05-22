@@ -4,7 +4,7 @@ import { usePersonalInfoForm } from './state';
 import {
   ProfileImageUploader,
   BasicInfoForm,
-  BirthDateSelector,
+  BirthDatePicker,
   DescriptionEditorSection,
   SubmitButtonWithStatus
 } from './components';
@@ -18,9 +18,8 @@ export default function PersonalInfoPage() {
     profileImage,
     previewUrl,
     uploadingImage,
-    year,
-    month,
-    day,
+    dob,
+    setDob,
     description,
     descriptionLoaded,
     showEditor,
@@ -32,9 +31,6 @@ export default function PersonalInfoPage() {
     setFirstName,
     setLastName,
     handleFileChange,
-    handleYearChange,
-    handleMonthChange,
-    handleDayChange,
     handleDescriptionChange,
     handleShowEditor,
     handleContentReady,
@@ -42,7 +38,7 @@ export default function PersonalInfoPage() {
   } = usePersonalInfoForm();
 
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 mb-10">
+    <div className="w-full bg-white rounded-lg shadow-md p-5 sm:p-6 mb-10">
       <h1 className="text-2xl font-bold mb-6">Personal Information</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -64,14 +60,10 @@ export default function PersonalInfoPage() {
           setLastName={setLastName}
         />
         
-        {/* Date of Birth */}
-        <BirthDateSelector
-          year={year}
-          month={month}
-          day={day}
-          onYearChange={handleYearChange}
-          onMonthChange={handleMonthChange}
-          onDayChange={handleDayChange}
+        {/* Date of Birth - Updated to use new component */}
+        <BirthDatePicker
+          dob={dob}
+          setDob={setDob}
         />
         
         {/* Description Editor */}
