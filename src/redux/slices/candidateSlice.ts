@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchWithAuth_GET } from "@/utils/api";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { fetchWithAuth_GET, fetchWithAuth_POST } from "@/utils/api";
 
 // Interfaces for candidate data structures
 interface CandidateSkill {
@@ -335,11 +335,81 @@ export const fetchCandidateLinks = createAsyncThunk(
   }
 );
 
+// Add a new interface for profile update payload
+interface UpdateCandidateProfilePayload {
+  userId: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  description?: string | null;
+  dob?: string | null;
+  profileImage?: string | null;
+}
+
+// Update the thunk for updating candidate profile
+export const updateCandidateProfile = createAsyncThunk(
+  "candidate/updateProfile",
+  async (profileData: UpdateCandidateProfilePayload, { rejectWithValue }) => {
+    try {
+      const apiData = {
+        user_id: profileData.userId,
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
+        dob: profileData.dob,
+        description: profileData.description,
+        profile_image: profileData.profileImage
+      };
+      
+      const response = await fetch('/api/v1/candidate/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify(apiData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue(errorData.error || "Failed to update profile");
+      }
+      
+      // Parse the response and use the returned data
+      const data = await response.json();
+      
+      if (!data.success || !data.updatedProfile) {
+        return rejectWithValue("Update succeeded but response data is invalid");
+      }
+      
+      // Return the server-provided data instead of the input data
+      return {
+        userId: profileData.userId,
+        firstName: data.updatedProfile.firstName,
+        lastName: data.updatedProfile.lastName,
+        description: data.updatedProfile.description,
+        dob: data.updatedProfile.dob,
+        profileImage: data.updatedProfile.profileImage,
+        // Include other fields from the response
+        userName: data.updatedProfile.userName
+      };
+    } catch (error) {
+      return rejectWithValue("Failed to update profile");
+    }
+  }
+);
+
 const candidateSlice = createSlice({
   name: "candidate",
   initialState,
   reducers: {
     clearCandidateProfile: () => initialState,
+    // Optional: Add a synchronous action for local-only updates
+    updateLocalProfile: (state, action: PayloadAction<Partial<UpdateCandidateProfilePayload>>) => {
+      if (action.payload.firstName !== undefined) state.firstName = action.payload.firstName;
+      if (action.payload.lastName !== undefined) state.lastName = action.payload.lastName;
+      if (action.payload.description !== undefined) state.description = action.payload.description;
+      if (action.payload.dob !== undefined) state.dob = action.payload.dob;
+      if (action.payload.profileImage !== undefined) state.profileImage = action.payload.profileImage;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -456,9 +526,30 @@ const candidateSlice = createSlice({
       .addCase(fetchCandidateLinks.rejected, (state, action) => {
         state.linksLoading = false;
         state.linksError = action.payload as string;
+      })
+
+      // Add cases for the new update profile thunk
+      .addCase(updateCandidateProfile.pending, (state) => {
+        // Optionally add a loading state for profile updates
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateCandidateProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Update state with new profile data
+        if (action.payload.firstName !== undefined) state.firstName = action.payload.firstName;
+        if (action.payload.lastName !== undefined) state.lastName = action.payload.lastName;
+        if (action.payload.description !== undefined) state.description = action.payload.description;
+        if (action.payload.dob !== undefined) state.dob = action.payload.dob;
+        if (action.payload.profileImage !== undefined) state.profileImage = action.payload.profileImage;
+        if (action.payload.userName !== undefined) state.userName = action.payload.userName;
+      })
+      .addCase(updateCandidateProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { clearCandidateProfile } = candidateSlice.actions;
+export const { clearCandidateProfile, updateLocalProfile } = candidateSlice.actions;
 export default candidateSlice.reducer;

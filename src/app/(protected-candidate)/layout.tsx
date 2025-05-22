@@ -157,7 +157,7 @@ export default function CandidateLayout({
 
   // Auth error state
   if (authInitialized && !authLoading && !isAuthenticated) {
-    router.push('/auth/candidate-sign-in');
+    router.push('/auth/sign-in');
     return null;
   }
 

@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { updateUserData } from '@/redux/slices/authSlice';
 import { formatDateToYMD, formatYMDtoISODate } from './utils';
+import { uploadFile, deleteFile } from '@/utils/fileUpload';
+import { updateCandidateProfile, fetchCandidateSummary } from '@/redux/slices/candidateSlice';
 
 const isEqual = <T extends Record<string, unknown>>(obj1: T | null, obj2: T | null): boolean => {  
   if (obj1 === obj2) return true;
@@ -29,6 +30,9 @@ const isEqual = <T extends Record<string, unknown>>(obj1: T | null, obj2: T | nu
 export function usePersonalInfoForm() {
   const dispatch = useAppDispatch();
   const candidateData = useAppSelector((state) => state.candidate);
+  const { user } = useAppSelector((state) => state.auth);
+  
+  const initialDataLoaded = useRef(false);
     
   const initialValues = useRef({
     firstName: '',
@@ -60,9 +64,13 @@ export function usePersonalInfoForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formChanged, setFormChanged] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  
+  const candidateDataLoaded = useMemo(() => 
+    Boolean(candidateData.userId) && !candidateData.isLoading,
+  [candidateData.userId, candidateData.isLoading]);
     
   useEffect(() => {
-    if (candidateData) {      
+    if (candidateDataLoaded && !initialDataLoaded.current) {
       setFirstName(candidateData.firstName || '');
       setLastName(candidateData.lastName || '');
       setDescription(candidateData.description || '');
@@ -81,11 +89,12 @@ export function usePersonalInfoForm() {
         setYear(year);
         setMonth(month);
         setDay(day);
-                
         initialValues.current.dob = { year, month, day };
       }
+      
+      initialDataLoaded.current = true;
     }
-  }, [candidateData]);
+  }, [candidateDataLoaded, candidateData]);
   
   const hasFormChanged = useMemo(() => {    
     if (selectedFile) return true;
@@ -108,6 +117,10 @@ export function usePersonalInfoForm() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      
       setSelectedFile(file);
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
@@ -141,7 +154,7 @@ export function usePersonalInfoForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
         
-    if (!hasFormChanged) {
+    if (!hasFormChanged || !user?.id) {
       return;
     }
     
@@ -152,24 +165,52 @@ export function usePersonalInfoForm() {
       const dob = formatYMDtoISODate(year, month, day);
             
       let profileImageUrl = profileImage;
-      if (selectedFile) {
-        setUploadingImage(true);                
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        profileImageUrl = previewUrl;
-        setUploadingImage(false);
-      }
+      
+      if (selectedFile && user?.id) {
+        setUploadingImage(true);
+        
+        try {
+          // First delete the existing profile image if there is one
+          if (profileImage) {
+            console.log("Deleting previous profile image:", profileImage);
+            const deleteSuccess = await deleteFile(profileImage);
             
-      await dispatch(updateUserData({
+            if (!deleteSuccess) {
+              console.warn("Failed to delete previous profile image. Continuing with upload.");
+            }
+          }
+          
+          // Upload the new image
+          profileImageUrl = await uploadFile(selectedFile, user.id, 'profile');
+        } catch (uploadError) {
+          console.error('Error handling profile image:', uploadError);
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+      
+      // Continue with profile update
+      await dispatch(updateCandidateProfile({
+        userId: user.id,
         firstName,
         lastName,
         description,
         dob,
         profileImage: profileImageUrl,
-      }));
-            
+      })).unwrap();
+      
+      // Then refetch the complete profile to ensure everything is in sync
+      await dispatch(fetchCandidateSummary(user.id));
+      
       setFormChanged(false);
       setSaveSuccess(true);
-            
+      setSelectedFile(null);
+      
+      if (previewUrl && profileImageUrl !== previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+      
       initialValues.current = {
         firstName,
         lastName,
@@ -177,12 +218,12 @@ export function usePersonalInfoForm() {
         description,
         dob: { year, month, day }
       };
-            
-      setSelectedFile(null);
-            
-      setTimeout(() => {
+      
+      const successTimer = setTimeout(() => {
         setSaveSuccess(false);
       }, 3000);
+      
+      return () => clearTimeout(successTimer);
     } catch (error) {
       console.error("Error updating profile:", error);
     } finally {
@@ -204,7 +245,7 @@ export function usePersonalInfoForm() {
     descriptionLoaded,
     showEditor,
     isSubmitting,
-  formChanged, 
+    formChanged, 
     saveSuccess,
         
     setFirstName: (val: string) => {
