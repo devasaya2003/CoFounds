@@ -182,6 +182,28 @@ export function usePersonalInfoForm() {
     setDescriptionLoaded(true);
   }, []);
   
+  const handleResetForm = useCallback(() => {
+    // Reset all form fields to initial values
+    setFirstName(initialValues.current.firstName);
+    setLastName(initialValues.current.lastName);
+    setDescription(initialValues.current.description);
+    setDob(initialValues.current.dob);
+    
+    // Clear file selection
+    if (selectedFile) {
+      setSelectedFile(null);
+    }
+    
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    
+    setProfileImage(initialValues.current.profileImage);
+    setFormChanged(false);
+    setSaveSuccess(false);
+  }, [initialValues, selectedFile, previewUrl]);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
         
@@ -277,17 +299,14 @@ export function usePersonalInfoForm() {
     isSubmitting,
     formChanged, 
     saveSuccess,
-        
-    setFirstName: (val: string) => {
-      setFirstName(val);
-    },
-    setLastName: (val: string) => {
-      setLastName(val);
-    },
+    
+    setFirstName,
+    setLastName,
     handleFileChange,
     handleDescriptionChange,
     handleShowEditor,
     handleContentReady,
-    handleSubmit
+    handleSubmit,
+    handleResetForm
   };
 }

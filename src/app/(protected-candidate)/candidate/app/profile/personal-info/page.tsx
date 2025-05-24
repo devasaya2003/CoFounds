@@ -34,7 +34,8 @@ export default function PersonalInfoPage() {
     handleDescriptionChange,
     handleShowEditor,
     handleContentReady,
-    handleSubmit
+    handleSubmit,
+    handleResetForm
   } = usePersonalInfoForm();
 
   return (
@@ -81,6 +82,7 @@ export default function PersonalInfoPage() {
           isSubmitting={isSubmitting}
           formChanged={formChanged}
           saveSuccess={saveSuccess}
+          onCancel={handleResetForm}
         />
       </form>
     </div>

@@ -274,32 +274,46 @@ export function DescriptionEditorSection({
 export function SubmitButtonWithStatus({
   isSubmitting,
   formChanged,
-  saveSuccess
+  saveSuccess,
+  onCancel
 }: {
   isSubmitting: boolean;
   formChanged: boolean;
   saveSuccess: boolean;
+  onCancel: () => void;
 }) {
   return (
     <div className="flex items-center pt-4">
-      <button
-        type="submit"
-        disabled={isSubmitting || !formChanged}
-        className={`px-6 py-2.5 rounded-md font-medium transition-colors ${
-          formChanged 
-            ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
-            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-        }`}
-      >
-        {isSubmitting ? (
-          <span className="flex items-center">
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Saving...
-          </span>
-        ) : (
-          'Save Changes'
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          disabled={isSubmitting || !formChanged}
+          className={`px-6 py-2.5 rounded-md font-medium transition-colors ${
+            formChanged 
+              ? 'bg-indigo-600 text-white hover:bg-indigo-700' 
+              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </span>
+          ) : (
+            'Save Changes'
+          )}
+        </button>
+        
+        {formChanged && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2.5 rounded-md font-medium transition-colors border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
         )}
-      </button>
+      </div>
       
       {saveSuccess && (
         <div className="ml-4 flex items-center text-green-600">
