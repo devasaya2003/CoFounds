@@ -1,23 +1,51 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchWithAuth_GET, fetchWithAuth_POST, fetchWithAuth_DELETE } from "@/utils/api";
+import { fetchWithAuth_GET, fetchWithAuth_PUT } from "@/utils/api";
 
-// Interface for skill model
+// Interface for skill model - updated to match actual API response
 export interface CandidateSkill {
   id: string;
   skill: {
     id: string;
     name: string;
   };
-  skillLevel: string;
+  skillLevel: 'beginner' | 'intermediate' | 'advanced';
   createdAt: string;
   updatedAt: string;
 }
 
-// Interface for adding a skill
-export interface AddCandidateSkillPayload {
+// Interface for batch skill operations
+export interface SkillOperationsPayload {
   userId: string;
-  skillId: string;
-  skillLevel: string;
+  newSkills?: {
+    skillId: string;
+    skillLevel: 'beginner' | 'intermediate' | 'advanced';
+  }[];
+  updatedSkills?: {
+    id: string;
+    skillId: string;
+    skillLevel: 'beginner' | 'intermediate' | 'advanced';
+  }[];
+  deletedSkills?: string[];
+}
+
+// Define the response type for the batch update operation
+export interface SkillUpdateRequest {
+  user_id: string;
+  new_skillset: { skill_id: string; skill_level: string }[];
+  updated_skillset: { skill_id: string; skill_level: string }[];
+  deleted_skillset: string[];
+}
+
+export interface SkillUpdateResponse {
+  success: boolean;
+  message: string;
+  data: {
+    updated: number;
+    created: number;
+    reactivated: number;
+    deleted: number;
+    total: number;
+  };
 }
 
 /**
@@ -31,7 +59,7 @@ export const fetchCandidateSkills = createAsyncThunk(
       const response = await fetchWithAuth_GET<CandidateSkill[]>(
         `${baseUrl}/candidate/skills/user/${userId}`
       );
-
+      
       return response;
     } catch (error) {
       return rejectWithValue("Failed to fetch candidate skills");
@@ -40,50 +68,49 @@ export const fetchCandidateSkills = createAsyncThunk(
 );
 
 /**
- * Add a new skill
+ * Update skills (add, update, delete in a single request)
  */
-export const addCandidateSkill = createAsyncThunk(
-  "candidate/addSkill",
-  async (skillData: AddCandidateSkillPayload, { rejectWithValue }) => {
+export const updateCandidateSkills = createAsyncThunk<
+  {
+    operations: SkillUpdateRequest;
+    response: SkillUpdateResponse;
+  },
+  SkillOperationsPayload,
+  { rejectValue: string }
+>(
+  "candidate/updateSkills",
+  async (operations: SkillOperationsPayload, { rejectWithValue }) => {
     try {
-      const response = await fetchWithAuth_POST(
+      // Transform payload to match API expectations
+      const apiPayload: SkillUpdateRequest = {
+        user_id: operations.userId,
+        new_skillset: operations.newSkills?.map(skill => ({
+          skill_id: skill.skillId,
+          skill_level: skill.skillLevel
+        })) || [],
+        updated_skillset: operations.updatedSkills?.map(skill => ({
+          skill_id: skill.skillId,
+          skill_level: skill.skillLevel
+        })) || [],
+        deleted_skillset: operations.deletedSkills || []
+      };
+      
+      const response = await fetchWithAuth_PUT<SkillUpdateResponse>(
         '/api/v1/candidate/skills',
-        {
-          user_id: skillData.userId,
-          skill_id: skillData.skillId,
-          skill_level: skillData.skillLevel
-        }
+        apiPayload
       );
       
       if (!response.success) {
-        return rejectWithValue(response.error || "Failed to add skill");
+        return rejectWithValue("Failed to update skills");
       }
       
-      return response.data;
+      // Return properly typed data
+      return {
+        operations: apiPayload,
+        response
+      };
     } catch (error) {
-      return rejectWithValue("Failed to add skill");
-    }
-  }
-);
-
-/**
- * Delete a skill
- */
-export const deleteCandidateSkill = createAsyncThunk(
-  "candidate/deleteSkill",
-  async (skillId: string, { rejectWithValue }) => {
-    try {
-      const response = await fetchWithAuth_DELETE(
-        `/api/v1/candidate/skills/${skillId}`
-      );
-      
-      if (!response.success) {
-        return rejectWithValue(response.error || "Failed to delete skill");
-      }
-      
-      return skillId;
-    } catch (error) {
-      return rejectWithValue("Failed to delete skill");
+      return rejectWithValue("Failed to update skills");
     }
   }
 );

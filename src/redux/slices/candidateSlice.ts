@@ -169,29 +169,28 @@ const candidateSlice = createSlice({
         state.skillsLoading = false;
         state.skillsError = action.payload as string;
       })
-      .addCase(candidateThunks.addCandidateSkill.pending, (state) => {
+      .addCase(candidateThunks.updateCandidateSkills.pending, (state) => {
         state.skillsLoading = true;
         state.skillsError = null;
       })
-      .addCase(candidateThunks.addCandidateSkill.fulfilled, (state, action) => {
+      .addCase(candidateThunks.updateCandidateSkills.fulfilled, (state, action) => {
         state.skillsLoading = false;
-        state.skills.push(action.payload);
-        state.skillsCount += 1;
+        
+        // Process deleted skills if any were included in the operation
+        if (action.payload.operations?.deleted_skillset?.length) {
+          state.skills = state.skills.filter(skill => 
+            !action.payload.operations.deleted_skillset.includes(skill.skill.id)
+          );
+          
+          // Update the skill count accordingly
+          if (action.payload.response.data.deleted > 0) {
+            state.skillsCount = Math.max(0, state.skillsCount - action.payload.response.data.deleted);
+          }
+        }
+        
+        // For added/updated skills, we'll trigger a fetch to get the complete updated data
       })
-      .addCase(candidateThunks.addCandidateSkill.rejected, (state, action) => {
-        state.skillsLoading = false;
-        state.skillsError = action.payload as string;
-      })
-      .addCase(candidateThunks.deleteCandidateSkill.pending, (state) => {
-        state.skillsLoading = true;
-        state.skillsError = null;
-      })
-      .addCase(candidateThunks.deleteCandidateSkill.fulfilled, (state, action) => {
-        state.skillsLoading = false;
-        state.skills = state.skills.filter(skill => skill.id !== action.payload);
-        state.skillsCount = Math.max(0, state.skillsCount - 1);
-      })
-      .addCase(candidateThunks.deleteCandidateSkill.rejected, (state, action) => {
+      .addCase(candidateThunks.updateCandidateSkills.rejected, (state, action) => {
         state.skillsLoading = false;
         state.skillsError = action.payload as string;
       })

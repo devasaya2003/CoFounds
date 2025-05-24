@@ -149,7 +149,7 @@ export default function PaginatedSkillsSelector({
                 className={`inline-flex items-center text-xs px-1.5 py-0.5 bg-indigo-200 rounded-full
                   ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-300'}`}
               >
-                <span>{skill.level}</span>
+                <span className='capitalize'>{skill.level}</span>
                 <Settings className="h-3 w-3 ml-1" />
               </button>
               {skillLevelMenuOpen === skill.id && !disabled && (
