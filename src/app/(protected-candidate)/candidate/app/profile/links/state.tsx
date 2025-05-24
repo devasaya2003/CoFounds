@@ -267,7 +267,7 @@ export function useSocialLinksForm() {
     setSaveSuccess(false);
     
     try {
-      // Use the batch operation with updateCandidateLinks
+      // Use the batch operation
       await dispatch(updateCandidateLinks({
         userId: user.id,
         newLinks: pendingChanges.added.map(link => ({
@@ -284,14 +284,6 @@ export function useSocialLinksForm() {
       setPendingChanges({ added: [], deleted: [] });
       setFormChanged(false);
       setSaveSuccess(true);
-      
-      // Update initial state reference with new state
-      if (links) {
-        initialStateRef.current.links = links.map(link => ({
-          ...link,
-          platform: link.linkTitle as SocialPlatform
-        }));
-      }
       
       const successTimer = setTimeout(() => {
         setSaveSuccess(false);

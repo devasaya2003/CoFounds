@@ -269,32 +269,6 @@ const candidateSlice = createSlice({
         state.linksLoading = false;
         state.linksError = action.payload as string;
       })
-      .addCase(candidateThunks.addCandidateLink.pending, (state) => {
-        state.linksLoading = true;
-        state.linksError = null;
-      })
-      .addCase(candidateThunks.addCandidateLink.fulfilled, (state, action) => {
-        state.linksLoading = false;
-        state.links.push(action.payload);
-        state.linksCount += 1;
-      })
-      .addCase(candidateThunks.addCandidateLink.rejected, (state, action) => {
-        state.linksLoading = false;
-        state.linksError = action.payload as string;
-      })
-      .addCase(candidateThunks.deleteCandidateLink.pending, (state) => {
-        state.linksLoading = true;
-        state.linksError = null;
-      })
-      .addCase(candidateThunks.deleteCandidateLink.fulfilled, (state, action) => {
-        state.linksLoading = false;
-        state.links = state.links.filter(link => link.id !== action.payload);
-        state.linksCount = Math.max(0, state.linksCount - 1);
-      })
-      .addCase(candidateThunks.deleteCandidateLink.rejected, (state, action) => {
-        state.linksLoading = false;
-        state.linksError = action.payload as string;
-      })
       .addCase(candidateThunks.updateCandidateLinks.pending, (state) => {
         state.linksLoading = true;
         state.linksError = null;
@@ -309,8 +283,8 @@ const candidateSlice = createSlice({
           );
           
           // Update the link count accordingly
-          if (action.payload.result?.deleted > 0) {
-            state.linksCount = Math.max(0, state.linksCount - action.payload.result.deleted);
+          if (action.payload.response.data.deleted > 0) {
+            state.linksCount = Math.max(0, state.linksCount - action.payload.response.data.deleted);
           }
         }
         

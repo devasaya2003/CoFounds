@@ -27,16 +27,22 @@ export interface LinkOperationsPayload {
 }
 
 // Update the response type to match the actual API response
-export interface UpdateLinksResponse {
+export interface LinkUpdateRequest {
+  user_id: string;
+  new_links: { link_url: string; link_title: string }[];
+  updated_links: { id: string; link_url: string; link_title: string }[];
+  deleted_links: string[];
+}
+
+export interface LinkUpdateResponse {
   success: boolean;
-  message?: string;
-  data?: {
+  message: string;
+  data: {
     updated: number;
     created: number;
     deleted: number;
     total: number;
   };
-  error?: string;
 }
 
 /**
@@ -62,7 +68,10 @@ export const fetchCandidateLinks = createAsyncThunk(
  * Update links (add, update, delete in a single request)
  */
 export const updateCandidateLinks = createAsyncThunk<
-  { operations: any; result: any }, // Return type modified to match reducer expectations
+  {
+    operations: LinkUpdateRequest;
+    response: LinkUpdateResponse;
+  },
   LinkOperationsPayload, 
   { rejectValue: string }
 >(
@@ -70,7 +79,7 @@ export const updateCandidateLinks = createAsyncThunk<
   async (operations: LinkOperationsPayload, { rejectWithValue }) => {
     try {
       // Transform payload to match API expectations
-      const apiPayload = {
+      const apiPayload: LinkUpdateRequest = {
         user_id: operations.userId,
         new_links: operations.newLinks?.map(link => ({
           link_url: link.linkUrl,
@@ -84,81 +93,22 @@ export const updateCandidateLinks = createAsyncThunk<
         deleted_links: operations.deletedLinks || []
       };
       
-      const response = await fetchWithAuth_PUT<UpdateLinksResponse>(
+      const response = await fetchWithAuth_PUT<LinkUpdateResponse>(
         '/api/v1/candidate/links',
         apiPayload
       );
       
       if (!response.success) {
-        return rejectWithValue(response.error || "Failed to update links");
+        return rejectWithValue("Failed to update links");
       }
       
-      // Return a structure that matches what the reducer expects
+      // Return properly typed data
       return {
         operations: apiPayload,
-        result: response.data || { updated: 0, created: 0, deleted: 0, total: 0 }
+        response
       };
     } catch (error) {
       return rejectWithValue("Failed to update links");
-    }
-  }
-);
-
-// Helper functions for common single operations (internally use the batch operation)
-
-/**
- * Add a single new link (convenience method)
- */
-export const addCandidateLink = createAsyncThunk(
-  "candidate/addLink",
-  async (
-    { userId, linkTitle, linkUrl }: { userId: string; linkTitle: string; linkUrl: string }, 
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      await dispatch(updateCandidateLinks({
-        userId,
-        newLinks: [{ linkTitle, linkUrl }]
-      })).unwrap();
-      
-      // After the operation succeeds, fetch the updated links to get the new link with its ID
-      const updatedLinks = await dispatch(fetchCandidateLinks(userId)).unwrap();
-      
-      // Find the newly added link (typically the one with matching title and url)
-      const newLink = updatedLinks.find(
-        link => link.linkTitle === linkTitle && link.linkUrl === linkUrl
-      );
-      
-      if (!newLink) {
-        return rejectWithValue("Link was added but couldn't be retrieved");
-      }
-      
-      return newLink;
-    } catch (error) {
-      return rejectWithValue("Failed to add link");
-    }
-  }
-);
-
-/**
- * Delete a single link (convenience method)
- */
-export const deleteCandidateLink = createAsyncThunk(
-  "candidate/deleteLink",
-  async (
-    { userId, linkId }: { userId: string; linkId: string },
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      await dispatch(updateCandidateLinks({
-        userId,
-        deletedLinks: [linkId]
-      })).unwrap();
-      
-      // Return the linkId for the reducer to remove from state
-      return linkId;
-    } catch (error) {
-      return rejectWithValue("Failed to delete link");
     }
   }
 );
