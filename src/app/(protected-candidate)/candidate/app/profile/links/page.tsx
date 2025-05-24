@@ -1,23 +1,23 @@
 'use client';
 
-import { useSocialLinksForm } from './state';
+import { useSocialLinksForm, CandidateLink } from './state';
 import { LinkForm, LinksList, SubmitButtonWithStatus } from './components';
+import { useRef } from 'react';
 
 export default function LinksPage() {
-  const {
-    // Data
+  const formRef = useRef<HTMLDivElement>(null);
+  
+  const {    
     candidateLinks,
     isLoading,
-    
-    // Form state
+        
     selectedPlatform,
     linkUrl,
     formChanged,
     isSubmitting,
     saveSuccess,
     editingLink,
-    
-    // Handlers
+        
     setSelectedPlatform,
     setLinkUrl,
     handleAddLink,
@@ -27,6 +27,15 @@ export default function LinksPage() {
     handleCancelEdit,
     handleResetAll
   } = useSocialLinksForm();
+  
+  const handleEditWithScroll = (link: CandidateLink) => {
+    handleEditLink(link);    
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 10);
+  };
 
   return (
     <div className="w-full bg-white rounded-lg shadow-md p-5 sm:p-6 mb-10">
@@ -34,7 +43,7 @@ export default function LinksPage() {
       
       <div className="space-y-6">
         {/* Add Links Form */}
-        <div>
+        <div ref={formRef}>
           <h2 className="text-lg font-medium text-gray-800 mb-3">
             {editingLink ? 'Edit Social Link' : 'Add your social link'}
           </h2>
@@ -56,7 +65,7 @@ export default function LinksPage() {
             links={candidateLinks} 
             isLoading={isLoading}
             onDeleteLink={handleDeleteLink}
-            onEditLink={handleEditLink}
+            onEditLink={handleEditWithScroll}
           />
         </div>
         

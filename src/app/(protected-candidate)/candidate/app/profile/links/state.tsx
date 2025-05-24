@@ -105,8 +105,15 @@ export function useSocialLinksForm() {
     setSelectedPlatform(link.platform || link.linkTitle as SocialPlatform);
     setLinkUrl(link.linkUrl);
     
-    // Scroll to top of the page to see the form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Enhanced scrolling to make sure it works in all browsers
+    setTimeout(() => {
+      // First try the modern smooth scroll
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Fallback for older browsers
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    }, 10);
   }, []);
   
   // Cancel editing
