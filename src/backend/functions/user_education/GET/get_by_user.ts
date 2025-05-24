@@ -6,6 +6,7 @@ export const getUserEducationByUserID = async (user_id: string) => {
     orderBy: { updatedAt: "desc" },
     select: {
       id: true,
+      eduFrom: true,
       degree: {
         select: {
             id: true,

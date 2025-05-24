@@ -223,7 +223,31 @@ const candidateSlice = createSlice({
         state.educationLoading = false;
         state.educationError = action.payload as string;
       })
-      // Add education actions (add, update, delete) here
+      .addCase(candidateThunks.updateCandidateEducation.pending, (state) => {
+        state.educationLoading = true;
+        state.educationError = null;
+      })
+      .addCase(candidateThunks.updateCandidateEducation.fulfilled, (state, action) => {
+        state.educationLoading = false;
+        
+        // Process deleted education if any were included in the operation
+        if (action.payload.operations?.deleted_education?.length) {
+          state.education = state.education.filter(edu => 
+            !action.payload.operations.deleted_education.includes(edu.id)
+          );
+          
+          // Update the education count accordingly
+          if (action.payload.response.data.deleted > 0) {
+            state.educationCount = Math.max(0, state.educationCount - action.payload.response.data.deleted);
+          }
+        }
+        
+        // For added/updated education, we'll trigger a fetch to get the complete updated data
+      })
+      .addCase(candidateThunks.updateCandidateEducation.rejected, (state, action) => {
+        state.educationLoading = false;
+        state.educationError = action.payload as string;
+      })
 
       // Experience
       .addCase(candidateThunks.fetchCandidateExperience.pending, (state) => {

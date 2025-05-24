@@ -1,9 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchWithAuth_GET, fetchWithAuth_POST, fetchWithAuth_DELETE, fetchWithAuth_PUT } from "@/utils/api";
+import { fetchWithAuth_GET, fetchWithAuth_PUT } from "@/utils/api";
 
 // Interface for education model
 export interface CandidateEducation {
   id: string;
+  eduFrom: string;
   degree: {
     id: string;
     name: string;
@@ -15,18 +16,53 @@ export interface CandidateEducation {
   updatedAt: string;
 }
 
-// Interface for adding education
-export interface AddCandidateEducationPayload {
+// Interface for batch education operations
+export interface EducationOperationsPayload {
   userId: string;
-  degreeId: string;
-  eduFrom?: string;
-  startedAt?: string | null;
-  endAt?: string | null;
+  newEducation?: {
+    degreeId: string;
+    eduFrom: string;
+    startedAt?: string | null;
+    endAt?: string | null;
+  }[];
+  updatedEducation?: {
+    id: string;
+    degreeId: string;
+    eduFrom: string;
+    startedAt?: string | null;
+    endAt?: string | null;
+  }[];
+  deletedEducation?: string[];
 }
 
-// Interface for updating education
-export interface UpdateCandidateEducationPayload extends AddCandidateEducationPayload {
-  educationId: string;
+// Define the response type for the batch update operation
+export interface EducationUpdateRequest {
+  user_id: string;
+  new_education: {
+    degree_id: string;
+    institution: string;
+    started_at: string | null;
+    end_at: string | null;
+  }[];
+  updated_education: {
+    id: string;
+    degree_id: string;
+    institution: string;
+    started_at: string | null;
+    end_at: string | null;
+  }[];
+  deleted_education: string[];
+}
+
+export interface EducationUpdateResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    updated: number;
+    created: number;
+    deleted: number;
+    total: number;
+  };
 }
 
 /**
@@ -49,81 +85,54 @@ export const fetchCandidateEducation = createAsyncThunk(
 );
 
 /**
- * Add new education
+ * Update education (add, update, delete in a single request)
  */
-export const addCandidateEducation = createAsyncThunk(
-  "candidate/addEducation",
-  async (educationData: AddCandidateEducationPayload, { rejectWithValue }) => {
-    try {
-      const response = await fetchWithAuth_POST(
-        '/api/v1/candidate/education',
-        {
-          user_id: educationData.userId,
-          degree_id: educationData.degreeId,
-          edu_from: educationData.eduFrom,
-          started_at: educationData.startedAt,
-          end_at: educationData.endAt
-        }
-      );
-      
-      if (!response.success) {
-        return rejectWithValue(response.error || "Failed to add education");
-      }
-      
-      return response.data;
-    } catch (error) {
-      return rejectWithValue("Failed to add education");
-    }
-  }
-);
-
-/**
- * Update education
- */
-export const updateCandidateEducation = createAsyncThunk(
+export const updateCandidateEducation = createAsyncThunk<
+  {
+    operations: EducationUpdateRequest;
+    response: EducationUpdateResponse;
+  },
+  EducationOperationsPayload,
+  { rejectValue: string }
+>(
   "candidate/updateEducation",
-  async (educationData: UpdateCandidateEducationPayload, { rejectWithValue }) => {
+  async (operations: EducationOperationsPayload, { rejectWithValue }) => {
     try {
-      const response = await fetchWithAuth_PUT(
-        `/api/v1/candidate/education/${educationData.educationId}`,
-        {
-          user_id: educationData.userId,
-          degree_id: educationData.degreeId,
-          edu_from: educationData.eduFrom,
-          started_at: educationData.startedAt,
-          end_at: educationData.endAt
-        }
+      // Transform payload to match API expectations
+      const apiPayload: EducationUpdateRequest = {
+        user_id: operations.userId,
+        new_education: operations.newEducation?.map(edu => ({
+          degree_id: edu.degreeId,
+          institution: edu.eduFrom,
+          started_at: edu.startedAt ?? null,
+          end_at: edu.endAt ?? null
+        })) || [],
+        updated_education: operations.updatedEducation?.map(edu => ({
+          id: edu.id,
+          degree_id: edu.degreeId,
+          institution: edu.eduFrom,
+          started_at: edu.startedAt ?? null,
+          end_at: edu.endAt ?? null
+        })) || [],
+        deleted_education: operations.deletedEducation || []
+      };
+      
+      const response = await fetchWithAuth_PUT<EducationUpdateResponse>(
+        '/api/v1/candidate/education',
+        apiPayload
       );
       
       if (!response.success) {
-        return rejectWithValue(response.error || "Failed to update education");
+        return rejectWithValue("Failed to update education");
       }
       
-      return response.data;
+      // Return properly typed data
+      return {
+        operations: apiPayload,
+        response
+      };
     } catch (error) {
       return rejectWithValue("Failed to update education");
-    }
-  }
-);
-
-/**
- * Delete education
- */
-export const deleteCandidateEducation = createAsyncThunk(
-  "candidate/deleteEducation",
-  async (educationId: string, { rejectWithValue }) => {
-    try {
-      const response = await fetchWithAuth_DELETE(
-        `/api/v1/candidate/education/${educationId}`
-      );
-      
-      if (!response.success) {
-        return rejectWithValue(response.error || "Failed to delete education");
-      }
-      
-      return educationId;
-    } catch (error) {
-      return rejectWithValue("Failed to delete education");
     }
   }
 );
